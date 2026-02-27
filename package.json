@@ -1,0 +1,24 @@
+{
+  "name": "akaar",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "dotenv -e .env -- turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:generate": "dotenv -e .env -- pnpm --filter @akaar/db db:generate",
+    "db:migrate": "dotenv -e .env -- pnpm --filter @akaar/db db:migrate",
+    "db:studio": "dotenv -e .env -- pnpm --filter @akaar/db db:studio",
+    "db:seed": "dotenv -e .env -- pnpm --filter @akaar/db seed",
+    "setup": "pnpm db:start && pnpm db:generate && pnpm db:migrate",
+    "start": "pnpm setup && pnpm dev"
+  },
+  "devDependencies": {
+    "turbo": "latest",
+    "prettier": "latest",
+    "dotenv-cli": "latest"
+  }
+}
