@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+.next
+**/.*next
+out
+dist
+build
+
+# Git
+.git
+.gitignore
+
+# Environment files (passed via docker-compose)
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Misc
+.DS_Store
+*.pem
+*.log
+coverage
+.turbo
+.claude
+nul
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation
+README.md
+*.md

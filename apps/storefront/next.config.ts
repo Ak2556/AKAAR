@@ -3,6 +3,7 @@ import { resolve } from "path";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  output: "standalone",
   transpilePackages: ["@akaar/db"],
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
