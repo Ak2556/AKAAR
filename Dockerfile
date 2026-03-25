@@ -24,6 +24,10 @@ RUN pnpm --filter @akaar/db db:generate
 
 # Build the Next.js app
 ENV NEXT_TELEMETRY_DISABLED=1
+# Set dummy env vars for build (real values come from docker-compose at runtime)
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/akaar"
+ENV RAZORPAY_KEY_ID="build_placeholder"
+ENV RAZORPAY_KEY_SECRET="build_placeholder"
 RUN pnpm --filter storefront build
 
 # Production image

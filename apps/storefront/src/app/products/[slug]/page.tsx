@@ -3,67 +3,119 @@
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShoppingCart, Heart, Share2, Check, Truck, Shield, RefreshCw } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Heart, Share2, Check, Truck, Shield, RefreshCw, Loader2 } from "lucide-react";
 import { ProductViewer3D } from "@/components/products/ProductViewer3D";
 import { Button } from "@/components/ui/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
+import { useSettings } from "@/context/SettingsContext";
 
-// Mock product data - replace with actual data fetching
-const mockProduct = {
-  id: "1",
-  name: "Precision Gear Assembly",
-  slug: "precision-gear-assembly",
-  category: "Industrial",
-  price: 149,
-  description: "High-precision gear system designed for industrial machinery. Manufactured using advanced 3D printing technology with tight tolerances and exceptional durability.",
-  features: [
-    "Tolerance: ±0.05mm",
-    "Material: Nylon PA12",
-    "Surface finish: Smooth",
-    "Operating temp: -40°C to 120°C",
-  ],
-  specifications: [
-    { label: "Dimensions", value: "50mm x 50mm x 25mm" },
-    { label: "Weight", value: "45g" },
-    { label: "Material", value: "Nylon PA12" },
-    { label: "Color", value: "Natural / Custom" },
-    { label: "Lead Time", value: "3-5 business days" },
-    { label: "Min Order", value: "1 unit" },
-  ],
-  materials: ["Nylon PA12", "ABS", "PETG", "Resin"],
-};
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  category: string | null;
+  price: number | null;
+  description: string | null;
+  shortDescription: string | null;
+  imageUrl: string | null;
+  meshFile?: {
+    id: string;
+    s3Key: string;
+    originalFilename: string;
+  };
+}
+
+const defaultMaterials = ["Nylon PA12", "ABS", "PETG", "Resin"];
+const defaultSpecifications = [
+  { label: "Lead Time", value: "3-5 business days" },
+  { label: "Min Order", value: "1 unit" },
+  { label: "Tolerance", value: "±0.1mm" },
+  { label: "Surface Finish", value: "Smooth" },
+];
+const defaultFeatures = [
+  "High precision manufacturing",
+  "Quality materials",
+  "Custom modifications available",
+  "Professional finishing",
+];
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const [selectedMaterial, setSelectedMaterial] = useState(mockProduct.materials[0]);
+  const slug = params.slug as string;
+  const { settings, formatPrice } = useSettings();
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(defaultMaterials[0]);
   const [quantity, setQuantity] = useState(1);
+
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const toast = useToast();
 
-  const isWishlisted = isInWishlist(mockProduct.id);
+  // Fetch product data
+  useEffect(() => {
+    async function fetchProduct() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/products/${slug}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error("Product not found");
+          }
+          throw new Error("Failed to load product");
+        }
+
+        const data = await response.json();
+        setProduct(data.product);
+        setRelatedProducts(data.relatedProducts || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (slug) {
+      fetchProduct();
+    }
+  }, [slug]);
+
+  const isWishlisted = product ? isInWishlist(product.id) : false;
+  const price = product?.price ? Number(product.price) : 0;
 
   const handleAddToCart = () => {
+    if (!product) return;
+
     addItem({
-      id: `${mockProduct.id}-${selectedMaterial}`,
-      name: mockProduct.name,
-      slug: mockProduct.slug,
-      price: mockProduct.price,
+      id: `${product.id}-${selectedMaterial}`,
+      name: product.name,
+      slug: product.slug,
+      price: price,
       material: selectedMaterial,
+      image: product.imageUrl || undefined,
     }, quantity);
-    toast.success(`Added ${quantity} ${mockProduct.name} to cart`);
+    toast.success(`Added ${quantity} ${product.name} to cart`);
   };
 
   const handleToggleWishlist = () => {
+    if (!product) return;
+
     toggleItem({
-      id: mockProduct.id,
-      name: mockProduct.name,
-      slug: mockProduct.slug,
-      price: mockProduct.price,
-      category: mockProduct.category,
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: price,
+      category: product.category || undefined,
+      imageUrl: product.imageUrl || undefined,
     });
     if (isWishlisted) {
       toast.info("Removed from wishlist");
@@ -73,21 +125,45 @@ export default function ProductDetailPage() {
   };
 
   const handleShare = async () => {
+    if (!product) return;
+
     const url = window.location.href;
-    const title = mockProduct.name;
+    const title = product.name;
 
     if (navigator.share) {
       try {
         await navigator.share({ title, url });
-      } catch (err) {
+      } catch {
         // User cancelled or error
       }
     } else {
-      // Fallback: copy to clipboard
       await navigator.clipboard.writeText(url);
       toast.success("Link copied to clipboard");
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !product) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">{error || "Product not found"}</h1>
+          <Link href="/products">
+            <Button>Back to Products</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -103,9 +179,9 @@ export default function ProductDetailPage() {
             Back to Products
           </Link>
           <span className="text-[var(--text-muted)]">/</span>
-          <span className="text-[var(--text-secondary)]">{mockProduct.category}</span>
+          <span className="text-[var(--text-secondary)]">{product.category || "Uncategorized"}</span>
           <span className="text-[var(--text-muted)]">/</span>
-          <span className="text-[var(--accent)]">{mockProduct.name}</span>
+          <span className="text-[var(--accent)]">{product.name}</span>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12">
@@ -128,20 +204,20 @@ export default function ProductDetailPage() {
             {/* Header */}
             <div>
               <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-                {mockProduct.category}
+                {product.category || "Uncategorized"}
               </span>
               <h1 className="text-3xl md:text-4xl font-bold mt-2">
-                {mockProduct.name}
+                {product.name}
               </h1>
               <p className="text-[var(--text-secondary)] mt-4">
-                {mockProduct.description}
+                {product.description || product.shortDescription || "High-quality precision-manufactured component."}
               </p>
             </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-4">
               <span className="text-4xl font-bold text-[var(--accent)]">
-                ${mockProduct.price}
+                {formatPrice(price)}
               </span>
               <span className="text-[var(--text-muted)]">per unit</span>
             </div>
@@ -150,7 +226,7 @@ export default function ProductDetailPage() {
             <div>
               <label className="block text-sm font-medium mb-3">Material</label>
               <div className="flex flex-wrap gap-3">
-                {mockProduct.materials.map((material) => (
+                {defaultMaterials.map((material) => (
                   <button
                     key={material}
                     onClick={() => setSelectedMaterial(material)}
@@ -186,7 +262,7 @@ export default function ProductDetailPage() {
                   </button>
                 </div>
                 <span className="text-[var(--text-muted)] text-sm">
-                  Total: ${(mockProduct.price * quantity).toFixed(2)}
+                  Total: {formatPrice(price * quantity)}
                 </span>
               </div>
             </div>
@@ -214,7 +290,7 @@ export default function ProductDetailPage() {
             <div className="border-t border-[var(--border)] pt-8">
               <h3 className="font-semibold mb-4">Key Features</h3>
               <ul className="space-y-3">
-                {mockProduct.features.map((feature, index) => (
+                {defaultFeatures.map((feature, index) => (
                   <li key={index} className="flex items-center gap-3 text-[var(--text-secondary)]">
                     <Check className="w-5 h-5 text-[var(--accent)]" />
                     {feature}
@@ -250,7 +326,7 @@ export default function ProductDetailPage() {
         >
           <h2 className="text-2xl font-bold mb-8">Specifications</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockProduct.specifications.map((spec, index) => (
+            {defaultSpecifications.map((spec, index) => (
               <div
                 key={index}
                 className="p-4 border border-[var(--border)] rounded-lg bg-[var(--bg-secondary)]"
@@ -261,6 +337,36 @@ export default function ProductDetailPage() {
             ))}
           </div>
         </motion.div>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-16"
+          >
+            <h2 className="text-2xl font-bold mb-8">Related Products</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((related) => (
+                <Link
+                  key={related.id}
+                  href={`/products/${related.slug}`}
+                  className="group p-4 border border-[var(--border)] rounded-lg bg-[var(--bg-secondary)] hover:border-[var(--accent)] transition-colors"
+                >
+                  <div className="aspect-square bg-[var(--bg-tertiary)] rounded-lg mb-4" />
+                  <span className="text-xs text-[var(--accent)]">{related.category}</span>
+                  <h3 className="font-medium mt-1 group-hover:text-[var(--accent)] transition-colors">
+                    {related.name}
+                  </h3>
+                  <p className="text-[var(--accent)] font-semibold mt-2">
+                    {formatPrice(Number(related.price) || 0)}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

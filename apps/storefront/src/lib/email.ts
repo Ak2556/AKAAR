@@ -194,7 +194,7 @@ export async function sendQuoteReceivedEmail(data: QuoteReceivedData) {
 // Password Reset Email
 interface PasswordResetData {
   to: string;
-  name: string;
+  name?: string;
   resetUrl: string;
 }
 

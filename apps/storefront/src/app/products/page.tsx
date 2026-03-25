@@ -1,34 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { ProductFilters } from "@/components/products/ProductFilters";
-import { Search, Grid, List, SlidersHorizontal } from "lucide-react";
+import { Search, Grid, List, SlidersHorizontal, Loader2 } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 
-// Mock data - prices in INR (base currency)
-const mockProducts = [
-  { id: "1", name: "Precision Gear Assembly", slug: "precision-gear-assembly", category: "Industrial", price: 12499, description: "High-precision gear system for industrial machinery" },
-  { id: "2", name: "Custom Electronics Enclosure", slug: "custom-electronics-enclosure", category: "Electronics", price: 6599, description: "Tailored enclosure with cable management" },
-  { id: "3", name: "Rapid Prototype Part", slug: "rapid-prototype-part", category: "Prototyping", price: 3999, description: "Fast turnaround prototype components" },
-  { id: "4", name: "Medical Device Housing", slug: "medical-device-housing", category: "Medical", price: 24999, description: "FDA-compliant medical device enclosure" },
-  { id: "5", name: "Automotive Bracket", slug: "automotive-bracket", category: "Automotive", price: 7499, description: "High-strength automotive mounting bracket" },
-  { id: "6", name: "Drone Frame Component", slug: "drone-frame-component", category: "Aerospace", price: 16599, description: "Lightweight carbon-reinforced drone part" },
-  { id: "7", name: "Custom Nozzle Design", slug: "custom-nozzle-design", category: "Industrial", price: 10799, description: "Precision-machined custom nozzle" },
-  { id: "8", name: "PCB Mounting Plate", slug: "pcb-mounting-plate", category: "Electronics", price: 3299, description: "Anti-static PCB mounting solution" },
-  { id: "9", name: "Robotic Gripper", slug: "robotic-gripper", category: "Robotics", price: 20799, description: "Multi-axis robotic gripper mechanism" },
-];
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  price: number;
+  description?: string;
+  imageUrl?: string;
+}
 
-const categories = [
-  { id: "industrial", label: "Industrial", count: 2 },
-  { id: "electronics", label: "Electronics", count: 2 },
-  { id: "prototyping", label: "Prototyping", count: 1 },
-  { id: "medical", label: "Medical", count: 1 },
-  { id: "automotive", label: "Automotive", count: 1 },
-  { id: "aerospace", label: "Aerospace", count: 1 },
-  { id: "robotics", label: "Robotics", count: 1 },
-];
+interface ApiProduct {
+  id: string;
+  name: string;
+  slug: string;
+  category: string | null;
+  price: number | string | null;
+  description: string | null;
+  imageUrl: string | null;
+}
+
+interface ProductsResponse {
+  products: ApiProduct[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  categories: string[];
+}
 
 const materials = [
   { id: "pla", label: "PLA" },
@@ -41,46 +49,117 @@ const materials = [
 
 export default function ProductsPage() {
   const { settings } = useSettings();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<{ id: string; label: string; count: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">(settings.defaultView);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [filters, setFilters] = useState({
     categories: [] as string[],
     materials: [] as string[],
-    priceRange: [0, 100000] as [number, number], // INR range
+    priceRange: [0, 100000] as [number, number],
   });
+
+  // Fetch products from API
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams();
+      params.set("page", currentPage.toString());
+      params.set("limit", settings.productsPerPage.toString());
+
+      if (searchQuery) {
+        params.set("search", searchQuery);
+      }
+
+      if (filters.categories.length === 1) {
+        params.set("category", filters.categories[0]);
+      }
+
+      // Map sortBy to API params
+      if (sortBy === "price-low") {
+        params.set("sortBy", "price");
+        params.set("sortOrder", "asc");
+      } else if (sortBy === "price-high") {
+        params.set("sortBy", "price");
+        params.set("sortOrder", "desc");
+      } else if (sortBy === "name") {
+        params.set("sortBy", "name");
+        params.set("sortOrder", "asc");
+      } else {
+        params.set("sortBy", "createdAt");
+        params.set("sortOrder", "desc");
+      }
+
+      const response = await fetch(`/api/products?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data: ProductsResponse = await response.json();
+
+      // Transform products for the grid
+      const transformedProducts: Product[] = data.products.map(p => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        price: p.price ? Number(p.price) : 0,
+        category: p.category || "Uncategorized",
+        description: p.description || undefined,
+        imageUrl: p.imageUrl || undefined,
+      }));
+
+      setProducts(transformedProducts);
+      setTotalPages(data.pagination.totalPages);
+      setTotalProducts(data.pagination.total);
+
+      // Build categories with counts
+      if (data.categories.length > 0) {
+        const categoryList = data.categories.map(cat => ({
+          id: cat.toLowerCase(),
+          label: cat,
+          count: transformedProducts.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).length,
+        }));
+        setCategories(categoryList);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchQuery, filters.categories, sortBy, settings.productsPerPage]);
+
+  // Fetch on mount and when dependencies change
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Update view mode when settings change
   useEffect(() => {
     setViewMode(settings.defaultView);
   }, [settings.defaultView]);
 
-  // Filter products based on search and filters
-  const filteredProducts = mockProducts.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory = filters.categories.length === 0 ||
-      filters.categories.includes(product.category.toLowerCase());
-
-    const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-
-    return matchesSearch && matchesCategory && matchesPrice;
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / settings.productsPerPage);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * settings.productsPerPage,
-    currentPage * settings.productsPerPage
-  );
-
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filters, settings.productsPerPage]);
+  }, [searchQuery, filters]);
+
+  // Filter products client-side for price range (API doesn't support this yet)
+  const filteredProducts = products.filter(product => {
+    const price = product.price ?? 0;
+    const matchesPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
+    return matchesPrice;
+  });
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -192,15 +271,50 @@ export default function ProductsPage() {
 
             {/* Results count */}
             <p className="text-sm text-[var(--text-muted)] mb-6">
-              Showing {paginatedProducts.length} of {filteredProducts.length} products
-              {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
+              {loading ? (
+                "Loading..."
+              ) : (
+                <>
+                  Showing {filteredProducts.length} of {totalProducts} products
+                  {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
+                </>
+              )}
             </p>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="text-center py-20">
+                <p className="text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={fetchProducts}
+                  className="px-6 py-2 bg-[var(--accent)] text-[var(--bg-primary)] rounded-lg hover:opacity-90"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && filteredProducts.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-[var(--text-secondary)]">No products found matching your criteria.</p>
+              </div>
+            )}
+
             {/* Product Grid */}
-            <ProductGrid products={paginatedProducts} viewMode={viewMode} />
+            {!loading && !error && filteredProducts.length > 0 && (
+              <ProductGrid products={filteredProducts} viewMode={viewMode} />
+            )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {!loading && totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-12">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -210,19 +324,31 @@ export default function ProductsPage() {
                   Previous
                 </button>
                 <div className="flex gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-10 h-10 rounded-lg transition-colors ${
-                        page === currentPage
-                          ? "bg-[var(--accent)] text-[var(--bg-primary)]"
-                          : "border border-[var(--border)] hover:border-[var(--accent)]"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let page: number;
+                    if (totalPages <= 5) {
+                      page = i + 1;
+                    } else if (currentPage <= 3) {
+                      page = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      page = totalPages - 4 + i;
+                    } else {
+                      page = currentPage - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-lg transition-colors ${
+                          page === currentPage
+                            ? "bg-[var(--accent)] text-[var(--bg-primary)]"
+                            : "border border-[var(--border)] hover:border-[var(--accent)]"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
                 </div>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

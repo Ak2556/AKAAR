@@ -14,6 +14,7 @@ import {
   Plus,
   AlertCircle,
   MessageSquare,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSettings } from "@/context/SettingsContext";
@@ -30,7 +31,7 @@ interface Quote {
   notes?: string;
 }
 
-const statusConfig: Record<string, { icon: React.ElementType; color: string; label: string }> = {
+const statusConfig: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   PENDING: { icon: Clock, color: "text-yellow-400 bg-yellow-400/10", label: "Pending Review" },
   REVIEWING: { icon: FileText, color: "text-blue-400 bg-blue-400/10", label: "Under Review" },
   QUOTED: { icon: CheckCircle, color: "text-green-400 bg-green-400/10", label: "Quote Ready" },

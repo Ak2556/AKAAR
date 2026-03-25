@@ -15,6 +15,7 @@ import {
   Clock,
   XCircle,
   AlertCircle,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSettings } from "@/context/SettingsContext";
@@ -39,7 +40,7 @@ interface Order {
   paymentStatus: string;
 }
 
-const statusConfig: Record<string, { icon: React.ElementType; color: string; label: string }> = {
+const statusConfig: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   PENDING: { icon: Clock, color: "text-yellow-400 bg-yellow-400/10", label: "Pending" },
   CONFIRMED: { icon: CheckCircle, color: "text-blue-400 bg-blue-400/10", label: "Confirmed" },
   PROCESSING: { icon: Package, color: "text-purple-400 bg-purple-400/10", label: "Processing" },

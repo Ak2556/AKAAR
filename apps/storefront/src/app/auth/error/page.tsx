@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
+import { Suspense } from "react";
 
 const errorMessages: Record<string, string> = {
   Configuration: "There is a problem with the server configuration.",
@@ -21,42 +22,56 @@ const errorMessages: Record<string, string> = {
   Default: "An error occurred during authentication.",
 };
 
-export default function AuthErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error") || "Default";
   const errorMessage = errorMessages[error] || errorMessages.Default;
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full max-w-md text-center"
+    >
+      <div className="glass rounded-xl p-8">
+        <div className="w-16 h-16 mx-auto mb-6 bg-red-500/10 rounded-full flex items-center justify-center">
+          <AlertCircle className="w-8 h-8 text-red-400" />
+        </div>
+
+        <h1 className="text-2xl font-bold mb-2">Authentication Error</h1>
+        <p className="text-[var(--text-secondary)] mb-8">{errorMessage}</p>
+
+        <div className="space-y-3">
+          <Link
+            href="/auth/signin"
+            className="block w-full py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-semibold rounded-lg hover:bg-[var(--accent)]/90 transition-colors"
+          >
+            Try Again
+          </Link>
+          <Link
+            href="/"
+            className="block w-full py-3 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
+          >
+            Go Home
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md text-center"
-      >
-        <div className="glass rounded-xl p-8">
-          <div className="w-16 h-16 mx-auto mb-6 bg-red-500/10 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-red-400" />
-          </div>
-
-          <h1 className="text-2xl font-bold mb-2">Authentication Error</h1>
-          <p className="text-[var(--text-secondary)] mb-8">{errorMessage}</p>
-
-          <div className="space-y-3">
-            <Link
-              href="/auth/signin"
-              className="block w-full py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-semibold rounded-lg hover:bg-[var(--accent)]/90 transition-colors"
-            >
-              Try Again
-            </Link>
-            <Link
-              href="/"
-              className="block w-full py-3 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
-            >
-              Go Home
-            </Link>
+      <Suspense fallback={
+        <div className="w-full max-w-md text-center">
+          <div className="glass rounded-xl p-8">
+            <div className="w-8 h-8 mx-auto border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
-      </motion.div>
+      }>
+        <ErrorContent />
+      </Suspense>
     </div>
   );
 }

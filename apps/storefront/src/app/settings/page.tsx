@@ -5,7 +5,8 @@ import { useState } from "react";
 import {
   Palette, Check, Globe, Bell, Eye, Shield,
   Monitor, MousePointer, Type, Sun,
-  Mail, Smartphone, Package, CreditCard, Trash2, Save, RotateCcw
+  Mail, Smartphone, Package, CreditCard, Trash2, Save, RotateCcw,
+  type LucideIcon,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { themeList } from "@/config/themes";
@@ -454,7 +455,7 @@ function SettingsSection({
   delay = 0,
   danger = false,
 }: {
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   description: string;
   children: React.ReactNode;
@@ -490,7 +491,7 @@ function ToggleSetting({
   checked,
   onChange,
 }: {
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   description: string;
   checked: boolean;
