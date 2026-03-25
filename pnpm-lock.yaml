@@ -21,8 +21,8 @@ importers:
   apps/storefront:
     dependencies:
       '@akaar/db':
-        specifier: file:../../packages/db
-        version: file:packages/db(typescript@5.9.3)
+        specifier: workspace:*
+        version: link:../../packages/db
       '@auth/prisma-adapter':
         specifier: ^2.11.1
         version: 2.11.1(@prisma/client@7.5.0)(nodemailer@8.0.1)
@@ -6514,18 +6514,4 @@ packages:
       '@types/react': 19.2.14
       react: 19.2.3
       use-sync-external-store: 1.6.0(react@19.2.3)
-    dev: false
-
-  file:packages/db(typescript@5.9.3):
-    resolution: {directory: packages/db, type: directory}
-    id: file:packages/db
-    name: '@akaar/db'
-    dependencies:
-      '@prisma/adapter-pg': 7.4.1
-      '@prisma/client': 7.5.0(typescript@5.9.3)
-      pg: 8.19.0
-    transitivePeerDependencies:
-      - pg-native
-      - prisma
-      - typescript
     dev: false
