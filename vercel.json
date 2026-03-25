@@ -1,10 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "corepack enable && corepack prepare pnpm@8.15.0 --activate && pnpm install",
   "buildCommand": "pnpm db:generate && pnpm --filter storefront build",
-  "installCommand": "pnpm install --no-frozen-lockfile",
-  "framework": "nextjs",
   "outputDirectory": "apps/storefront/.next",
-  "env": {
-    "NEXT_TELEMETRY_DISABLED": "1"
-  }
+  "framework": "nextjs"
 }
