@@ -1,4 +1,4 @@
 {
-  "installCommand": "cd ../.. && npm install -g pnpm@8.15.0 && pnpm install",
+  "installCommand": "cd ../.. && npm install -g pnpm@8.15.0 && pnpm install --no-frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm db:generate && cd apps/storefront && pnpm build"
 }
