@@ -21,11 +21,11 @@ importers:
   apps/storefront:
     dependencies:
       '@akaar/db':
-        specifier: workspace:*
-        version: link:../../packages/db
+        specifier: file:../../packages/db
+        version: file:packages/db(typescript@5.9.3)
       '@auth/prisma-adapter':
         specifier: ^2.11.1
-        version: 2.11.1(@prisma/client@7.4.1)(nodemailer@8.0.1)
+        version: 2.11.1(@prisma/client@7.5.0)(nodemailer@8.0.1)
       '@aws-sdk/client-s3':
         specifier: ^3.996.0
         version: 3.996.0
@@ -188,13 +188,13 @@ packages:
       preact-render-to-string: 6.5.11(preact@10.24.3)
     dev: false
 
-  /@auth/prisma-adapter@2.11.1(@prisma/client@7.4.1)(nodemailer@8.0.1):
+  /@auth/prisma-adapter@2.11.1(@prisma/client@7.5.0)(nodemailer@8.0.1):
     resolution: {integrity: sha512-Ke7DXP0Fy0Mlmjz/ZJLXwQash2UkA4621xCM0rMtEczr1kppLc/njCbUkHkIQ/PnmILjqSPEKeTjDPsYruvkug==}
     peerDependencies:
       '@prisma/client': '>=2.26.0 || >=3 || >=4 || >=5 || >=6'
     dependencies:
       '@auth/core': 0.41.1(nodemailer@8.0.1)
-      '@prisma/client': 7.4.1(typescript@5.9.3)
+      '@prisma/client': 7.5.0(typescript@5.9.3)
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
       - '@simplewebauthn/server'
@@ -1791,6 +1791,10 @@ packages:
     resolution: {integrity: sha512-8fy74OMYC7mt9cJ2MncIDk1awPRgmtXVvwTN2FlW4JVhbck8Dgt0wTkhPG85myfj4ZeP2stjF9Sdg12n5HrpQg==}
     dev: false
 
+  /@prisma/client-runtime-utils@7.5.0:
+    resolution: {integrity: sha512-KnJ2b4Si/pcWEtK68uM+h0h1oh80CZt2suhLTVuLaSKg4n58Q9jBF/A42Kw6Ma+aThy1yAhfDeTC0JvEmeZnFQ==}
+    dev: false
+
   /@prisma/client@7.4.1(prisma@7.4.1):
     resolution: {integrity: sha512-pgIll2W1NVdof37xLeyySW+yfQ4rI+ERGCRwnO3BjVOx42GpYq6jhTyuALK8VKirvJJIvImgfGDA2qwhYVvMuA==}
     engines: {node: ^20.19 || ^22.12 || >=24.0}
@@ -1807,8 +1811,8 @@ packages:
       prisma: 7.4.1(@types/react@19.2.14)(react-dom@19.2.3)(react@19.2.3)
     dev: false
 
-  /@prisma/client@7.4.1(typescript@5.9.3):
-    resolution: {integrity: sha512-pgIll2W1NVdof37xLeyySW+yfQ4rI+ERGCRwnO3BjVOx42GpYq6jhTyuALK8VKirvJJIvImgfGDA2qwhYVvMuA==}
+  /@prisma/client@7.5.0(typescript@5.9.3):
+    resolution: {integrity: sha512-h4hF9ctp+kSRs7ENHGsFQmHAgHcfkOCxbYt6Ti9Xi8x7D+kP4tTi9x51UKmiTH/OqdyJAO+8V+r+JA5AWdav7w==}
     engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
@@ -1819,7 +1823,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@prisma/client-runtime-utils': 7.4.1
+      '@prisma/client-runtime-utils': 7.5.0
       typescript: 5.9.3
     dev: false
 
@@ -6510,4 +6514,18 @@ packages:
       '@types/react': 19.2.14
       react: 19.2.3
       use-sync-external-store: 1.6.0(react@19.2.3)
+    dev: false
+
+  file:packages/db(typescript@5.9.3):
+    resolution: {directory: packages/db, type: directory}
+    id: file:packages/db
+    name: '@akaar/db'
+    dependencies:
+      '@prisma/adapter-pg': 7.4.1
+      '@prisma/client': 7.5.0(typescript@5.9.3)
+      pg: 8.19.0
+    transitivePeerDependencies:
+      - pg-native
+      - prisma
+      - typescript
     dev: false
