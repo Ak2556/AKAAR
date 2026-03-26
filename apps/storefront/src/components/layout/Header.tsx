@@ -3,13 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Box, Layers, Wrench, ShoppingCart, Search, Heart, User, LogOut, Package, Settings } from "lucide-react";
+import { Menu, X, Box, Layers, Wrench, ShoppingCart, Search, Heart, User, LogOut, Package, Settings, Sun, Moon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { SearchModal } from "@/components/search/SearchModal";
 import { useSession, signOut } from "next-auth/react";
+import { useTheme } from "@/hooks/useTheme";
 
 const navItems = [
   { href: "/products", label: "Products", icon: Box },
@@ -26,6 +27,7 @@ export function Header() {
   const { openCart, totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
   const { data: session, status } = useSession();
+  const { isDark, toggleMode } = useTheme();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -89,6 +91,15 @@ export function Header() {
 
             {/* Actions */}
             <div className="hidden md:flex items-center gap-2">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleMode}
+                className="p-2 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
               {/* Search Button */}
               <button
                 onClick={() => setIsSearchOpen(true)}
@@ -220,6 +231,13 @@ export function Header() {
 
             {/* Mobile Menu Button */}
             <div className="flex md:hidden items-center gap-2">
+              <button
+                onClick={toggleMode}
+                className="p-2 text-[var(--text-secondary)]"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 text-[var(--text-secondary)]"

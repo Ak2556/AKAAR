@@ -134,3 +134,8 @@ export const themes: Record<ThemeId, Theme> = {
 
 export const themeList = Object.values(themes);
 export const defaultTheme: ThemeId = 'cyberpunk';
+
+// Theme mode for quick toggle (system auto-detects preference)
+export type ThemeMode = 'system' | 'light' | 'dark';
+export const darkThemes: ThemeId[] = ['cyberpunk', 'industrial'];
+export const lightThemes: ThemeId[] = ['light', 'nature'];

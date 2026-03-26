@@ -1,17 +1,35 @@
-import { themes, defaultTheme } from "@/config/themes";
+import { themes, defaultTheme, darkThemes, lightThemes } from "@/config/themes";
 
 // Generate the inline script that runs before React hydration
 const themeScript = `
 (function() {
   const STORAGE_KEY = 'akaar-theme';
+  const MODE_STORAGE_KEY = 'akaar-theme-mode';
   const themes = ${JSON.stringify(themes)};
   const defaultTheme = '${defaultTheme}';
+  const darkThemes = ${JSON.stringify(darkThemes)};
+  const lightThemes = ${JSON.stringify(lightThemes)};
 
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const themeId = (saved && themes[saved]) ? saved : defaultTheme;
-    const theme = themes[themeId];
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+    const savedMode = localStorage.getItem(MODE_STORAGE_KEY) || 'system';
 
+    // Resolve theme based on mode
+    let themeId;
+    if (savedMode === 'system') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        themeId = (savedTheme && darkThemes.includes(savedTheme)) ? savedTheme : 'cyberpunk';
+      } else {
+        themeId = (savedTheme && lightThemes.includes(savedTheme)) ? savedTheme : 'light';
+      }
+    } else if (savedMode === 'dark') {
+      themeId = (savedTheme && darkThemes.includes(savedTheme)) ? savedTheme : 'cyberpunk';
+    } else {
+      themeId = (savedTheme && lightThemes.includes(savedTheme)) ? savedTheme : 'light';
+    }
+
+    const theme = themes[themeId] || themes[defaultTheme];
     const root = document.documentElement;
 
     // Apply colors
@@ -31,7 +49,7 @@ const themeScript = `
     root.style.setProperty('--foreground', theme.colors.textPrimary);
 
     // Set theme attribute
-    root.setAttribute('data-theme', themeId);
+    root.setAttribute('data-theme', theme.id);
 
     // Toggle effect classes
     if (theme.effects.enableGlow) root.classList.add('theme-glow');
