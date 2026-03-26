@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { PerspectiveCamera, Float } from "@react-three/drei";
+import { PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 
 interface MinimalLightSceneProps {
@@ -10,148 +10,248 @@ interface MinimalLightSceneProps {
   mouseY?: number;
 }
 
-function GlassRing({
-  radius = 2,
-  tube = 0.02,
-  color = "#3b82f6",
-  rotationOffset = [0, 0, 0],
-  speed = 1
-}: {
-  radius?: number;
-  tube?: number;
-  color?: string;
-  rotationOffset?: [number, number, number];
-  speed?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
+// Falling matrix dots
+function MatrixRain({ count = 800 }: { count?: number }) {
+  const pointsRef = useRef<THREE.Points>(null);
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = rotationOffset[0] + state.clock.elapsedTime * 0.1 * speed;
-      meshRef.current.rotation.y = rotationOffset[1] + state.clock.elapsedTime * 0.15 * speed;
+  const { positions, speeds, opacities } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const speeds = new Float32Array(count);
+    const opacities = new Float32Array(count);
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      // Spread in X and Z, random Y position
+      positions[i3] = (Math.random() - 0.5) * 25;
+      positions[i3 + 1] = Math.random() * 20 - 5;
+      positions[i3 + 2] = (Math.random() - 0.5) * 20 - 5;
+
+      speeds[i] = 0.5 + Math.random() * 1.5;
+      opacities[i] = 0.3 + Math.random() * 0.7;
     }
+
+    return { positions, speeds, opacities };
+  }, [count]);
+
+  useFrame((state, delta) => {
+    if (!pointsRef.current) return;
+
+    const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      // Fall down
+      posArray[i3 + 1] -= speeds[i] * delta * 2;
+
+      // Reset when below view
+      if (posArray[i3 + 1] < -10) {
+        posArray[i3 + 1] = 15;
+        posArray[i3] = (Math.random() - 0.5) * 25;
+      }
+    }
+
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
-    <mesh ref={meshRef}>
-      <torusGeometry args={[radius, tube, 64, 128]} />
-      <meshStandardMaterial
-        color={color}
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.06}
+        color="#6366f1"
         transparent
-        opacity={0.6}
-        metalness={0.1}
-        roughness={0.2}
+        opacity={0.5}
+        sizeAttenuation
       />
-    </mesh>
+    </points>
   );
 }
 
-function SoftSphere({ mouseX = 0, mouseY = 0 }: { mouseX?: number; mouseY?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
+// Static dot grid - cinematic matrix floor
+function DotGrid({ rows = 40, cols = 40, spacing = 0.6 }: { rows?: number; cols?: number; spacing?: number }) {
+  const pointsRef = useRef<THREE.Points>(null);
+
+  const positions = useMemo(() => {
+    const positions = new Float32Array(rows * cols * 3);
+    let idx = 0;
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        positions[idx++] = (j - cols / 2) * spacing;
+        positions[idx++] = 0;
+        positions[idx++] = (i - rows / 2) * spacing;
+      }
+    }
+
+    return positions;
+  }, [rows, cols, spacing]);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.05;
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
+    if (!pointsRef.current) return;
+    // Subtle wave animation
+    const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
+    const time = state.clock.elapsedTime;
 
-      // Subtle mouse influence
-      meshRef.current.rotation.y += mouseX * 0.0005;
-      meshRef.current.rotation.x += mouseY * 0.0005;
+    for (let i = 0; i < rows * cols; i++) {
+      const i3 = i * 3;
+      const x = posArray[i3];
+      const z = posArray[i3 + 2];
+      // Wave effect
+      posArray[i3 + 1] = Math.sin(x * 0.3 + time * 0.5) * Math.cos(z * 0.3 + time * 0.3) * 0.3;
     }
+
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
-      <mesh ref={meshRef}>
-        <icosahedronGeometry args={[1.2, 1]} />
-        <meshStandardMaterial
-          ref={materialRef}
-          color="#e0e7ff"
+    <group position={[0, -3, 0]}>
+      <points ref={pointsRef}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.04}
+          color="#94a3b8"
           transparent
-          opacity={0.3}
-          metalness={0.1}
-          roughness={0.8}
-          wireframe
+          opacity={0.6}
+          sizeAttenuation
         />
-      </mesh>
-    </Float>
+      </points>
+    </group>
   );
 }
 
-function FloatingShapes() {
-  const group1Ref = useRef<THREE.Group>(null);
-  const group2Ref = useRef<THREE.Group>(null);
+// Central glowing orb
+function CentralOrb({ mouseX = 0, mouseY = 0 }: { mouseX: number; mouseY: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const innerRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (group1Ref.current) {
-      group1Ref.current.rotation.z = state.clock.elapsedTime * 0.02;
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+      groupRef.current.rotation.y += mouseX * 0.001;
+      groupRef.current.rotation.x += mouseY * 0.001;
     }
-    if (group2Ref.current) {
-      group2Ref.current.rotation.z = -state.clock.elapsedTime * 0.015;
+    if (innerRef.current) {
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
+      innerRef.current.scale.setScalar(scale);
     }
   });
 
   return (
-    <>
-      {/* Outer ring group */}
-      <group ref={group1Ref}>
-        <GlassRing radius={2.5} tube={0.015} color="#6366f1" rotationOffset={[0.5, 0, 0]} speed={0.8} />
-        <GlassRing radius={2.8} tube={0.01} color="#8b5cf6" rotationOffset={[1.2, 0.5, 0]} speed={0.6} />
-      </group>
+    <group ref={groupRef}>
+      {/* Inner glow */}
+      <mesh ref={innerRef}>
+        <sphereGeometry args={[0.8, 32, 32]} />
+        <meshBasicMaterial color="#818cf8" transparent opacity={0.15} />
+      </mesh>
 
-      {/* Inner ring group */}
-      <group ref={group2Ref}>
-        <GlassRing radius={1.8} tube={0.02} color="#3b82f6" rotationOffset={[0.8, 1, 0]} speed={1} />
-        <GlassRing radius={2.1} tube={0.012} color="#a5b4fc" rotationOffset={[0.3, 0.8, 0.5]} speed={0.7} />
-      </group>
-    </>
+      {/* Wireframe shell */}
+      <mesh>
+        <icosahedronGeometry args={[1.2, 1]} />
+        <meshBasicMaterial color="#6366f1" wireframe transparent opacity={0.4} />
+      </mesh>
+
+      {/* Outer ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.8, 0.01, 16, 100]} />
+        <meshBasicMaterial color="#a5b4fc" transparent opacity={0.5} />
+      </mesh>
+
+      {/* Vertical ring */}
+      <mesh>
+        <torusGeometry args={[1.6, 0.01, 16, 100]} />
+        <meshBasicMaterial color="#c7d2fe" transparent opacity={0.4} />
+      </mesh>
+    </group>
   );
 }
 
-function SubtleGrid() {
-  return (
-    <group position={[0, -3, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      {/* Very subtle gradient plane */}
-      <mesh rotation={[0, 0, 0]}>
-        <planeGeometry args={[50, 50]} />
-        <meshBasicMaterial color="#f8fafc" transparent opacity={0.5} />
-      </mesh>
+// Floating vertical dot columns
+function DotColumns({ count = 12 }: { count?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
 
-      {/* Minimal line accents */}
-      {[-8, -4, 0, 4, 8].map((x, i) => (
-        <mesh key={i} position={[x, 0, 0.01]}>
-          <planeGeometry args={[0.005, 30]} />
-          <meshBasicMaterial color="#cbd5e1" transparent opacity={0.3} />
-        </mesh>
+  const columns = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => {
+      const angle = (i / count) * Math.PI * 2;
+      const radius = 5 + Math.random() * 3;
+      return {
+        x: Math.cos(angle) * radius,
+        z: Math.sin(angle) * radius,
+        dots: 8 + Math.floor(Math.random() * 8),
+        speed: 0.2 + Math.random() * 0.3,
+        offset: Math.random() * Math.PI * 2,
+      };
+    });
+  }, [count]);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.02;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {columns.map((col, colIdx) => (
+        <group key={colIdx} position={[col.x, 0, col.z]}>
+          {Array.from({ length: col.dots }, (_, dotIdx) => (
+            <DotInColumn
+              key={dotIdx}
+              baseY={-4 + dotIdx * 0.8}
+              speed={col.speed}
+              offset={col.offset + dotIdx * 0.3}
+            />
+          ))}
+        </group>
       ))}
     </group>
+  );
+}
+
+function DotInColumn({ baseY, speed, offset }: { baseY: number; speed: number; offset: number }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      const pulse = Math.sin(state.clock.elapsedTime * speed * 3 + offset);
+      meshRef.current.scale.setScalar(0.8 + pulse * 0.3);
+      (meshRef.current.material as THREE.MeshBasicMaterial).opacity = 0.3 + pulse * 0.3;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, baseY, 0]}>
+      <sphereGeometry args={[0.03, 8, 8]} />
+      <meshBasicMaterial color="#6366f1" transparent opacity={0.5} />
+    </mesh>
   );
 }
 
 export function MinimalLightScene({ mouseX = 0, mouseY = 0 }: MinimalLightSceneProps) {
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
+      <PerspectiveCamera makeDefault position={[0, 1, 10]} fov={50} />
 
       {/* Soft ambient lighting */}
-      <ambientLight intensity={1} />
+      <ambientLight intensity={0.8} />
 
-      {/* Soft directional lights for subtle shadows */}
-      <directionalLight position={[5, 5, 5]} intensity={0.5} color="#e0e7ff" />
-      <directionalLight position={[-5, 3, -5]} intensity={0.3} color="#c7d2fe" />
+      {/* Falling matrix rain */}
+      <MatrixRain count={600} />
 
-      {/* Central wireframe shape */}
-      <SoftSphere mouseX={mouseX} mouseY={mouseY} />
+      {/* Dot grid floor with wave */}
+      <DotGrid rows={35} cols={35} spacing={0.7} />
 
-      {/* Floating glass rings */}
-      <FloatingShapes />
+      {/* Central orb */}
+      <CentralOrb mouseX={mouseX} mouseY={mouseY} />
 
-      {/* Subtle floor grid */}
-      <SubtleGrid />
+      {/* Surrounding dot columns */}
+      <DotColumns count={10} />
 
-      {/* Very light fog */}
-      <fog attach="fog" args={["#ffffff", 10, 50]} />
+      {/* Very subtle fog */}
+      <fog attach="fog" args={["#f8fafc", 8, 35]} />
     </>
   );
 }
