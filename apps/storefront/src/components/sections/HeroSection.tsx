@@ -3,13 +3,61 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { Scene } from "@/components/three/Scene";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import { useTheme } from "@/hooks/useTheme";
 
+// Typing effect component
+function TypeWriter({
+  text,
+  delay = 0,
+  speed = 50,
+  className = "",
+  onComplete,
+}: {
+  text: string;
+  delay?: number;
+  speed?: number;
+  className?: string;
+  onComplete?: () => void;
+}) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const startTimer = setTimeout(() => setStarted(true), delay);
+    return () => clearTimeout(startTimer);
+  }, [delay]);
+
+  useEffect(() => {
+    if (!started) return;
+
+    if (displayedText.length < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText(text.slice(0, displayedText.length + 1));
+      }, speed);
+      return () => clearTimeout(timer);
+    } else {
+      onComplete?.();
+    }
+  }, [displayedText, text, speed, started, onComplete]);
+
+  return (
+    <span className={className}>
+      {displayedText}
+      {started && displayedText.length < text.length && (
+        <span className="animate-pulse text-[var(--accent)]">|</span>
+      )}
+    </span>
+  );
+}
+
 export function HeroSection() {
   const { normalizedX, normalizedY } = useMousePosition();
   const { isDark } = useTheme();
+  const [line1Complete, setLine1Complete] = useState(false);
+  const [line2Complete, setLine2Complete] = useState(false);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -42,21 +90,47 @@ export function HeroSection() {
             <span className="text-sm text-[var(--accent)] font-mono">WE GIVE AKAAR TO IDEAS</span>
           </motion.div>
 
-          {/* Headline */}
+          {/* Headline with typing effect */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-            <span className="block text-[var(--text-primary)]">Frictionless</span>
-            <span className="block gradient-text">3D Printing</span>
+            <span className="block text-[var(--text-primary)]">
+              <TypeWriter
+                text="Frictionless"
+                delay={800}
+                speed={80}
+                onComplete={() => setLine1Complete(true)}
+              />
+            </span>
+            <span className="block gradient-text min-h-[1.2em]">
+              {line1Complete && (
+                <TypeWriter
+                  text="3D Printing"
+                  delay={200}
+                  speed={80}
+                  onComplete={() => setLine2Complete(true)}
+                />
+              )}
+            </span>
           </h1>
 
-          {/* Subheadline */}
-          <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-12">
+          {/* Subheadline - fades in after typing completes */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: line2Complete ? 1 : 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-12"
+          >
             From CAD to physical part in days. A seamless storefront driven by an
             automated algorithmic quoting engine. Upload your model, get instant pricing,
             and push to production.
-          </p>
+          </motion.p>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* CTAs - fade in after typing completes */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: line2Complete ? 1 : 0, y: line2Complete ? 0 : 20 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
             <Link href="/quote">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -77,7 +151,7 @@ export function HeroSection() {
                 Explore Materials
               </motion.button>
             </Link>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Scroll indicator */}
