@@ -5,14 +5,16 @@ import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
 import { Scene } from "@/components/three/Scene";
 import { useMousePosition } from "@/hooks/useMousePosition";
+import { useTheme } from "@/hooks/useTheme";
 
 export function HeroSection() {
   const { normalizedX, normalizedY } = useMousePosition();
+  const { isDark } = useTheme();
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* 3D Background */}
-      <Scene mouseX={normalizedX} mouseY={normalizedY} />
+      <Scene mouseX={normalizedX} mouseY={normalizedY} isDark={isDark} />
 
       {/* Grid overlay */}
       <div className="absolute inset-0 grid-overlay pointer-events-none" />

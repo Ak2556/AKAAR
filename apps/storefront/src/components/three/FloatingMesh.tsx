@@ -8,9 +8,16 @@ import * as THREE from "three";
 interface FloatingMeshProps {
   mouseX?: number;
   mouseY?: number;
+  accentColor?: string;
+  secondaryColor?: string;
 }
 
-export function FloatingMesh({ mouseX = 0, mouseY = 0 }: FloatingMeshProps) {
+export function FloatingMesh({
+  mouseX = 0,
+  mouseY = 0,
+  accentColor = "#00fff5",
+  secondaryColor = "#ff00ff",
+}: FloatingMeshProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const wireframeRef = useRef<THREE.LineSegments>(null);
 
@@ -37,8 +44,8 @@ export function FloatingMesh({ mouseX = 0, mouseY = 0 }: FloatingMeshProps) {
         <mesh ref={meshRef}>
           <icosahedronGeometry args={[1.5, 1]} />
           <MeshDistortMaterial
-            color="#00fff5"
-            emissive="#00fff5"
+            color={accentColor}
+            emissive={accentColor}
             emissiveIntensity={0.1}
             transparent
             opacity={0.1}
@@ -50,13 +57,13 @@ export function FloatingMesh({ mouseX = 0, mouseY = 0 }: FloatingMeshProps) {
         {/* Wireframe outer shell */}
         <lineSegments ref={wireframeRef}>
           <icosahedronGeometry args={[1.8, 1]} />
-          <lineBasicMaterial color="#00fff5" transparent opacity={0.5} />
+          <lineBasicMaterial color={accentColor} transparent opacity={0.5} />
         </lineSegments>
 
         {/* Second wireframe layer */}
         <lineSegments rotation={[0.5, 0.5, 0]}>
           <icosahedronGeometry args={[2.2, 0]} />
-          <lineBasicMaterial color="#ff00ff" transparent opacity={0.2} />
+          <lineBasicMaterial color={secondaryColor} transparent opacity={0.2} />
         </lineSegments>
       </group>
     </Float>

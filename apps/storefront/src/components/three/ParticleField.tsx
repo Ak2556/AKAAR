@@ -7,9 +7,16 @@ import * as THREE from "three";
 interface ParticleFieldProps {
   count?: number;
   size?: number;
+  baseColor?: [number, number, number];
+  isDark?: boolean;
 }
 
-export function ParticleField({ count = 500, size = 0.02 }: ParticleFieldProps) {
+export function ParticleField({
+  count = 500,
+  size = 0.02,
+  baseColor = [0, 0.9, 0.9],
+  isDark = true,
+}: ParticleFieldProps) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const particles = useMemo(() => {
@@ -22,14 +29,15 @@ export function ParticleField({ count = 500, size = 0.02 }: ParticleFieldProps) 
       positions[i3 + 1] = (Math.random() - 0.5) * 20;
       positions[i3 + 2] = (Math.random() - 0.5) * 30;
 
-      // Cyan color with variation
-      colors[i3] = 0;
-      colors[i3 + 1] = 0.8 + Math.random() * 0.2;
-      colors[i3 + 2] = 0.8 + Math.random() * 0.2;
+      // Color with variation based on theme
+      const variation = Math.random() * 0.2;
+      colors[i3] = Math.min(1, baseColor[0] + variation);
+      colors[i3 + 1] = Math.min(1, baseColor[1] + variation);
+      colors[i3 + 2] = Math.min(1, baseColor[2] + variation);
     }
 
     return { positions, colors };
-  }, [count]);
+  }, [count, baseColor]);
 
   useFrame((state) => {
     if (pointsRef.current) {
@@ -54,9 +62,9 @@ export function ParticleField({ count = 500, size = 0.02 }: ParticleFieldProps) 
         size={size}
         vertexColors
         transparent
-        opacity={0.6}
+        opacity={isDark ? 0.6 : 0.8}
         sizeAttenuation
-        blending={THREE.AdditiveBlending}
+        blending={isDark ? THREE.AdditiveBlending : THREE.NormalBlending}
       />
     </points>
   );
