@@ -2,7 +2,7 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { PerspectiveCamera } from "@react-three/drei";
+import { PerspectiveCamera, Float, MeshDistortMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
 interface MinimalLightSceneProps {
@@ -10,248 +10,165 @@ interface MinimalLightSceneProps {
   mouseY?: number;
 }
 
-// Falling matrix dots
-function MatrixRain({ count = 800 }: { count?: number }) {
+// Light mode colors - matching dark mode's cyberpunk vibe
+const COLORS = {
+  accent: "#0891b2",      // Cyan/teal for light mode
+  secondary: "#c026d3",   // Magenta/fuchsia
+  grid: "#06b6d4",        // Lighter cyan for grid
+  gridBg: "#f0fdfa",      // Very light cyan tint
+  particle: "#0891b2",
+};
+
+// Floating mesh matching dark mode structure
+function FloatingMesh({ mouseX = 0, mouseY = 0 }: { mouseX?: number; mouseY?: number }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const wireframeRef = useRef<THREE.LineSegments>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += 0.002;
+      meshRef.current.rotation.y += 0.003;
+      meshRef.current.rotation.y += mouseX * 0.001;
+      meshRef.current.rotation.x += mouseY * 0.001;
+    }
+    if (wireframeRef.current) {
+      wireframeRef.current.rotation.x = meshRef.current?.rotation.x || 0;
+      wireframeRef.current.rotation.y = meshRef.current?.rotation.y || 0;
+    }
+  });
+
+  return (
+    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+      <group>
+        {/* Inner solid mesh with distortion */}
+        <mesh ref={meshRef}>
+          <icosahedronGeometry args={[1.5, 1]} />
+          <MeshDistortMaterial
+            color={COLORS.accent}
+            emissive={COLORS.accent}
+            emissiveIntensity={0.05}
+            transparent
+            opacity={0.15}
+            distort={0.3}
+            speed={2}
+          />
+        </mesh>
+
+        {/* Wireframe outer shell */}
+        <lineSegments ref={wireframeRef}>
+          <icosahedronGeometry args={[1.8, 1]} />
+          <lineBasicMaterial color={COLORS.accent} transparent opacity={0.6} />
+        </lineSegments>
+
+        {/* Second wireframe layer */}
+        <lineSegments rotation={[0.5, 0.5, 0]}>
+          <icosahedronGeometry args={[2.2, 0]} />
+          <lineBasicMaterial color={COLORS.secondary} transparent opacity={0.3} />
+        </lineSegments>
+      </group>
+    </Float>
+  );
+}
+
+// Grid floor matching dark mode
+function GridFloor() {
+  const gridRef = useRef<THREE.GridHelper>(null);
+
+  useFrame((state) => {
+    if (gridRef.current) {
+      gridRef.current.position.z = (state.clock.elapsedTime * 0.5) % 1;
+    }
+  });
+
+  return (
+    <group position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <gridHelper
+        ref={gridRef}
+        args={[100, 100, COLORS.grid, "#e0f2fe"]}
+        rotation={[Math.PI / 2, 0, 0]}
+      />
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.1]}>
+        <planeGeometry args={[100, 100]} />
+        <meshBasicMaterial color={COLORS.gridBg} transparent opacity={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
+// Particle field matching dark mode
+function ParticleField({ count = 300 }: { count?: number }) {
   const pointsRef = useRef<THREE.Points>(null);
 
-  const { positions, speeds, opacities } = useMemo(() => {
+  const particles = useMemo(() => {
     const positions = new Float32Array(count * 3);
-    const speeds = new Float32Array(count);
-    const opacities = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
+
+    // Parse hex color to RGB
+    const r = 0.03; // cyan-ish
+    const g = 0.57;
+    const b = 0.7;
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      // Spread in X and Z, random Y position
-      positions[i3] = (Math.random() - 0.5) * 25;
-      positions[i3 + 1] = Math.random() * 20 - 5;
-      positions[i3 + 2] = (Math.random() - 0.5) * 20 - 5;
+      positions[i3] = (Math.random() - 0.5) * 30;
+      positions[i3 + 1] = (Math.random() - 0.5) * 20;
+      positions[i3 + 2] = (Math.random() - 0.5) * 30;
 
-      speeds[i] = 0.5 + Math.random() * 1.5;
-      opacities[i] = 0.3 + Math.random() * 0.7;
+      // Color with variation
+      const variation = Math.random() * 0.2;
+      colors[i3] = Math.min(1, r + variation);
+      colors[i3 + 1] = Math.min(1, g + variation);
+      colors[i3 + 2] = Math.min(1, b + variation);
     }
 
-    return { positions, speeds, opacities };
+    return { positions, colors };
   }, [count]);
 
-  useFrame((state, delta) => {
-    if (!pointsRef.current) return;
-
-    const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
-
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      // Fall down
-      posArray[i3 + 1] -= speeds[i] * delta * 2;
-
-      // Reset when below view
-      if (posArray[i3 + 1] < -10) {
-        posArray[i3 + 1] = 15;
-        posArray[i3] = (Math.random() - 0.5) * 25;
-      }
+  useFrame((state) => {
+    if (pointsRef.current) {
+      pointsRef.current.rotation.y = state.clock.elapsedTime * 0.02;
+      pointsRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.05;
     }
-
-    pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-position" args={[particles.positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[particles.colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.06}
-        color="#6366f1"
+        size={0.025}
+        vertexColors
         transparent
-        opacity={0.5}
+        opacity={0.7}
         sizeAttenuation
       />
     </points>
   );
 }
 
-// Static dot grid - cinematic matrix floor
-function DotGrid({ rows = 40, cols = 40, spacing = 0.6 }: { rows?: number; cols?: number; spacing?: number }) {
-  const pointsRef = useRef<THREE.Points>(null);
-
-  const positions = useMemo(() => {
-    const positions = new Float32Array(rows * cols * 3);
-    let idx = 0;
-
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        positions[idx++] = (j - cols / 2) * spacing;
-        positions[idx++] = 0;
-        positions[idx++] = (i - rows / 2) * spacing;
-      }
-    }
-
-    return positions;
-  }, [rows, cols, spacing]);
-
-  useFrame((state) => {
-    if (!pointsRef.current) return;
-    // Subtle wave animation
-    const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
-    const time = state.clock.elapsedTime;
-
-    for (let i = 0; i < rows * cols; i++) {
-      const i3 = i * 3;
-      const x = posArray[i3];
-      const z = posArray[i3 + 2];
-      // Wave effect
-      posArray[i3 + 1] = Math.sin(x * 0.3 + time * 0.5) * Math.cos(z * 0.3 + time * 0.3) * 0.3;
-    }
-
-    pointsRef.current.geometry.attributes.position.needsUpdate = true;
-  });
-
-  return (
-    <group position={[0, -3, 0]}>
-      <points ref={pointsRef}>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.04}
-          color="#94a3b8"
-          transparent
-          opacity={0.6}
-          sizeAttenuation
-        />
-      </points>
-    </group>
-  );
-}
-
-// Central glowing orb
-function CentralOrb({ mouseX = 0, mouseY = 0 }: { mouseX: number; mouseY: number }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const innerRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.1;
-      groupRef.current.rotation.y += mouseX * 0.001;
-      groupRef.current.rotation.x += mouseY * 0.001;
-    }
-    if (innerRef.current) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-      innerRef.current.scale.setScalar(scale);
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Inner glow */}
-      <mesh ref={innerRef}>
-        <sphereGeometry args={[0.8, 32, 32]} />
-        <meshBasicMaterial color="#818cf8" transparent opacity={0.15} />
-      </mesh>
-
-      {/* Wireframe shell */}
-      <mesh>
-        <icosahedronGeometry args={[1.2, 1]} />
-        <meshBasicMaterial color="#6366f1" wireframe transparent opacity={0.4} />
-      </mesh>
-
-      {/* Outer ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1.8, 0.01, 16, 100]} />
-        <meshBasicMaterial color="#a5b4fc" transparent opacity={0.5} />
-      </mesh>
-
-      {/* Vertical ring */}
-      <mesh>
-        <torusGeometry args={[1.6, 0.01, 16, 100]} />
-        <meshBasicMaterial color="#c7d2fe" transparent opacity={0.4} />
-      </mesh>
-    </group>
-  );
-}
-
-// Floating vertical dot columns
-function DotColumns({ count = 12 }: { count?: number }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  const columns = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => {
-      const angle = (i / count) * Math.PI * 2;
-      const radius = 5 + Math.random() * 3;
-      return {
-        x: Math.cos(angle) * radius,
-        z: Math.sin(angle) * radius,
-        dots: 8 + Math.floor(Math.random() * 8),
-        speed: 0.2 + Math.random() * 0.3,
-        offset: Math.random() * Math.PI * 2,
-      };
-    });
-  }, [count]);
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.02;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {columns.map((col, colIdx) => (
-        <group key={colIdx} position={[col.x, 0, col.z]}>
-          {Array.from({ length: col.dots }, (_, dotIdx) => (
-            <DotInColumn
-              key={dotIdx}
-              baseY={-4 + dotIdx * 0.8}
-              speed={col.speed}
-              offset={col.offset + dotIdx * 0.3}
-            />
-          ))}
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function DotInColumn({ baseY, speed, offset }: { baseY: number; speed: number; offset: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      const pulse = Math.sin(state.clock.elapsedTime * speed * 3 + offset);
-      meshRef.current.scale.setScalar(0.8 + pulse * 0.3);
-      (meshRef.current.material as THREE.MeshBasicMaterial).opacity = 0.3 + pulse * 0.3;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} position={[0, baseY, 0]}>
-      <sphereGeometry args={[0.03, 8, 8]} />
-      <meshBasicMaterial color="#6366f1" transparent opacity={0.5} />
-    </mesh>
-  );
-}
-
 export function MinimalLightScene({ mouseX = 0, mouseY = 0 }: MinimalLightSceneProps) {
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 1, 10]} fov={50} />
+      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
 
-      {/* Soft ambient lighting */}
-      <ambientLight intensity={0.8} />
+      {/* Lighting - brighter for light mode */}
+      <ambientLight intensity={0.6} />
+      <pointLight position={[10, 10, 10]} intensity={0.8} color={COLORS.accent} />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} color={COLORS.secondary} />
 
-      {/* Falling matrix rain */}
-      <MatrixRain count={600} />
+      {/* Main floating mesh - same as dark mode */}
+      <FloatingMesh mouseX={mouseX} mouseY={mouseY} />
 
-      {/* Dot grid floor with wave */}
-      <DotGrid rows={35} cols={35} spacing={0.7} />
+      {/* Grid floor - same as dark mode */}
+      <GridFloor />
 
-      {/* Central orb */}
-      <CentralOrb mouseX={mouseX} mouseY={mouseY} />
+      {/* Particle field - same as dark mode */}
+      <ParticleField count={300} />
 
-      {/* Surrounding dot columns */}
-      <DotColumns count={10} />
-
-      {/* Very subtle fog */}
-      <fog attach="fog" args={["#f8fafc", 8, 35]} />
+      {/* Fog for depth - light colored */}
+      <fog attach="fog" args={["#f0fdfa", 5, 35]} />
     </>
   );
 }
