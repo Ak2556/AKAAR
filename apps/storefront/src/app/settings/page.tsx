@@ -85,31 +85,145 @@ export default function SettingsPage() {
             description="Choose your preferred visual style"
             delay={0.1}
           >
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {themeList.map((theme) => (
                 <button
                   key={theme.id}
                   onClick={() => setTheme(theme.id)}
-                  className={`group relative p-4 border rounded-xl transition-all text-left ${
+                  className={`group relative overflow-hidden rounded-2xl transition-all text-left ${
                     themeId === theme.id
-                      ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                      : "border-[var(--border)] hover:border-[var(--accent)]/50 bg-[var(--bg-secondary)]"
+                      ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-primary)]"
+                      : "hover:scale-[1.02]"
                   }`}
                 >
-                  {themeId === theme.id && (
-                    <div className="absolute top-3 right-3 w-6 h-6 bg-[var(--accent)] rounded-full flex items-center justify-center">
-                      <Check className="w-4 h-4 text-[var(--bg-primary)]" />
+                  {/* Theme Preview Card */}
+                  <div
+                    className="aspect-[4/3] p-4 relative"
+                    style={{ background: theme.colors.bgPrimary }}
+                  >
+                    {/* Mini mockup of theme */}
+                    <div className="absolute inset-3 flex flex-col">
+                      {/* Header mockup */}
+                      <div
+                        className="h-6 rounded-t-lg flex items-center px-2 gap-1"
+                        style={{ background: theme.colors.bgSecondary, borderBottom: `1px solid ${theme.colors.border}` }}
+                      >
+                        <div className="w-2 h-2 rounded-full" style={{ background: theme.colors.accent }} />
+                        <div className="w-8 h-1.5 rounded" style={{ background: theme.colors.textMuted }} />
+                      </div>
+
+                      {/* Content mockup */}
+                      <div
+                        className="flex-1 p-2 flex gap-2"
+                        style={{ background: theme.colors.bgSecondary }}
+                      >
+                        {/* Sidebar */}
+                        <div className="w-1/4 space-y-1">
+                          <div className="h-2 rounded" style={{ background: theme.colors.textMuted, opacity: 0.3 }} />
+                          <div className="h-2 w-3/4 rounded" style={{ background: theme.colors.textMuted, opacity: 0.3 }} />
+                          <div className="h-2 w-1/2 rounded" style={{ background: theme.colors.accent }} />
+                        </div>
+
+                        {/* Main content */}
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 w-3/4 rounded" style={{ background: theme.colors.textPrimary, opacity: 0.8 }} />
+                          <div className="h-2 rounded" style={{ background: theme.colors.textMuted, opacity: 0.4 }} />
+                          <div className="h-2 w-5/6 rounded" style={{ background: theme.colors.textMuted, opacity: 0.4 }} />
+                          <div className="flex gap-1 mt-2">
+                            <div className="h-4 w-12 rounded" style={{ background: theme.colors.accent }} />
+                            <div className="h-4 w-12 rounded" style={{ background: theme.colors.border }} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex gap-1 mb-3">
-                    <div className="w-6 h-6 rounded border border-[var(--border)]" style={{ background: theme.colors.bgPrimary }} />
-                    <div className="w-6 h-6 rounded border border-[var(--border)]" style={{ background: theme.colors.accent }} />
-                    <div className="w-6 h-6 rounded border border-[var(--border)]" style={{ background: theme.colors.accentSecondary }} />
+
+                    {/* Selected indicator */}
+                    {themeId === theme.id && (
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: theme.colors.accent }}>
+                        <Check className="w-4 h-4" style={{ color: theme.colors.bgPrimary }} />
+                      </div>
+                    )}
+
+                    {/* Nothing theme dot pattern */}
+                    {theme.id === 'nothing' && (
+                      <div
+                        className="absolute inset-0 opacity-30"
+                        style={{
+                          backgroundImage: `radial-gradient(circle, ${theme.colors.accent}40 1px, transparent 1px)`,
+                          backgroundSize: '8px 8px'
+                        }}
+                      />
+                    )}
                   </div>
-                  <h3 className="font-semibold text-sm">{theme.name}</h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{theme.description}</p>
+
+                  {/* Theme info */}
+                  <div
+                    className="p-4 border-t"
+                    style={{
+                      background: theme.colors.bgSecondary,
+                      borderColor: theme.colors.border
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                        {theme.name}
+                      </h3>
+                      {theme.id === 'nothing' && (
+                        <span
+                          className="px-1.5 py-0.5 text-[10px] font-bold uppercase rounded"
+                          style={{ background: theme.colors.accent, color: theme.colors.bgPrimary }}
+                        >
+                          New
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs" style={{ color: theme.colors.textMuted }}>
+                      {theme.description}
+                    </p>
+
+                    {/* Color swatches */}
+                    <div className="flex gap-1 mt-3">
+                      <div
+                        className="w-5 h-5 rounded-full border"
+                        style={{ background: theme.colors.bgPrimary, borderColor: theme.colors.border }}
+                        title="Background"
+                      />
+                      <div
+                        className="w-5 h-5 rounded-full border"
+                        style={{ background: theme.colors.accent, borderColor: theme.colors.border }}
+                        title="Accent"
+                      />
+                      <div
+                        className="w-5 h-5 rounded-full border"
+                        style={{ background: theme.colors.accentSecondary, borderColor: theme.colors.border }}
+                        title="Secondary"
+                      />
+                      <div
+                        className="w-5 h-5 rounded-full border"
+                        style={{ background: theme.colors.textPrimary, borderColor: theme.colors.border }}
+                        title="Text"
+                      />
+                    </div>
+                  </div>
                 </button>
               ))}
+            </div>
+
+            {/* Theme features info */}
+            <div className="mt-6 p-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)]">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
+                  <Palette className="w-4 h-4 text-[var(--accent)]" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Current: {themeList.find(t => t.id === themeId)?.name}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    {themeList.find(t => t.id === themeId)?.effects.enableGlow ? 'Glow effects enabled' : 'Minimal effects'}
+                    {' · '}
+                    {themeList.find(t => t.id === themeId)?.effects.enableGrid ? 'Grid overlay enabled' : 'No grid overlay'}
+                  </p>
+                </div>
+              </div>
             </div>
           </SettingsSection>
 

@@ -146,6 +146,11 @@ body {
   background: rgba(24, 24, 27, 0.85);
 }
 
+:root[data-theme="nothing"] .glass {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(215, 38, 56, 0.1);
+}
+
 /* Noise texture overlay - only when theme-noise is enabled */
 .noise::before {
   content: none;
@@ -246,4 +251,72 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ============ NOTHING THEME SPECIAL STYLES ============ */
+
+/* Nothing theme - pure minimal aesthetic */
+:root[data-theme="nothing"] {
+  --font-weight-normal: 300;
+}
+
+:root[data-theme="nothing"] body {
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+/* Nothing dot-matrix pattern - subtle background */
+:root[data-theme="nothing"] .dot-matrix {
+  background-image: radial-gradient(circle, rgba(215, 38, 56, 0.03) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Nothing gradient - subtle red glow */
+:root[data-theme="nothing"] .gradient-text {
+  background: linear-gradient(135deg, #d72638, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Nothing scrollbar - minimal */
+:root[data-theme="nothing"]::-webkit-scrollbar {
+  width: 4px;
+}
+
+:root[data-theme="nothing"]::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+:root[data-theme="nothing"]::-webkit-scrollbar-thumb {
+  background: #1f1f1f;
+  border-radius: 2px;
+}
+
+:root[data-theme="nothing"]::-webkit-scrollbar-thumb:hover {
+  background: #d72638;
+}
+
+/* Nothing selection */
+:root[data-theme="nothing"] ::selection {
+  background: #d72638;
+  color: #ffffff;
+}
+
+/* Nothing button styles */
+:root[data-theme="nothing"] .btn-nothing {
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+/* Nothing card hover - subtle red border */
+:root[data-theme="nothing"] .card-hover:hover {
+  border-color: rgba(215, 38, 56, 0.3);
+}
+
+/* Nothing accent line */
+:root[data-theme="nothing"] .accent-line {
+  background: linear-gradient(90deg, transparent, #d72638, transparent);
 }

@@ -1,4 +1,4 @@
-export type ThemeId = 'cyberpunk' | 'light' | 'industrial' | 'nature';
+export type ThemeId = 'cyberpunk' | 'light' | 'industrial' | 'nature' | 'nothing';
 
 export interface Theme {
   id: ThemeId;
@@ -130,6 +130,32 @@ export const themes: Record<ThemeId, Theme> = {
       enableNoise: false,
     },
   },
+
+  nothing: {
+    id: 'nothing',
+    name: 'Nothing',
+    description: 'Minimal dot-matrix inspired by Nothing OS',
+    colors: {
+      bgPrimary: '#000000',
+      bgSecondary: '#0a0a0a',
+      bgTertiary: '#141414',
+      textPrimary: '#ffffff',
+      textSecondary: '#9ca3af',
+      textMuted: '#4b5563',
+      accent: '#d72638',
+      accentSecondary: '#ff6b6b',
+      accentGlow: 'rgba(215, 38, 56, 0.3)',
+      border: '#1f1f1f',
+      borderAccent: '#2a2a2a',
+      grid: '#0a0a0a',
+    },
+    effects: {
+      enableGlow: false,
+      enableScanlines: false,
+      enableGrid: false,
+      enableNoise: false,
+    },
+  },
 };
 
 export const themeList = Object.values(themes);
@@ -137,5 +163,5 @@ export const defaultTheme: ThemeId = 'cyberpunk';
 
 // Theme mode for quick toggle (system auto-detects preference)
 export type ThemeMode = 'system' | 'light' | 'dark';
-export const darkThemes: ThemeId[] = ['cyberpunk', 'industrial'];
+export const darkThemes: ThemeId[] = ['cyberpunk', 'industrial', 'nothing'];
 export const lightThemes: ThemeId[] = ['light', 'nature'];
