@@ -12,26 +12,32 @@ export interface TeamMember {
     twitter?: string;
     email?: string;
   };
+  isFounder?: boolean;
+  founderVision?: string;
 }
 
 export const teamMembers: TeamMember[] = [
   {
     slug: "akash-thakur",
     name: "Akash Thakur",
-    role: "AI/ML Engineer & Systems Architect",
-    domain: "Core software infrastructure, automated quoting engine algorithms, and the digital storefront",
+    role: "Founder & CEO",
+    domain: "Vision, Strategy, Technology & Product Leadership",
     image: "/team/akash-thakur.png",
-    bio: `Akash is the technical backbone of AKAAR 3D, bringing expertise in artificial intelligence and systems architecture to revolutionize how 3D printing services are delivered. With a passion for building scalable software solutions, he designed and built the automated quoting engine that powers instant pricing for customers.
+    bio: `Akash is the visionary founder behind AKAAR 3D. What started as a simple observation—that local manufacturing was broken by friction, opacity, and inconsistency—became a mission to build something better. He assembled the team, defined the vision, and leads every aspect of the company from technology to strategy.
 
-His work spans the entire digital infrastructure - from the customer-facing storefront to the backend algorithms that calculate print costs based on geometry, material, and complexity. Akash believes in using technology to remove friction from manufacturing processes.
+As both the technical architect and business leader, Akash wears multiple hats. He personally designed and built the automated quoting engine, the customer-facing storefront, and the backend infrastructure that powers AKAAR's operations. His background in AI/ML and systems architecture enables him to solve complex problems at the intersection of software and manufacturing.
 
-When not coding, Akash explores the latest developments in machine learning and contributes to open-source projects. He's driven by the mission to make professional 3D printing accessible to everyone.`,
-    skills: ["Python", "Machine Learning", "Next.js", "System Design", "API Development", "Cloud Architecture", "Data Engineering", "TypeScript"],
+Beyond code, Akash sets the company's direction, builds partnerships, and ensures every team member is aligned with the mission: to make professional 3D printing accessible to everyone. He brought together Mohit, Harish, and Tarveen—each an expert in their domain—to create a team capable of delivering on this ambitious vision.
+
+When he's not leading AKAAR, Akash explores cutting-edge developments in machine learning and contributes to open-source projects. He believes that the future of manufacturing is digital-first, and AKAAR 3D is just the beginning.`,
+    skills: ["Leadership", "Product Strategy", "Python", "Machine Learning", "Next.js", "System Design", "API Development", "Cloud Architecture", "Business Development", "TypeScript"],
     social: {
       linkedin: "https://linkedin.com/in/akash-thakur",
       github: "https://github.com/Ak2556",
       email: "akash@akaar3d.com",
     },
+    isFounder: true,
+    founderVision: "I started AKAAR 3D because I saw a broken system—manual quoting, inconsistent quality, and endless friction that slowed down innovators. We're not just a 3D printing service; we're building the infrastructure for the next generation of hardware creators. Every engineer, every startup, every maker deserves access to manufacturing that just works.",
   },
   {
     slug: "mohit-sheravat",

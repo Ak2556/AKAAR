@@ -5,7 +5,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import {
   Target, Eye, Rocket, Users, Award, Globe,
-  Printer, Cpu, Cog, ArrowRight, CheckCircle
+  Printer, Cpu, Cog, ArrowRight, CheckCircle, Star
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { teamMembers } from "@/lib/team-data";
@@ -330,7 +330,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
+      {/* Founder Section */}
       <section ref={teamRef} className="py-20 bg-[var(--bg-secondary)]">
         <div className="container mx-auto px-6">
           <motion.div
@@ -339,20 +339,123 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold">
-              The Founding <span className="gradient-text">Team</span>
+              Meet the <span className="gradient-text">Founder</span>
             </h2>
             <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              Engineers and operators building the infrastructure for frictionless manufacturing
+              The visionary who started it all
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
+          {/* Founder Featured Card */}
+          {teamMembers.filter(m => m.isFounder).map((founder) => (
+            <motion.div
+              key={founder.name}
+              initial={{ opacity: 0, y: 30 }}
+              animate={teamInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.1 }}
+              className="mb-20"
+            >
+              <Link href={`/team/${founder.slug}`} className="group block">
+                <div className="relative">
+                  {/* Glow Effect - Always slightly visible for founder */}
+                  <div className="absolute -inset-2 bg-gradient-to-r from-[var(--accent)] via-blue-500 to-purple-600 rounded-3xl opacity-30 group-hover:opacity-70 blur-xl transition-all duration-500" />
+
+                  {/* Main Card */}
+                  <div className="relative grid md:grid-cols-2 gap-0 rounded-3xl overflow-hidden bg-[var(--bg-primary)] border border-[var(--accent)]/30 group-hover:border-[var(--accent)]/60 transition-all duration-300">
+                    {/* Image Side */}
+                    <div className="relative aspect-square md:aspect-auto md:min-h-[500px]">
+                      <img
+                        src={founder.image}
+                        alt={founder.name}
+                        className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
+                      />
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--bg-primary)] md:block hidden" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent md:hidden" />
+
+                      {/* Founder Badge */}
+                      <div className="absolute top-6 left-6">
+                        <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--accent)] to-blue-500 text-white text-sm font-bold rounded-full shadow-lg">
+                          <Star className="w-4 h-4" />
+                          FOUNDER & CEO
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content Side */}
+                    <div className="p-8 md:p-12 flex flex-col justify-center">
+                      {/* Name */}
+                      <h3 className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-[var(--accent)] transition-colors">
+                        {founder.name}
+                      </h3>
+
+                      {/* Domain */}
+                      <p className="text-lg text-[var(--accent)] font-medium mb-6">
+                        {founder.domain}
+                      </p>
+
+                      {/* Vision Quote */}
+                      {founder.founderVision && (
+                        <div className="relative mb-8">
+                          <div className="absolute -left-4 -top-2 text-6xl text-[var(--accent)]/20 font-serif">"</div>
+                          <p className="text-lg text-[var(--text-secondary)] italic leading-relaxed pl-4 border-l-2 border-[var(--accent)]/50">
+                            {founder.founderVision}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Skills Preview */}
+                      <div className="flex flex-wrap gap-2 mb-8">
+                        {founder.skills.slice(0, 5).map((skill) => (
+                          <span
+                            key={skill}
+                            className="px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-sm font-medium rounded-full border border-[var(--accent)]/20"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {founder.skills.length > 5 && (
+                          <span className="px-3 py-1 bg-[var(--bg-secondary)] text-[var(--text-muted)] text-sm rounded-full">
+                            +{founder.skills.length - 5} more
+                          </span>
+                        )}
+                      </div>
+
+                      {/* CTA */}
+                      <div className="flex items-center gap-2 text-[var(--accent)] font-semibold group-hover:gap-4 transition-all">
+                        <span>Read Full Story</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+
+          {/* Core Team Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={teamInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-12"
+          >
+            <h3 className="text-2xl md:text-3xl font-bold">
+              The Core <span className="gradient-text">Team</span>
+            </h3>
+            <p className="text-[var(--text-secondary)] mt-3 max-w-xl mx-auto">
+              Experts assembled by Akash to execute the vision
+            </p>
+          </motion.div>
+
+          {/* Other Team Members */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teamMembers.filter(m => !m.isFounder).map((member, index) => (
               <motion.div
                 key={member.name}
                 initial={{ opacity: 0, y: 30 }}
                 animate={teamInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
                 className="group"
               >
                 <Link href={`/team/${member.slug}`}>
