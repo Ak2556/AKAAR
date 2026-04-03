@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { Logo } from "@/components/ui/Logo";
 import { Menu, X, Box, Layers, Wrench, ShoppingCart, Search, Heart, User, LogOut, Package, Settings, Sun, Moon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -63,16 +63,7 @@ export function Header() {
         <nav className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <Image
-                src="/logo.jpeg"
-                alt="Akaar 3D - Giving Akaar to Ideas"
-                width={160}
-                height={48}
-                className="h-12 w-auto"
-                priority
-              />
-            </Link>
+            <Logo size="md" showTagline={false} />
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">

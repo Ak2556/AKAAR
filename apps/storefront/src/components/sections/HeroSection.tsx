@@ -56,6 +56,8 @@ function TypeWriter({
 export function HeroSection() {
   const { normalizedX, normalizedY } = useMousePosition();
   const { isDark } = useTheme();
+  const [brandComplete, setBrandComplete] = useState(false);
+  const [taglineComplete, setTaglineComplete] = useState(false);
   const [line1Complete, setLine1Complete] = useState(false);
   const [line2Complete, setLine2Complete] = useState(false);
 
@@ -90,15 +92,43 @@ export function HeroSection() {
             <span className="text-sm text-[var(--accent)] font-mono">WE GIVE AKAAR TO IDEAS</span>
           </motion.div>
 
+          {/* Brand Name with typing effect */}
+          <div className="mb-4">
+            <span className="text-2xl md:text-3xl font-mono font-bold text-[var(--accent)]">
+              <TypeWriter
+                text="AKAAR 3D"
+                delay={500}
+                speed={100}
+                onComplete={() => setBrandComplete(true)}
+              />
+            </span>
+            {brandComplete && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="block text-sm md:text-base text-[var(--text-muted)] italic mt-1"
+              >
+                <TypeWriter
+                  text="Giving AKAAR to Ideas"
+                  delay={200}
+                  speed={40}
+                  onComplete={() => setTaglineComplete(true)}
+                />
+              </motion.span>
+            )}
+          </div>
+
           {/* Headline with typing effect */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-            <span className="block text-[var(--text-primary)]">
-              <TypeWriter
-                text="Frictionless"
-                delay={800}
-                speed={80}
-                onComplete={() => setLine1Complete(true)}
-              />
+            <span className="block text-[var(--text-primary)] min-h-[1.2em]">
+              {taglineComplete && (
+                <TypeWriter
+                  text="Frictionless"
+                  delay={400}
+                  speed={80}
+                  onComplete={() => setLine1Complete(true)}
+                />
+              )}
             </span>
             <span className="block gradient-text min-h-[1.2em]">
               {line1Complete && (

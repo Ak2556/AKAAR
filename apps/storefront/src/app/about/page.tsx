@@ -8,6 +8,7 @@ import {
   Printer, Cpu, Cog, ArrowRight, CheckCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { teamMembers } from "@/lib/team-data";
 
 const stats = [
   { value: "500+", label: "Parts Produced" },
@@ -60,12 +61,6 @@ const capabilities = [
   },
 ];
 
-const team = [
-  { name: "Akash Thakur", role: "AI/ML Engineer & Systems Architect", domain: "Core software infrastructure, automated quoting engine algorithms, and the digital storefront", image: "/team/akash-thakur.png" },
-  { name: "Mohit Sheravat", role: "Lead Industrial Designer", domain: "CAD optimization, mesh validation, and model slicing for structural integrity", image: "/team/mohit-sheravat.jpeg" },
-  { name: "Harish Kumar Meena", role: "Head of Hardware Infrastructure", domain: "Print farm operations, electronics maintenance, and machine uptime maximization", image: "/team/harish-kumar-meena.jpeg" },
-  { name: "Tarveen Sheravat", role: "Head of Operations & Unit Economics", domain: "Supply chain logistics, material procurement, and cost-margin optimization", image: "/team/tarveen-sheravat.jpeg" },
-];
 
 const milestones = [
   { year: "2024", title: "Founded", description: "Started AKAAR 3D with a vision to democratize manufacturing" },
@@ -352,7 +347,7 @@ export default function AboutPage() {
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {team.map((member, index) => (
+            {teamMembers.map((member, index) => (
               <motion.div
                 key={member.name}
                 initial={{ opacity: 0, y: 30 }}
@@ -360,23 +355,30 @@ export default function AboutPage() {
                 transition={{ delay: index * 0.1 }}
                 className="group"
               >
-                <div className="aspect-square mb-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)] overflow-hidden relative">
-                  {member.image ? (
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Users className="w-16 h-16 text-[var(--border)]" />
+                <Link href={`/team/${member.slug}`}>
+                  <div className="aspect-square mb-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)] overflow-hidden relative flex items-center justify-center group-hover:border-[var(--accent)]/50 transition-colors">
+                    {member.image ? (
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Users className="w-16 h-16 text-[var(--border)]" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="px-3 py-1 bg-[var(--accent)] text-[var(--bg-primary)] text-xs font-medium rounded-full">
+                        View Profile
+                      </span>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <h3 className="font-semibold">{member.name}</h3>
-                <p className="text-sm text-[var(--accent)] mb-2">{member.role}</p>
-                <p className="text-xs text-[var(--text-muted)]">{member.domain}</p>
+                  </div>
+                  <h3 className="font-semibold group-hover:text-[var(--accent)] transition-colors">{member.name}</h3>
+                  <p className="text-sm text-[var(--accent)] mb-2">{member.role}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{member.domain}</p>
+                </Link>
               </motion.div>
             ))}
           </div>

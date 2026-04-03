@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Linkedin, Mail, Send } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { Logo } from "@/components/ui/Logo";
 
 const footerLinks = {
   products: [
@@ -105,16 +105,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-block mb-6">
-              <Image
-                src="/logo.jpeg"
-                alt="Akaar 3D - Giving Akaar to Ideas"
-                width={180}
-                height={54}
-                className="h-14 w-auto"
-              />
-            </Link>
-            <p className="text-[var(--text-muted)] text-sm italic mb-4">Giving AKAAR to Ideas</p>
+            <div className="mb-6">
+              <Logo size="lg" showTagline={true} />
+            </div>
             <p className="text-[var(--text-secondary)] max-w-sm mb-4">
               Frictionless 3D printing for engineers and hardware startups.
               From CAD to physical part in days.
