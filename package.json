@@ -1,0 +1,23 @@
+{
+  "name": "akaar",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "pnpm --filter storefront dev",
+    "build": "pnpm --filter storefront build",
+    "lint": "pnpm --filter storefront lint",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:generate": "pnpm --filter @akaar/db db:generate",
+    "db:migrate": "pnpm --filter @akaar/db db:migrate",
+    "db:studio": "pnpm --filter @akaar/db db:studio",
+    "db:seed": "pnpm --filter @akaar/db seed",
+    "setup": "pnpm db:start && pnpm db:generate && pnpm db:migrate",
+    "start": "pnpm setup && pnpm dev"
+  },
+  "devDependencies": {
+    "prettier": "latest",
+    "dotenv-cli": "latest"
+  }
+}
