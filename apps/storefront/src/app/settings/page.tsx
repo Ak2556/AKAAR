@@ -144,15 +144,19 @@ export default function SettingsPage() {
                       </div>
                     )}
 
-                    {/* Nothing theme dot pattern */}
+                    {/* Nothing theme dot pattern - monochrome with red dot */}
                     {theme.id === 'nothing' && (
-                      <div
-                        className="absolute inset-0 opacity-30"
-                        style={{
-                          backgroundImage: `radial-gradient(circle, ${theme.colors.accent}40 1px, transparent 1px)`,
-                          backgroundSize: '8px 8px'
-                        }}
-                      />
+                      <>
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)`,
+                            backgroundSize: '12px 12px'
+                          }}
+                        />
+                        {/* Nothing red indicator dot */}
+                        <div className="absolute top-3 left-3 w-2 h-2 rounded-full" style={{ background: '#d71921' }} />
+                      </>
                     )}
                   </div>
 
@@ -169,10 +173,8 @@ export default function SettingsPage() {
                         {theme.name}
                       </h3>
                       {theme.id === 'nothing' && (
-                        <span
-                          className="px-1.5 py-0.5 text-[10px] font-bold uppercase rounded"
-                          style={{ background: theme.colors.accent, color: theme.colors.bgPrimary }}
-                        >
+                        <span className="flex items-center gap-1 text-[10px] font-medium uppercase" style={{ color: '#d71921' }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#d71921' }} />
                           New
                         </span>
                       )}
@@ -195,8 +197,8 @@ export default function SettingsPage() {
                       />
                       <div
                         className="w-5 h-5 rounded-full border"
-                        style={{ background: theme.colors.accentSecondary, borderColor: theme.colors.border }}
-                        title="Secondary"
+                        style={{ background: theme.id === 'nothing' ? '#d71921' : theme.colors.accentSecondary, borderColor: theme.colors.border }}
+                        title={theme.id === 'nothing' ? 'Red Accent' : 'Secondary'}
                       />
                       <div
                         className="w-5 h-5 rounded-full border"

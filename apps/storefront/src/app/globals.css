@@ -253,70 +253,139 @@ body {
   }
 }
 
-/* ============ NOTHING THEME SPECIAL STYLES ============ */
+/* ============ NOTHING THEME - Nothing OS Inspired ============ */
 
-/* Nothing theme - pure minimal aesthetic */
+/* Nothing - Monochrome minimal with dot-matrix aesthetic */
 :root[data-theme="nothing"] {
-  --font-weight-normal: 300;
+  --nothing-red: #d71921;
 }
 
 :root[data-theme="nothing"] body {
-  font-weight: 300;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-/* Nothing dot-matrix pattern - subtle background */
-:root[data-theme="nothing"] .dot-matrix {
-  background-image: radial-gradient(circle, rgba(215, 38, 56, 0.03) 1px, transparent 1px);
-  background-size: 16px 16px;
-}
-
-/* Nothing gradient - subtle red glow */
+/* Nothing - Monochrome gradient (white to gray) */
 :root[data-theme="nothing"] .gradient-text {
-  background: linear-gradient(135deg, #d72638, #ff6b6b);
+  background: linear-gradient(135deg, #ffffff, #a3a3a3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Nothing scrollbar - minimal */
+/* Nothing - Dot matrix pattern overlay */
+:root[data-theme="nothing"] .grid-overlay {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Nothing - Minimal scrollbar */
 :root[data-theme="nothing"]::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 :root[data-theme="nothing"]::-webkit-scrollbar-track {
-  background: #000000;
+  background: transparent;
 }
 
 :root[data-theme="nothing"]::-webkit-scrollbar-thumb {
-  background: #1f1f1f;
-  border-radius: 2px;
+  background: #333333;
+  border-radius: 0;
 }
 
 :root[data-theme="nothing"]::-webkit-scrollbar-thumb:hover {
-  background: #d72638;
+  background: #d71921;
 }
 
-/* Nothing selection */
+/* Nothing - Selection with red accent */
 :root[data-theme="nothing"] ::selection {
-  background: #d72638;
+  background: #d71921;
   color: #ffffff;
 }
 
-/* Nothing button styles */
-:root[data-theme="nothing"] .btn-nothing {
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-
-/* Nothing card hover - subtle red border */
-:root[data-theme="nothing"] .card-hover:hover {
-  border-color: rgba(215, 38, 56, 0.3);
-}
-
-/* Nothing accent line */
+/* Nothing - Accent line uses red */
 :root[data-theme="nothing"] .accent-line {
-  background: linear-gradient(90deg, transparent, #d72638, transparent);
+  background: linear-gradient(90deg, transparent, #d71921, transparent);
+}
+
+/* Nothing - Glass effect - pure black with subtle border */
+:root[data-theme="nothing"] .glass {
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid #262626;
+  backdrop-filter: none;
+}
+
+/* Nothing - Buttons get subtle hover red */
+:root[data-theme="nothing"] button:hover,
+:root[data-theme="nothing"] a:hover {
+  --accent: #d71921;
+}
+
+/* Nothing - Primary buttons are white on black */
+:root[data-theme="nothing"] .btn-primary,
+:root[data-theme="nothing"] [class*="bg-[var(--accent)]"] {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+:root[data-theme="nothing"] .btn-primary:hover,
+:root[data-theme="nothing"] [class*="bg-[var(--accent)]"]:hover {
+  background: #d71921 !important;
+  color: #ffffff !important;
+}
+
+/* Nothing - Dot matrix text effect for headings */
+:root[data-theme="nothing"] .dot-text {
+  font-family: var(--font-mono), 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Nothing - Card style */
+:root[data-theme="nothing"] .card,
+:root[data-theme="nothing"] [class*="rounded-xl"],
+:root[data-theme="nothing"] [class*="rounded-2xl"] {
+  border-radius: 0 !important;
+}
+
+/* Nothing - Square corners for minimal look */
+:root[data-theme="nothing"] .nothing-square {
+  border-radius: 0;
+}
+
+/* Nothing - Monochrome icons */
+:root[data-theme="nothing"] svg {
+  stroke-width: 1.5;
+}
+
+/* Nothing - Red dot indicator */
+:root[data-theme="nothing"] .nothing-dot {
+  width: 6px;
+  height: 6px;
+  background: #d71921;
+  border-radius: 50%;
+}
+
+/* Nothing - Thin borders */
+:root[data-theme="nothing"] [class*="border"] {
+  border-width: 1px;
+}
+
+/* Nothing - Status/notification red accent */
+:root[data-theme="nothing"] .nothing-status {
+  color: #d71921;
+}
+
+/* Nothing - Widget style boxes */
+:root[data-theme="nothing"] .nothing-widget {
+  background: #0d0d0d;
+  border: 1px solid #262626;
+  padding: 1rem;
+}
+
+/* Nothing - Dot grid background for sections */
+:root[data-theme="nothing"] .nothing-dotgrid {
+  background-image:
+    radial-gradient(circle, #333333 1px, transparent 1px);
+  background-size: 16px 16px;
 }
