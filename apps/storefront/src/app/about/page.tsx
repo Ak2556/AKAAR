@@ -346,7 +346,7 @@ export default function AboutPage() {
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {teamMembers.map((member, index) => (
               <motion.div
                 key={member.name}
@@ -356,28 +356,65 @@ export default function AboutPage() {
                 className="group"
               >
                 <Link href={`/team/${member.slug}`}>
-                  <div className="aspect-square mb-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)] overflow-hidden relative flex items-center justify-center group-hover:border-[var(--accent)]/50 transition-colors">
-                    {member.image ? (
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        className="w-full h-full object-cover object-center"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Users className="w-16 h-16 text-[var(--border)]" />
+                  {/* Card Container */}
+                  <div className="relative">
+                    {/* Glow Effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[var(--accent)] to-blue-600 rounded-2xl opacity-0 group-hover:opacity-70 blur-lg transition-all duration-500" />
+
+                    {/* Main Card */}
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--bg-primary)] border border-[var(--border)] group-hover:border-[var(--accent)]/50 transition-all duration-300">
+                      {/* Image */}
+                      {member.image ? (
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-secondary)]">
+                          <Users className="w-20 h-20 text-[var(--border)]" />
+                        </div>
+                      )}
+
+                      {/* Gradient Overlay - Always visible, stronger on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+
+                      {/* Content Overlay */}
+                      <div className="absolute inset-0 flex flex-col justify-end p-5">
+                        {/* Role Badge */}
+                        <div className="transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 mb-3">
+                          <span className="inline-block px-3 py-1 bg-[var(--accent)]/20 backdrop-blur-sm text-[var(--accent)] text-xs font-medium rounded-full border border-[var(--accent)]/30">
+                            {member.role.split(' ')[0]}
+                          </span>
+                        </div>
+
+                        {/* Name */}
+                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--accent)] transition-colors">
+                          {member.name}
+                        </h3>
+
+                        {/* Full Role */}
+                        <p className="text-sm text-white/80 mb-2 line-clamp-1">
+                          {member.role}
+                        </p>
+
+                        {/* Domain - Shows on hover */}
+                        <p className="text-xs text-white/60 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
+                          {member.domain}
+                        </p>
+
+                        {/* View Profile Arrow */}
+                        <div className="flex items-center gap-2 mt-3 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
+                          <span className="text-sm font-medium text-[var(--accent)]">View Profile</span>
+                          <ArrowRight className="w-4 h-4 text-[var(--accent)] group-hover:translate-x-1 transition-transform" />
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="px-3 py-1 bg-[var(--accent)] text-[var(--bg-primary)] text-xs font-medium rounded-full">
-                        View Profile
-                      </span>
+
+                      {/* Corner Accent */}
+                      <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-[var(--accent)]/0 group-hover:border-[var(--accent)] transition-colors duration-300 rounded-tr-lg" />
+                      <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-[var(--accent)]/0 group-hover:border-[var(--accent)] transition-colors duration-300 rounded-bl-lg" />
                     </div>
                   </div>
-                  <h3 className="font-semibold group-hover:text-[var(--accent)] transition-colors">{member.name}</h3>
-                  <p className="text-sm text-[var(--accent)] mb-2">{member.role}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{member.domain}</p>
                 </Link>
               </motion.div>
             ))}
