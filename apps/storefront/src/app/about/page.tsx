@@ -4,18 +4,21 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
 import {
-  Target, Eye, Rocket, Users, Award, Globe,
+  Target, Eye, Rocket, Users, Award,
   Printer, Cpu, Cog, ArrowRight, CheckCircle, Star
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { teamMembers } from "@/lib/team-data";
 
-const stats = [
-  { value: "500+", label: "Parts Produced" },
-  { value: "50+", label: "Happy Clients" },
-  { value: "99%", label: "Quality Rate" },
-  { value: "24h", label: "Avg Response" },
-];
+// New engagement components
+import { AnimatedStats } from "@/components/about/AnimatedStats";
+import { InteractiveTimeline } from "@/components/about/InteractiveTimeline";
+import { TestimonialsCarousel } from "@/components/about/TestimonialsCarousel";
+import { WorkGallery } from "@/components/about/WorkGallery";
+import { ScrollProgress } from "@/components/about/ScrollProgress";
+import { SectionHeader } from "@/components/about/SectionHeader";
+import { EnhancedTeamCard } from "@/components/about/EnhancedTeamCard";
+import { EnhancedCTA } from "@/components/about/EnhancedCTA";
 
 const values = [
   {
@@ -61,14 +64,6 @@ const capabilities = [
   },
 ];
 
-
-const milestones = [
-  { year: "2024", title: "Founded", description: "Started AKAAR 3D with a vision to democratize manufacturing" },
-  { year: "2024", title: "Print Farm Setup", description: "Established our first production facility in Jaipur" },
-  { year: "2025", title: "Platform Launch", description: "Launched our digital quoting and ordering platform" },
-  { year: "2025", title: "Pan-India Shipping", description: "Expanded logistics to serve customers across India" },
-];
-
 export default function AboutPage() {
   const heroRef = useRef(null);
   const valuesRef = useRef(null);
@@ -82,8 +77,11 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Scroll Progress Indicator */}
+      <ScrollProgress />
+
       {/* Hero */}
-      <section ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
+      <section id="hero" ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
         <div className="absolute inset-0 grid-overlay opacity-30" />
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--accent)]/5 rounded-full blur-3xl" />
 
@@ -123,31 +121,20 @@ export default function AboutPage() {
               </div>
             </motion.div>
 
-            {/* Stats */}
+            {/* Animated Stats */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="grid grid-cols-2 gap-6"
             >
-              {stats.map((stat, index) => (
-                <div
-                  key={stat.label}
-                  className="p-6 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]"
-                >
-                  <div className="text-4xl font-bold text-[var(--accent)] mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-[var(--text-muted)]">{stat.label}</div>
-                </div>
-              ))}
+              <AnimatedStats />
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Mission & Vision */}
-      <section className="py-20 bg-[var(--bg-secondary)]">
+      <section id="mission" className="py-20 bg-[var(--bg-secondary)]">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div
@@ -189,20 +176,13 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <section ref={valuesRef} className="py-20">
+      <section id="values" ref={valuesRef} className="py-20">
         <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={valuesInView ? { opacity: 1, y: 0 } : {}}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Our <span className="gradient-text">Values</span>
-            </h2>
-            <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              The principles that guide everything we do
-            </p>
-          </motion.div>
+          <SectionHeader
+            preText="Our"
+            highlightText="Values"
+            subtitle="The principles that guide everything we do"
+          />
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
@@ -211,7 +191,8 @@ export default function AboutPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={valuesInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: index * 0.1 }}
-                className="group p-6 border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/50 transition-all"
+                whileHover={{ y: -5 }}
+                className="group p-6 border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/50 transition-all bg-[var(--bg-secondary)]"
               >
                 <div className="w-12 h-12 mb-4 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)]/10 transition-all">
                   <value.icon className="w-6 h-6 text-[var(--accent)]" />
@@ -227,20 +208,13 @@ export default function AboutPage() {
       </section>
 
       {/* Capabilities */}
-      <section ref={capabilitiesRef} className="py-20 bg-[var(--bg-secondary)]">
+      <section id="capabilities" ref={capabilitiesRef} className="py-20 bg-[var(--bg-secondary)]">
         <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={capabilitiesInView ? { opacity: 1, y: 0 } : {}}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Our <span className="gradient-text">Capabilities</span>
-            </h2>
-            <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              State-of-the-art equipment and expertise
-            </p>
-          </motion.div>
+          <SectionHeader
+            preText="Our"
+            highlightText="Capabilities"
+            subtitle="State-of-the-art equipment and expertise"
+          />
 
           <div className="grid md:grid-cols-3 gap-8">
             {capabilities.map((cap, index) => (
@@ -249,6 +223,7 @@ export default function AboutPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={capabilitiesInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
                 className={`p-8 border rounded-xl bg-[var(--bg-primary)] relative ${
                   cap.comingSoon ? "border-amber-500/30 opacity-75" : "border-[var(--border)]"
                 }`}
@@ -277,74 +252,54 @@ export default function AboutPage() {
       </section>
 
       {/* Timeline */}
-      <section className="py-20">
+      <section id="journey" className="py-20">
         <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Our <span className="gradient-text">Journey</span>
-            </h2>
-            <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              Key milestones in our growth
-            </p>
-          </motion.div>
+          <SectionHeader
+            preText="Our"
+            highlightText="Journey"
+            subtitle="Key milestones in our growth - tap to learn more"
+          />
 
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[var(--border)] hidden lg:block" />
+          <InteractiveTimeline />
+        </div>
+      </section>
 
-            <div className="space-y-8 lg:space-y-0">
-              {milestones.map((milestone, index) => (
-                <motion.div
-                  key={milestone.year}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`relative lg:w-1/2 ${
-                    index % 2 === 0 ? "lg:pr-12 lg:ml-0" : "lg:pl-12 lg:ml-auto"
-                  }`}
-                >
-                  {/* Timeline dot */}
-                  <div className="hidden lg:block absolute top-6 w-4 h-4 bg-[var(--accent)] rounded-full border-4 border-[var(--bg-primary)] ${index % 2 === 0 ? 'right-0 translate-x-1/2' : 'left-0 -translate-x-1/2'}"
-                    style={{ [index % 2 === 0 ? 'right' : 'left']: '-8px' }}
-                  />
+      {/* Testimonials */}
+      <section id="testimonials" className="py-20 bg-[var(--bg-secondary)]">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            preText="What Clients"
+            highlightText="Say"
+            subtitle="Don't just take our word for it"
+          />
 
-                  <div className="p-6 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]">
-                    <span className="text-[var(--accent)] font-mono text-sm">
-                      {milestone.year}
-                    </span>
-                    <h3 className="text-lg font-semibold mt-2">{milestone.title}</h3>
-                    <p className="text-sm text-[var(--text-secondary)] mt-1">
-                      {milestone.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <TestimonialsCarousel />
           </div>
         </div>
       </section>
 
-      {/* Founder Section */}
-      <section ref={teamRef} className="py-20 bg-[var(--bg-secondary)]">
+      {/* Work Gallery */}
+      <section id="work" className="py-20">
         <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={teamInView ? { opacity: 1, y: 0 } : {}}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Meet the <span className="gradient-text">Founder</span>
-            </h2>
-            <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              The visionary who started it all
-            </p>
-          </motion.div>
+          <SectionHeader
+            preText="Our"
+            highlightText="Work"
+            subtitle="A selection of projects we've brought to life"
+          />
+
+          <WorkGallery />
+        </div>
+      </section>
+
+      {/* Founder Section */}
+      <section id="team" ref={teamRef} className="py-20 bg-[var(--bg-secondary)]">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            preText="Meet the"
+            highlightText="Founder"
+            subtitle="The visionary who started it all"
+          />
 
           {/* Founder Featured Card */}
           {teamMembers.filter(m => m.isFounder).map((founder) => (
@@ -357,7 +312,7 @@ export default function AboutPage() {
             >
               <Link href={`/team/${founder.slug}`} className="group block">
                 <div className="relative">
-                  {/* Glow Effect - Always slightly visible for founder */}
+                  {/* Glow Effect */}
                   <div className="absolute -inset-2 bg-gradient-to-r from-[var(--accent)] via-blue-500 to-purple-600 rounded-3xl opacity-30 group-hover:opacity-70 blur-xl transition-all duration-500" />
 
                   {/* Main Card */}
@@ -369,7 +324,6 @@ export default function AboutPage() {
                         alt={founder.name}
                         className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
                       />
-                      {/* Gradient Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--bg-primary)] md:block hidden" />
                       <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent md:hidden" />
 
@@ -384,17 +338,13 @@ export default function AboutPage() {
 
                     {/* Content Side */}
                     <div className="p-8 md:p-12 flex flex-col justify-center">
-                      {/* Name */}
                       <h3 className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-[var(--accent)] transition-colors">
                         {founder.name}
                       </h3>
-
-                      {/* Domain */}
                       <p className="text-lg text-[var(--accent)] font-medium mb-6">
                         {founder.domain}
                       </p>
 
-                      {/* Vision Quote */}
                       {founder.founderVision && (
                         <div className="relative mb-8">
                           <div className="absolute -left-4 -top-2 text-6xl text-[var(--accent)]/20 font-serif">"</div>
@@ -404,7 +354,6 @@ export default function AboutPage() {
                         </div>
                       )}
 
-                      {/* Skills Preview */}
                       <div className="flex flex-wrap gap-2 mb-8">
                         {founder.skills.slice(0, 5).map((skill) => (
                           <span
@@ -421,7 +370,6 @@ export default function AboutPage() {
                         )}
                       </div>
 
-                      {/* CTA */}
                       <div className="flex items-center gap-2 text-[var(--accent)] font-semibold group-hover:gap-4 transition-all">
                         <span>Read Full Story</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
@@ -444,120 +392,21 @@ export default function AboutPage() {
               The Core <span className="gradient-text">Team</span>
             </h3>
             <p className="text-[var(--text-secondary)] mt-3 max-w-xl mx-auto">
-              Experts assembled by Akash to execute the vision
+              Experts assembled by Akash to execute the vision - tap cards to flip
             </p>
           </motion.div>
 
-          {/* Other Team Members */}
+          {/* Enhanced Team Cards with flip effect */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.filter(m => !m.isFounder).map((member, index) => (
-              <motion.div
-                key={member.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={teamInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="group"
-              >
-                <Link href={`/team/${member.slug}`}>
-                  {/* Card Container */}
-                  <div className="relative">
-                    {/* Glow Effect */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[var(--accent)] to-blue-600 rounded-2xl opacity-0 group-hover:opacity-70 blur-lg transition-all duration-500" />
-
-                    {/* Main Card */}
-                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--bg-primary)] border border-[var(--border)] group-hover:border-[var(--accent)]/50 transition-all duration-300">
-                      {/* Image */}
-                      {member.image ? (
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-secondary)]">
-                          <Users className="w-20 h-20 text-[var(--border)]" />
-                        </div>
-                      )}
-
-                      {/* Gradient Overlay - Always visible, stronger on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
-
-                      {/* Content Overlay */}
-                      <div className="absolute inset-0 flex flex-col justify-end p-5">
-                        {/* Role Badge */}
-                        <div className="transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 mb-3">
-                          <span className="inline-block px-3 py-1 bg-[var(--accent)]/20 backdrop-blur-sm text-[var(--accent)] text-xs font-medium rounded-full border border-[var(--accent)]/30">
-                            {member.role.split(' ')[0]}
-                          </span>
-                        </div>
-
-                        {/* Name */}
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--accent)] transition-colors">
-                          {member.name}
-                        </h3>
-
-                        {/* Full Role */}
-                        <p className="text-sm text-white/80 mb-2 line-clamp-1">
-                          {member.role}
-                        </p>
-
-                        {/* Domain - Shows on hover */}
-                        <p className="text-xs text-white/60 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
-                          {member.domain}
-                        </p>
-
-                        {/* View Profile Arrow */}
-                        <div className="flex items-center gap-2 mt-3 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
-                          <span className="text-sm font-medium text-[var(--accent)]">View Profile</span>
-                          <ArrowRight className="w-4 h-4 text-[var(--accent)] group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </div>
-
-                      {/* Corner Accent */}
-                      <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-[var(--accent)]/0 group-hover:border-[var(--accent)] transition-colors duration-300 rounded-tr-lg" />
-                      <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-[var(--accent)]/0 group-hover:border-[var(--accent)] transition-colors duration-300 rounded-bl-lg" />
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+              <EnhancedTeamCard key={member.slug} member={member} index={index} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <Globe className="w-16 h-16 text-[var(--accent)] mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Give Your Ideas AKAAR?
-            </h2>
-            <p className="text-[var(--text-secondary)] mb-8">
-              From concept to physical part. Upload your CAD, get instant pricing,
-              and let us bring your ideas to life.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/quote">
-                <Button variant="primary" size="lg" glow>
-                  Get a Quote
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/products">
-                <Button variant="outline" size="lg">
-                  Browse Products
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* Enhanced CTA */}
+      <EnhancedCTA />
     </div>
   );
 }

@@ -99,3 +99,134 @@ export function getTeamMember(slug: string): TeamMember | undefined {
 export function getAllTeamSlugs(): string[] {
   return teamMembers.map((member) => member.slug);
 }
+
+// Testimonials
+export interface Testimonial {
+  id: string;
+  name: string;
+  company: string;
+  role: string;
+  quote: string;
+  rating: number;
+  avatar?: string;
+  project?: string;
+}
+
+export const testimonials: Testimonial[] = [
+  {
+    id: "1",
+    name: "Rahul Sharma",
+    company: "TechStart Innovations",
+    role: "Founder & CTO",
+    quote: "AKAAR 3D transformed our prototyping workflow. What used to take weeks now takes days. Their instant quoting system is a game-changer for hardware startups like ours.",
+    rating: 5,
+    project: "IoT Device Housing",
+  },
+  {
+    id: "2",
+    name: "Priya Patel",
+    company: "DesignWorks Studio",
+    role: "Lead Product Designer",
+    quote: "The print quality is exceptional. We've tried multiple vendors, but AKAAR's attention to detail and consistent results keep us coming back. The team actually understands design intent.",
+    rating: 5,
+    project: "Consumer Electronics Prototype",
+  },
+  {
+    id: "3",
+    name: "Vikram Reddy",
+    company: "MechSolutions",
+    role: "Engineering Manager",
+    quote: "Finally, a 3D printing service that gets manufacturing right. Fast turnaround, accurate quotes, and parts that fit perfectly every time. Our go-to for functional prototypes.",
+    rating: 5,
+    project: "Industrial Fixtures",
+  },
+  {
+    id: "4",
+    name: "Ananya Krishnan",
+    company: "Robotics Lab IIT",
+    role: "Research Lead",
+    quote: "For our robotics research, precision is non-negotiable. AKAAR delivers parts with tolerances that actually match the specs. Great communication and technical expertise.",
+    rating: 5,
+    project: "Custom Robot Components",
+  },
+  {
+    id: "5",
+    name: "Sanjay Mehta",
+    company: "AutoParts India",
+    role: "Procurement Head",
+    quote: "We needed 200+ custom jigs for our assembly line. AKAAR handled the volume, maintained quality, and delivered on time. Their platform made ordering at scale surprisingly easy.",
+    rating: 5,
+    project: "Assembly Line Jigs",
+  },
+];
+
+// Projects for gallery
+export interface Project {
+  id: string;
+  title: string;
+  category: "industrial" | "prototypes" | "custom" | "consumer";
+  image: string;
+  description: string;
+  client?: string;
+  material?: string;
+  printTime?: string;
+}
+
+export const projects: Project[] = [
+  {
+    id: "1",
+    title: "Drone Frame Components",
+    category: "prototypes",
+    image: "/projects/drone-frame.jpg",
+    description: "Lightweight structural components for a custom racing drone, optimized for strength-to-weight ratio.",
+    material: "Carbon-filled PETG",
+    printTime: "12 hours",
+  },
+  {
+    id: "2",
+    title: "Industrial Gripper Assembly",
+    category: "industrial",
+    image: "/projects/gripper.jpg",
+    description: "Custom end-effector for robotic arm with integrated sensor mounts and cable routing.",
+    client: "Automation Solutions",
+    material: "ABS",
+    printTime: "8 hours",
+  },
+  {
+    id: "3",
+    title: "Medical Device Housing",
+    category: "consumer",
+    image: "/projects/medical-device.jpg",
+    description: "Ergonomic enclosure for a portable health monitoring device with snap-fit assembly.",
+    material: "PLA",
+    printTime: "6 hours",
+  },
+  {
+    id: "4",
+    title: "Custom Lamp Collection",
+    category: "custom",
+    image: "/projects/lamp.jpg",
+    description: "Geometric lampshades with intricate patterns, designed for ambient lighting.",
+    material: "White PLA",
+    printTime: "15 hours",
+  },
+  {
+    id: "5",
+    title: "Automotive Test Fixtures",
+    category: "industrial",
+    image: "/projects/fixture.jpg",
+    description: "Precision alignment fixtures for quality control in automotive component testing.",
+    client: "AutoTech Labs",
+    material: "ASA",
+    printTime: "10 hours",
+  },
+  {
+    id: "6",
+    title: "Smart Home Hub",
+    category: "consumer",
+    image: "/projects/smart-hub.jpg",
+    description: "Sleek enclosure for IoT home automation controller with ventilation and mounting options.",
+    material: "PETG",
+    printTime: "5 hours",
+  },
+];
