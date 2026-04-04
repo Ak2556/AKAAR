@@ -1,35 +1,26 @@
-import { themes, defaultTheme, darkThemes, lightThemes } from "@/config/themes";
+import { themes, defaultTheme, defaultStyle, defaultMode } from "@/config/themes";
 
 // Generate the inline script that runs before React hydration
 const themeScript = `
 (function() {
-  const STORAGE_KEY = 'akaar-theme';
+  const STYLE_STORAGE_KEY = 'akaar-theme-style';
   const MODE_STORAGE_KEY = 'akaar-theme-mode';
   const themes = ${JSON.stringify(themes)};
-  const defaultTheme = '${defaultTheme}';
-  const darkThemes = ${JSON.stringify(darkThemes)};
-  const lightThemes = ${JSON.stringify(lightThemes)};
+  const defaultStyle = '${defaultStyle}';
+  const defaultMode = '${defaultMode}';
+  const validStyles = ['cyberpunk', 'minimal', 'industrial', 'nothing'];
 
   try {
-    const savedTheme = localStorage.getItem(STORAGE_KEY);
-    const savedMode = localStorage.getItem(MODE_STORAGE_KEY) || 'system';
+    const savedStyle = localStorage.getItem(STYLE_STORAGE_KEY);
+    const savedMode = localStorage.getItem(MODE_STORAGE_KEY);
 
-    // Resolve theme based on mode
-    let themeId;
-    if (savedMode === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        themeId = (savedTheme && darkThemes.includes(savedTheme)) ? savedTheme : 'cyberpunk';
-      } else {
-        themeId = (savedTheme && lightThemes.includes(savedTheme)) ? savedTheme : 'light';
-      }
-    } else if (savedMode === 'dark') {
-      themeId = (savedTheme && darkThemes.includes(savedTheme)) ? savedTheme : 'cyberpunk';
-    } else {
-      themeId = (savedTheme && lightThemes.includes(savedTheme)) ? savedTheme : 'light';
-    }
+    // Validate saved values
+    const style = (savedStyle && validStyles.includes(savedStyle)) ? savedStyle : defaultStyle;
+    const mode = (savedMode === 'light' || savedMode === 'dark') ? savedMode : defaultMode;
 
-    const theme = themes[themeId] || themes[defaultTheme];
+    // Build theme ID
+    const themeId = style + '-' + mode;
+    const theme = themes[themeId] || themes['${defaultTheme}'];
     const root = document.documentElement;
 
     // Apply colors
@@ -48,8 +39,9 @@ const themeScript = `
     root.style.setProperty('--background', theme.colors.bgPrimary);
     root.style.setProperty('--foreground', theme.colors.textPrimary);
 
-    // Set theme attribute
-    root.setAttribute('data-theme', theme.id);
+    // Set theme and mode attributes
+    root.setAttribute('data-theme', theme.styleId);
+    root.setAttribute('data-mode', theme.mode);
 
     // Toggle effect classes
     if (theme.effects.enableGlow) root.classList.add('theme-glow');

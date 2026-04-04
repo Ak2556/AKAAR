@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Default Theme Colors (Cyberpunk) - will be overridden by ThemeProvider */
+  /* Default Theme Colors (Cyberpunk Dark) - will be overridden by ThemeProvider */
   --bg-primary: #0a0a0a;
   --bg-secondary: #111111;
   --bg-tertiary: #1a1a1a;
@@ -127,28 +127,36 @@ body {
   text-shadow: 0 0 10px var(--accent-glow);
 }
 
-/* Glassmorphism - adapts to theme */
+/* Glassmorphism - adapts to theme and mode */
 .glass {
   background: rgba(17, 17, 17, 0.8);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border);
 }
 
-:root[data-theme="light"] .glass {
+/* Light mode glass */
+:root[data-mode="light"] .glass {
   background: rgba(255, 255, 255, 0.8);
 }
 
-:root[data-theme="nature"] .glass {
-  background: rgba(254, 252, 232, 0.9);
-}
-
-:root[data-theme="industrial"] .glass {
+/* Theme-specific glass adjustments */
+:root[data-theme="industrial"][data-mode="dark"] .glass {
   background: rgba(24, 24, 27, 0.85);
 }
 
+:root[data-theme="industrial"][data-mode="light"] .glass {
+  background: rgba(255, 251, 235, 0.9);
+}
+
 :root[data-theme="nothing"] .glass {
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid rgba(215, 38, 56, 0.1);
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid #262626;
+  backdrop-filter: none;
+}
+
+:root[data-theme="nothing"][data-mode="light"] .glass {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e5e5;
 }
 
 /* Noise texture overlay - only when theme-noise is enabled */
@@ -265,17 +273,29 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* Nothing - Monochrome gradient (white to gray) */
-:root[data-theme="nothing"] .gradient-text {
+/* Nothing - Monochrome gradient (adapts to mode) */
+:root[data-theme="nothing"][data-mode="dark"] .gradient-text {
   background: linear-gradient(135deg, #ffffff, #a3a3a3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+:root[data-theme="nothing"][data-mode="light"] .gradient-text {
+  background: linear-gradient(135deg, #000000, #525252);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Nothing - Dot matrix pattern overlay */
-:root[data-theme="nothing"] .grid-overlay {
+:root[data-theme="nothing"][data-mode="dark"] .grid-overlay {
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+:root[data-theme="nothing"][data-mode="light"] .grid-overlay {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -293,6 +313,10 @@ body {
   border-radius: 0;
 }
 
+:root[data-theme="nothing"][data-mode="light"]::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+}
+
 :root[data-theme="nothing"]::-webkit-scrollbar-thumb:hover {
   background: #d71921;
 }
@@ -308,24 +332,23 @@ body {
   background: linear-gradient(90deg, transparent, #d71921, transparent);
 }
 
-/* Nothing - Glass effect - pure black with subtle border */
-:root[data-theme="nothing"] .glass {
-  background: rgba(0, 0, 0, 0.95);
-  border: 1px solid #262626;
-  backdrop-filter: none;
-}
-
 /* Nothing - Buttons get subtle hover red */
 :root[data-theme="nothing"] button:hover,
 :root[data-theme="nothing"] a:hover {
   --accent: #d71921;
 }
 
-/* Nothing - Primary buttons are white on black */
-:root[data-theme="nothing"] .btn-primary,
-:root[data-theme="nothing"] [class*="bg-[var(--accent)]"] {
+/* Nothing - Primary buttons */
+:root[data-theme="nothing"][data-mode="dark"] .btn-primary,
+:root[data-theme="nothing"][data-mode="dark"] [class*="bg-[var(--accent)]"] {
   background: #ffffff !important;
   color: #000000 !important;
+}
+
+:root[data-theme="nothing"][data-mode="light"] .btn-primary,
+:root[data-theme="nothing"][data-mode="light"] [class*="bg-[var(--accent)]"] {
+  background: #000000 !important;
+  color: #ffffff !important;
 }
 
 :root[data-theme="nothing"] .btn-primary:hover,
@@ -341,14 +364,13 @@ body {
   text-transform: uppercase;
 }
 
-/* Nothing - Card style */
+/* Nothing - Square corners for minimal look */
 :root[data-theme="nothing"] .card,
 :root[data-theme="nothing"] [class*="rounded-xl"],
 :root[data-theme="nothing"] [class*="rounded-2xl"] {
   border-radius: 0 !important;
 }
 
-/* Nothing - Square corners for minimal look */
 :root[data-theme="nothing"] .nothing-square {
   border-radius: 0;
 }
@@ -377,15 +399,25 @@ body {
 }
 
 /* Nothing - Widget style boxes */
-:root[data-theme="nothing"] .nothing-widget {
+:root[data-theme="nothing"][data-mode="dark"] .nothing-widget {
   background: #0d0d0d;
   border: 1px solid #262626;
   padding: 1rem;
 }
 
+:root[data-theme="nothing"][data-mode="light"] .nothing-widget {
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  padding: 1rem;
+}
+
 /* Nothing - Dot grid background for sections */
-:root[data-theme="nothing"] .nothing-dotgrid {
-  background-image:
-    radial-gradient(circle, #333333 1px, transparent 1px);
+:root[data-theme="nothing"][data-mode="dark"] .nothing-dotgrid {
+  background-image: radial-gradient(circle, #333333 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+:root[data-theme="nothing"][data-mode="light"] .nothing-dotgrid {
+  background-image: radial-gradient(circle, #d4d4d4 1px, transparent 1px);
   background-size: 16px 16px;
 }

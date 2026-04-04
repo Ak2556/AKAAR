@@ -1,17 +1,29 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { themes, defaultTheme, darkThemes, lightThemes, type ThemeId, type Theme, type ThemeMode } from "@/config/themes";
+import {
+  themes,
+  themeStyles,
+  themesByStyle,
+  defaultStyle,
+  defaultMode,
+  defaultTheme,
+  type ThemeId,
+  type ThemeStyle,
+  type ThemeMode,
+  type Theme,
+} from "@/config/themes";
 
-const STORAGE_KEY = "akaar-theme";
+const STYLE_STORAGE_KEY = "akaar-theme-style";
 const MODE_STORAGE_KEY = "akaar-theme-mode";
 
 interface ThemeContextValue {
   theme: Theme;
   themeId: ThemeId;
+  style: ThemeStyle;
   mode: ThemeMode;
   isDark: boolean;
-  setTheme: (themeId: ThemeId) => void;
+  setStyle: (style: ThemeStyle) => void;
   setMode: (mode: ThemeMode) => void;
   toggleMode: () => void;
 }
@@ -39,8 +51,9 @@ function applyTheme(theme: Theme) {
   root.style.setProperty("--background", theme.colors.bgPrimary);
   root.style.setProperty("--foreground", theme.colors.textPrimary);
 
-  // Set theme data attribute for effect classes
-  root.setAttribute("data-theme", theme.id);
+  // Set theme data attributes for CSS targeting
+  root.setAttribute("data-theme", theme.styleId);
+  root.setAttribute("data-mode", theme.mode);
 
   // Toggle effect classes based on theme settings
   root.classList.toggle("theme-glow", theme.effects.enableGlow);
@@ -49,93 +62,61 @@ function applyTheme(theme: Theme) {
   root.classList.toggle("theme-noise", theme.effects.enableNoise);
 }
 
-function getSystemPrefersDark(): boolean {
-  if (typeof window === "undefined") return true;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
-function resolveThemeFromMode(mode: ThemeMode, savedThemeId: ThemeId): ThemeId {
-  if (mode === "system") {
-    const prefersDark = getSystemPrefersDark();
-    // Use saved theme if it matches preference, otherwise use default for that mode
-    if (prefersDark) {
-      return darkThemes.includes(savedThemeId) ? savedThemeId : "cyberpunk";
-    } else {
-      return lightThemes.includes(savedThemeId) ? savedThemeId : "light";
-    }
-  }
-  if (mode === "dark") {
-    return darkThemes.includes(savedThemeId) ? savedThemeId : "cyberpunk";
-  }
-  return lightThemes.includes(savedThemeId) ? savedThemeId : "light";
+function getThemeId(style: ThemeStyle, mode: ThemeMode): ThemeId {
+  return `${style}-${mode}` as ThemeId;
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeId, setThemeId] = useState<ThemeId>(defaultTheme);
-  const [mode, setModeState] = useState<ThemeMode>("system");
+  const [style, setStyleState] = useState<ThemeStyle>(defaultStyle);
+  const [mode, setModeState] = useState<ThemeMode>(defaultMode);
   const [mounted, setMounted] = useState(false);
 
   // Load saved theme and mode on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem(STORAGE_KEY) as ThemeId | null;
+    const savedStyle = localStorage.getItem(STYLE_STORAGE_KEY) as ThemeStyle | null;
     const savedMode = localStorage.getItem(MODE_STORAGE_KEY) as ThemeMode | null;
 
-    const currentMode = savedMode || "system";
-    const baseTheme = savedTheme && themes[savedTheme] ? savedTheme : defaultTheme;
+    // Validate saved values
+    const validStyle = savedStyle && themeStyles[savedStyle] ? savedStyle : defaultStyle;
+    const validMode = savedMode && (savedMode === 'light' || savedMode === 'dark') ? savedMode : defaultMode;
 
-    setModeState(currentMode);
-    setThemeId(resolveThemeFromMode(currentMode, baseTheme));
+    setStyleState(validStyle);
+    setModeState(validMode);
     setMounted(true);
   }, []);
 
-  // Listen for system preference changes when in system mode
-  useEffect(() => {
-    if (!mounted || mode !== "system") return;
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => {
-      const savedTheme = localStorage.getItem(STORAGE_KEY) as ThemeId | null;
-      setThemeId(resolveThemeFromMode("system", savedTheme || defaultTheme));
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [mounted, mode]);
-
-  // Apply theme when it changes
+  // Apply theme when style or mode changes
   useEffect(() => {
     if (mounted) {
-      applyTheme(themes[themeId]);
+      const themeId = getThemeId(style, mode);
+      const theme = themes[themeId];
+      if (theme) {
+        applyTheme(theme);
+      }
     }
-  }, [themeId, mounted]);
+  }, [style, mode, mounted]);
 
-  const setTheme = useCallback((newThemeId: ThemeId) => {
-    setThemeId(newThemeId);
-    localStorage.setItem(STORAGE_KEY, newThemeId);
-    // Update mode based on theme type
-    const newMode = darkThemes.includes(newThemeId) ? "dark" : "light";
-    setModeState(newMode);
-    localStorage.setItem(MODE_STORAGE_KEY, newMode);
+  const setStyle = useCallback((newStyle: ThemeStyle) => {
+    setStyleState(newStyle);
+    localStorage.setItem(STYLE_STORAGE_KEY, newStyle);
   }, []);
 
   const setMode = useCallback((newMode: ThemeMode) => {
     setModeState(newMode);
     localStorage.setItem(MODE_STORAGE_KEY, newMode);
-    const savedTheme = localStorage.getItem(STORAGE_KEY) as ThemeId | null;
-    setThemeId(resolveThemeFromMode(newMode, savedTheme || defaultTheme));
   }, []);
 
   const toggleMode = useCallback(() => {
-    const isDark = darkThemes.includes(themeId);
-    const newMode: ThemeMode = isDark ? "light" : "dark";
+    const newMode: ThemeMode = mode === 'dark' ? 'light' : 'dark';
     setMode(newMode);
-  }, [themeId, setMode]);
+  }, [mode, setMode]);
 
-  const theme = themes[themeId];
-  const isDark = darkThemes.includes(themeId);
+  const themeId = getThemeId(style, mode);
+  const theme = themes[themeId] || themes[defaultTheme];
+  const isDark = mode === 'dark';
 
   return (
-    <ThemeContext.Provider value={{ theme, themeId, mode, isDark, setTheme, setMode, toggleMode }}>
+    <ThemeContext.Provider value={{ theme, themeId, style, mode, isDark, setStyle, setMode, toggleMode }}>
       {children}
     </ThemeContext.Provider>
   );

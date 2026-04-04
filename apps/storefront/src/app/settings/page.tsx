@@ -4,15 +4,15 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import {
   Palette, Check, Globe, Bell, Eye, Shield,
-  Monitor, MousePointer, Type, Sun,
-  Mail, Smartphone, Package, CreditCard, Trash2, Save, RotateCcw,
+  Monitor, MousePointer, Type, Sun, Moon,
+  Mail, Smartphone, Package, CreditCard, Trash2, RotateCcw,
   type LucideIcon,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import { themeList } from "@/config/themes";
+import { themeStyleList, themesByStyle, type ThemeStyle } from "@/config/themes";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
-import { useSettings, currencies, defaultSettings, type Settings } from "@/context/SettingsContext";
+import { useSettings, currencies, type Settings } from "@/context/SettingsContext";
 
 const languages = [
   { code: "en", name: "English" },
@@ -22,7 +22,7 @@ const languages = [
 ];
 
 export default function SettingsPage() {
-  const { themeId, setTheme } = useTheme();
+  const { style, mode, isDark, setStyle, toggleMode } = useTheme();
   const { settings, updateSetting, resetSettings } = useSettings();
   const toast = useToast();
   const [hasChanges, setHasChanges] = useState(false);
@@ -31,7 +31,6 @@ export default function SettingsPage() {
   const handleUpdateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     updateSetting(key, value);
     setHasChanges(true);
-    // Settings are auto-saved, but we track for UI feedback
     toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} updated`);
   };
 
@@ -44,7 +43,6 @@ export default function SettingsPage() {
   const handleClearData = (type: string, key: string) => {
     localStorage.removeItem(key);
     toast.success(`${type} cleared`);
-    // Dispatch storage event for other tabs
     window.dispatchEvent(new StorageEvent('storage', { key }));
   };
 
@@ -54,6 +52,11 @@ export default function SettingsPage() {
       toast.success("All data cleared");
       setTimeout(() => window.location.reload(), 500);
     }
+  };
+
+  const handleStyleChange = (newStyle: ThemeStyle) => {
+    setStyle(newStyle);
+    toast.success(`Theme changed to ${themeStyleList.find(t => t.id === newStyle)?.name}`);
   };
 
   return (
@@ -85,144 +88,211 @@ export default function SettingsPage() {
             description="Choose your preferred visual style"
             delay={0.1}
           >
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {themeList.map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => setTheme(theme.id)}
-                  className={`group relative overflow-hidden rounded-2xl transition-all text-left ${
-                    themeId === theme.id
-                      ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-primary)]"
-                      : "hover:scale-[1.02]"
-                  }`}
-                >
-                  {/* Theme Preview Card */}
-                  <div
-                    className="aspect-[4/3] p-4 relative"
-                    style={{ background: theme.colors.bgPrimary }}
+            {/* Light/Dark Mode Toggle */}
+            <div className="mb-8 p-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {isDark ? (
+                    <Moon className="w-5 h-5 text-[var(--accent)]" />
+                  ) : (
+                    <Sun className="w-5 h-5 text-[var(--accent)]" />
+                  )}
+                  <div>
+                    <p className="font-medium">Appearance</p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Currently using {isDark ? 'dark' : 'light'} mode
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => !isDark || toggleMode()}
+                    className={`p-2 rounded-lg transition-all ${
+                      !isDark
+                        ? 'bg-[var(--accent)] text-[var(--bg-primary)]'
+                        : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    }`}
+                    title="Light mode"
                   >
-                    {/* Mini mockup of theme */}
-                    <div className="absolute inset-3 flex flex-col">
-                      {/* Header mockup */}
-                      <div
-                        className="h-6 rounded-t-lg flex items-center px-2 gap-1"
-                        style={{ background: theme.colors.bgSecondary, borderBottom: `1px solid ${theme.colors.border}` }}
-                      >
-                        <div className="w-2 h-2 rounded-full" style={{ background: theme.colors.accent }} />
-                        <div className="w-8 h-1.5 rounded" style={{ background: theme.colors.textMuted }} />
-                      </div>
+                    <Sun className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => isDark || toggleMode()}
+                    className={`p-2 rounded-lg transition-all ${
+                      isDark
+                        ? 'bg-[var(--accent)] text-[var(--bg-primary)]'
+                        : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    }`}
+                    title="Dark mode"
+                  >
+                    <Moon className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                      {/* Content mockup */}
-                      <div
-                        className="flex-1 p-2 flex gap-2"
-                        style={{ background: theme.colors.bgSecondary }}
-                      >
-                        {/* Sidebar */}
-                        <div className="w-1/4 space-y-1">
-                          <div className="h-2 rounded" style={{ background: theme.colors.textMuted, opacity: 0.3 }} />
-                          <div className="h-2 w-3/4 rounded" style={{ background: theme.colors.textMuted, opacity: 0.3 }} />
-                          <div className="h-2 w-1/2 rounded" style={{ background: theme.colors.accent }} />
+            {/* Theme Style Selection */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              {themeStyleList.map((themeStyle) => {
+                const previewTheme = themesByStyle[themeStyle.id][mode];
+                const isSelected = style === themeStyle.id;
+
+                return (
+                  <button
+                    key={themeStyle.id}
+                    onClick={() => handleStyleChange(themeStyle.id)}
+                    className={`group relative overflow-hidden rounded-2xl transition-all text-left ${
+                      isSelected
+                        ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-primary)]"
+                        : "hover:scale-[1.02]"
+                    }`}
+                  >
+                    {/* Theme Preview Card */}
+                    <div
+                      className="aspect-[4/3] p-4 relative"
+                      style={{ background: previewTheme.colors.bgPrimary }}
+                    >
+                      {/* Mini mockup of theme */}
+                      <div className="absolute inset-3 flex flex-col">
+                        {/* Header mockup */}
+                        <div
+                          className="h-6 rounded-t-lg flex items-center px-2 gap-1"
+                          style={{ background: previewTheme.colors.bgSecondary, borderBottom: `1px solid ${previewTheme.colors.border}` }}
+                        >
+                          <div className="w-2 h-2 rounded-full" style={{ background: previewTheme.colors.accent }} />
+                          <div className="w-8 h-1.5 rounded" style={{ background: previewTheme.colors.textMuted }} />
                         </div>
 
-                        {/* Main content */}
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 w-3/4 rounded" style={{ background: theme.colors.textPrimary, opacity: 0.8 }} />
-                          <div className="h-2 rounded" style={{ background: theme.colors.textMuted, opacity: 0.4 }} />
-                          <div className="h-2 w-5/6 rounded" style={{ background: theme.colors.textMuted, opacity: 0.4 }} />
-                          <div className="flex gap-1 mt-2">
-                            <div className="h-4 w-12 rounded" style={{ background: theme.colors.accent }} />
-                            <div className="h-4 w-12 rounded" style={{ background: theme.colors.border }} />
+                        {/* Content mockup */}
+                        <div
+                          className="flex-1 p-2 flex gap-2"
+                          style={{ background: previewTheme.colors.bgSecondary }}
+                        >
+                          {/* Sidebar */}
+                          <div className="w-1/4 space-y-1">
+                            <div className="h-2 rounded" style={{ background: previewTheme.colors.textMuted, opacity: 0.3 }} />
+                            <div className="h-2 w-3/4 rounded" style={{ background: previewTheme.colors.textMuted, opacity: 0.3 }} />
+                            <div className="h-2 w-1/2 rounded" style={{ background: previewTheme.colors.accent }} />
+                          </div>
+
+                          {/* Main content */}
+                          <div className="flex-1 space-y-2">
+                            <div className="h-3 w-3/4 rounded" style={{ background: previewTheme.colors.textPrimary, opacity: 0.8 }} />
+                            <div className="h-2 rounded" style={{ background: previewTheme.colors.textMuted, opacity: 0.4 }} />
+                            <div className="h-2 w-5/6 rounded" style={{ background: previewTheme.colors.textMuted, opacity: 0.4 }} />
+                            <div className="flex gap-1 mt-2">
+                              <div className="h-4 w-12 rounded" style={{ background: previewTheme.colors.accent }} />
+                              <div className="h-4 w-12 rounded" style={{ background: previewTheme.colors.border }} />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Selected indicator */}
-                    {themeId === theme.id && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: theme.colors.accent }}>
-                        <Check className="w-4 h-4" style={{ color: theme.colors.bgPrimary }} />
-                      </div>
-                    )}
-
-                    {/* Nothing theme dot pattern - monochrome with red dot */}
-                    {theme.id === 'nothing' && (
-                      <>
-                        <div
-                          className="absolute inset-0"
-                          style={{
-                            backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)`,
-                            backgroundSize: '12px 12px'
-                          }}
-                        />
-                        {/* Nothing red indicator dot */}
-                        <div className="absolute top-3 left-3 w-2 h-2 rounded-full" style={{ background: '#d71921' }} />
-                      </>
-                    )}
-                  </div>
-
-                  {/* Theme info */}
-                  <div
-                    className="p-4 border-t"
-                    style={{
-                      background: theme.colors.bgSecondary,
-                      borderColor: theme.colors.border
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                        {theme.name}
-                      </h3>
-                      {theme.id === 'nothing' && (
-                        <span className="flex items-center gap-1 text-[10px] font-medium uppercase" style={{ color: '#d71921' }}>
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#d71921' }} />
-                          New
-                        </span>
+                      {/* Selected indicator */}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: previewTheme.colors.accent }}>
+                          <Check className="w-4 h-4" style={{ color: previewTheme.colors.bgPrimary }} />
+                        </div>
                       )}
-                    </div>
-                    <p className="text-xs" style={{ color: theme.colors.textMuted }}>
-                      {theme.description}
-                    </p>
 
-                    {/* Color swatches */}
-                    <div className="flex gap-1 mt-3">
+                      {/* Nothing theme dot pattern */}
+                      {themeStyle.id === 'nothing' && (
+                        <>
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              backgroundImage: `radial-gradient(circle, ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} 1px, transparent 1px)`,
+                              backgroundSize: '12px 12px'
+                            }}
+                          />
+                          <div className="absolute top-3 left-3 w-2 h-2 rounded-full" style={{ background: '#d71921' }} />
+                        </>
+                      )}
+
+                      {/* Light/Dark indicator badge */}
                       <div
-                        className="w-5 h-5 rounded-full border"
-                        style={{ background: theme.colors.bgPrimary, borderColor: theme.colors.border }}
-                        title="Background"
-                      />
-                      <div
-                        className="w-5 h-5 rounded-full border"
-                        style={{ background: theme.colors.accent, borderColor: theme.colors.border }}
-                        title="Accent"
-                      />
-                      <div
-                        className="w-5 h-5 rounded-full border"
-                        style={{ background: theme.id === 'nothing' ? '#d71921' : theme.colors.accentSecondary, borderColor: theme.colors.border }}
-                        title={theme.id === 'nothing' ? 'Red Accent' : 'Secondary'}
-                      />
-                      <div
-                        className="w-5 h-5 rounded-full border"
-                        style={{ background: theme.colors.textPrimary, borderColor: theme.colors.border }}
-                        title="Text"
-                      />
+                        className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-medium uppercase"
+                        style={{
+                          background: previewTheme.colors.bgSecondary,
+                          color: previewTheme.colors.textMuted,
+                          border: `1px solid ${previewTheme.colors.border}`
+                        }}
+                      >
+                        {isDark ? 'Dark' : 'Light'}
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+
+                    {/* Theme info */}
+                    <div
+                      className="p-4 border-t"
+                      style={{
+                        background: previewTheme.colors.bgSecondary,
+                        borderColor: previewTheme.colors.border
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold" style={{ color: previewTheme.colors.textPrimary }}>
+                          {themeStyle.name}
+                        </h3>
+                        {themeStyle.id === 'nothing' && (
+                          <span className="flex items-center gap-1 text-[10px] font-medium uppercase" style={{ color: '#d71921' }}>
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#d71921' }} />
+                            New
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs" style={{ color: previewTheme.colors.textMuted }}>
+                        {themeStyle.description}
+                      </p>
+
+                      {/* Color swatches showing both modes */}
+                      <div className="flex items-center gap-3 mt-3">
+                        <div className="flex gap-1">
+                          <div
+                            className="w-4 h-4 rounded-full border"
+                            style={{ background: themeStyle.dark.bgPrimary, borderColor: themeStyle.dark.border }}
+                            title="Dark background"
+                          />
+                          <div
+                            className="w-4 h-4 rounded-full border"
+                            style={{ background: themeStyle.light.bgPrimary, borderColor: themeStyle.light.border }}
+                            title="Light background"
+                          />
+                        </div>
+                        <div className="w-px h-4 bg-[var(--border)]" />
+                        <div className="flex gap-1">
+                          <div
+                            className="w-4 h-4 rounded-full border"
+                            style={{ background: themeStyle.accents.accent, borderColor: previewTheme.colors.border }}
+                            title="Accent"
+                          />
+                          <div
+                            className="w-4 h-4 rounded-full border"
+                            style={{ background: themeStyle.id === 'nothing' ? '#d71921' : themeStyle.accents.accentSecondary, borderColor: previewTheme.colors.border }}
+                            title="Secondary accent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Theme features info */}
+            {/* Theme info summary */}
             <div className="mt-6 p-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)]">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
                   <Palette className="w-4 h-4 text-[var(--accent)]" />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Current: {themeList.find(t => t.id === themeId)?.name}</p>
+                  <p className="font-medium text-sm">
+                    {themeStyleList.find(t => t.id === style)?.name} · {isDark ? 'Dark' : 'Light'} Mode
+                  </p>
                   <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {themeList.find(t => t.id === themeId)?.effects.enableGlow ? 'Glow effects enabled' : 'Minimal effects'}
+                    {themeStyleList.find(t => t.id === style)?.effects.enableGlow ? 'Glow effects enabled' : 'Minimal effects'}
                     {' · '}
-                    {themeList.find(t => t.id === themeId)?.effects.enableGrid ? 'Grid overlay enabled' : 'No grid overlay'}
+                    {themeStyleList.find(t => t.id === style)?.effects.enableGrid ? 'Grid overlay enabled' : 'No grid overlay'}
                   </p>
                 </div>
               </div>
