@@ -9,6 +9,8 @@ from ..core.security import (
     get_current_user
 )
 from ..core.config import settings
+from ..core.utils import generate_cuid
+from ..core.logger import logger
 from ..models.schemas import UserCreate, UserLogin, UserResponse, Token
 from sqlalchemy import text
 
@@ -28,26 +30,36 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
 
-    # Create user
+    # Create user with CUID
+    user_id = generate_cuid()
     hashed_password = get_password_hash(user_data.password)
-    result = db.execute(
-        text("""
-            INSERT INTO "User" (id, email, name, password, "createdAt", "updatedAt")
-            VALUES (gen_random_uuid(), :email, :name, :password, NOW(), NOW())
-            RETURNING id, email
-        """),
-        {
-            "email": user_data.email,
-            "name": user_data.name,
-            "password": hashed_password
-        }
-    )
-    db.commit()
-    user = result.fetchone()
+    
+    try:
+        db.execute(
+            text("""
+                INSERT INTO "User" (id, email, name, password, "createdAt", "updatedAt")
+                VALUES (:id, :email, :name, :password, NOW(), NOW())
+            """),
+            {
+                "id": user_id,
+                "email": user_data.email,
+                "name": user_data.name,
+                "password": hashed_password
+            }
+        )
+        db.commit()
+        logger.info(f"New user registered: {user_data.email}")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to register user {user_data.email}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during registration"
+        )
 
     # Create token
     access_token = create_access_token(
-        data={"sub": str(user.id), "email": user.email},
+        data={"sub": user_id, "email": user_data.email},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
