@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional, List
 from ..core.database import get_db
-from ..models.schemas import ProductResponse, ProductListResponse, CategoryResponse
+from ..models.schemas import ProductResponse, ProductListResponse
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -16,7 +16,7 @@ async def get_products(
     search: Optional[str] = None,
     minPrice: Optional[float] = None,
     maxPrice: Optional[float] = None,
-    inStock: Optional[bool] = None,
+    isActive: Optional[bool] = True,
     db: Session = Depends(get_db)
 ):
     offset = (page - 1) * pageSize
@@ -26,7 +26,7 @@ async def get_products(
     params = {"limit": pageSize, "offset": offset}
 
     if category:
-        where_clauses.append("c.slug = :category")
+        where_clauses.append("p.category = :category")
         params["category"] = category
 
     if search:
@@ -41,21 +41,20 @@ async def get_products(
         where_clauses.append("p.price <= :maxPrice")
         params["maxPrice"] = maxPrice
 
-    if inStock is not None:
-        where_clauses.append("p.\"inStock\" = :inStock")
-        params["inStock"] = inStock
+    if isActive is not None:
+        where_clauses.append("p.\"isActive\" = :isActive")
+        params["isActive"] = isActive
 
     where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
 
     # Get products
     result = db.execute(
         text(f"""
-            SELECT p.id, p.name, p.slug, p.description, p.price,
-                   p.images, p."modelUrl", p."inStock", p."categoryId", p."createdAt"
+            SELECT p.id, p.name, p.slug, p.description, p."shortDescription", p.price,
+                   p."imageUrl", p.category, p."sortOrder", p."isActive", p."meshFileId", p."createdAt", p."updatedAt"
             FROM "Product" p
-            LEFT JOIN "Category" c ON p."categoryId" = c.id
             WHERE {where_sql}
-            ORDER BY p."createdAt" DESC
+            ORDER BY p."sortOrder" ASC, p."createdAt" DESC
             LIMIT :limit OFFSET :offset
         """),
         params
@@ -67,7 +66,6 @@ async def get_products(
         text(f"""
             SELECT COUNT(*) as total
             FROM "Product" p
-            LEFT JOIN "Category" c ON p."categoryId" = c.id
             WHERE {where_sql}
         """),
         params
@@ -81,12 +79,15 @@ async def get_products(
                 name=p.name,
                 slug=p.slug,
                 description=p.description,
-                price=float(p.price),
-                images=p.images or [],
-                modelUrl=p.modelUrl,
-                inStock=p.inStock,
-                categoryId=str(p.categoryId),
-                createdAt=p.createdAt
+                shortDescription=p.shortDescription,
+                price=float(p.price) if p.price else None,
+                imageUrl=p.imageUrl,
+                category=p.category,
+                sortOrder=p.sortOrder,
+                isActive=p.isActive,
+                meshFileId=p.meshFileId,
+                createdAt=p.createdAt,
+                updatedAt=p.updatedAt
             )
             for p in products
         ],
@@ -96,30 +97,12 @@ async def get_products(
     )
 
 
-@router.get("/categories", response_model=List[CategoryResponse])
-async def get_categories(db: Session = Depends(get_db)):
-    result = db.execute(
-        text("SELECT id, name, slug, description FROM \"Category\" ORDER BY name")
-    )
-    categories = result.fetchall()
-
-    return [
-        CategoryResponse(
-            id=str(c.id),
-            name=c.name,
-            slug=c.slug,
-            description=c.description
-        )
-        for c in categories
-    ]
-
-
 @router.get("/{slug}", response_model=ProductResponse)
 async def get_product(slug: str, db: Session = Depends(get_db)):
     result = db.execute(
         text("""
-            SELECT id, name, slug, description, price, images,
-                   "modelUrl", "inStock", "categoryId", "createdAt"
+            SELECT id, name, slug, description, "shortDescription", price, "imageUrl", 
+                   category, "sortOrder", "isActive", "meshFileId", "createdAt", "updatedAt"
             FROM "Product" WHERE slug = :slug
         """),
         {"slug": slug}
@@ -134,10 +117,13 @@ async def get_product(slug: str, db: Session = Depends(get_db)):
         name=product.name,
         slug=product.slug,
         description=product.description,
-        price=float(product.price),
-        images=product.images or [],
-        modelUrl=product.modelUrl,
-        inStock=product.inStock,
-        categoryId=str(product.categoryId),
-        createdAt=product.createdAt
+        shortDescription=product.shortDescription,
+        price=float(product.price) if product.price else None,
+        imageUrl=product.imageUrl,
+        category=product.category,
+        sortOrder=product.sortOrder,
+        isActive=product.isActive,
+        meshFileId=product.meshFileId,
+        createdAt=product.createdAt,
+        updatedAt=product.updatedAt
     )

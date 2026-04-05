@@ -12,7 +12,7 @@ import traceback
 from .core.config import settings
 from .core.database import engine, Base
 from .core.logger import logger
-from .routers import health, auth, products, orders, quotes, geometry, upload
+from .routers import health, auth, products, orders, quotes, geometry, upload, addresses
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -78,6 +78,7 @@ app.include_router(orders.router)
 app.include_router(quotes.router)
 app.include_router(geometry.router)
 app.include_router(upload.router)
+app.include_router(addresses.router)
 
 @app.get("/")
 async def root():

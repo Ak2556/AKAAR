@@ -1,10 +1,18 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
 
 
-# Enums
+# ============================================
+# Enums (Must match Prisma)
+# ============================================
+
+class UserRole(str, Enum):
+    CUSTOMER = "CUSTOMER"
+    ADMIN = "ADMIN"
+
+
 class OrderStatus(str, Enum):
     PENDING = "PENDING"
     CONFIRMED = "CONFIRMED"
@@ -14,17 +22,32 @@ class OrderStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class PaymentStatus(str, Enum):
+    PENDING = "PENDING"
+    AUTHORIZED = "AUTHORIZED"
+    CAPTURED = "CAPTURED"
+    FAILED = "FAILED"
+    REFUNDED = "REFUNDED"
+
+
 class QuoteStatus(str, Enum):
     PENDING = "PENDING"
-    REVIEWED = "REVIEWED"
-    APPROVED = "APPROVED"
+    REVIEWING = "REVIEWING"
+    QUOTED = "QUOTED"
+    ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
 
 
+# ============================================
 # User Schemas
+# ============================================
+
 class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
+    image: Optional[str] = None
+    role: UserRole = UserRole.CUSTOMER
 
 
 class UserCreate(UserBase):
@@ -39,6 +62,7 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: str
     createdAt: datetime
+    updatedAt: datetime
 
     class Config:
         from_attributes = True
@@ -49,25 +73,79 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+# ============================================
+# Address Schemas
+# ============================================
+
+class AddressBase(BaseModel):
+    firstName: str
+    lastName: str
+    address: str
+    apartment: Optional[str] = None
+    city: str
+    state: str
+    zip: str
+    country: str = "India"
+    phone: Optional[str] = None
+    label: Optional[str] = None
+    type: str = "home"
+    isDefault: bool = False
+
+
+class AddressCreate(AddressBase):
+    pass
+
+
+class AddressUpdate(BaseModel):
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    address: Optional[str] = None
+    apartment: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    country: Optional[str] = None
+    phone: Optional[str] = None
+    label: Optional[str] = None
+    type: Optional[str] = None
+    isDefault: Optional[bool] = None
+
+
+class AddressResponse(AddressBase):
+    id: str
+    userId: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================
 # Product Schemas
+# ============================================
+
 class ProductBase(BaseModel):
     name: str
     slug: str
     description: Optional[str] = None
-    price: float
-    images: List[str] = []
-    modelUrl: Optional[str] = None
-    inStock: bool = True
+    shortDescription: Optional[str] = None
+    imageUrl: Optional[str] = None
+    category: Optional[str] = None
+    sortOrder: int = 0
+    isActive: bool = True
+    price: Optional[float] = None
+    meshFileId: str
 
 
 class ProductCreate(ProductBase):
-    categoryId: str
+    pass
 
 
 class ProductResponse(ProductBase):
     id: str
-    categoryId: str
     createdAt: datetime
+    updatedAt: datetime
 
     class Config:
         from_attributes = True
@@ -80,38 +158,44 @@ class ProductListResponse(BaseModel):
     pageSize: int
 
 
-# Category Schemas
-class CategoryBase(BaseModel):
-    name: str
-    slug: str
-    description: Optional[str] = None
-
-
-class CategoryResponse(CategoryBase):
-    id: str
-
-    class Config:
-        from_attributes = True
-
-
+# ============================================
 # Order Schemas
+# ============================================
+
 class OrderItemCreate(BaseModel):
-    productId: str
+    productId: Optional[str] = None
+    name: str
+    slug: Optional[str] = None
+    material: Optional[str] = None
     quantity: int
-    price: float
+    unitPrice: float
+    totalPrice: float
 
 
 class OrderCreate(BaseModel):
     items: List[OrderItemCreate]
-    shippingAddressId: str
-    paymentMethod: str = "razorpay"
+    subtotal: float
+    shippingCost: float
+    tax: float
+    total: float
+    shippingMethod: str
+    shippingAddress: Dict[str, Any]
+    email: EmailStr
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+    paymentMethod: Optional[str] = "razorpay"
 
 
 class OrderItemResponse(BaseModel):
     id: str
-    productId: str
+    productId: Optional[str]
+    name: str
+    slug: Optional[str]
+    material: Optional[str]
     quantity: int
-    price: float
+    unitPrice: float
+    totalPrice: float
+    createdAt: datetime
 
     class Config:
         from_attributes = True
@@ -119,71 +203,93 @@ class OrderItemResponse(BaseModel):
 
 class OrderResponse(BaseModel):
     id: str
-    userId: str
+    orderNumber: str
+    userId: Optional[str]
     status: OrderStatus
+    subtotal: float
+    shippingCost: float
+    tax: float
     total: float
-    items: List[OrderItemResponse]
+    shippingMethod: str
+    shippingAddress: Dict[str, Any]
+    paymentMethod: Optional[str]
+    paymentStatus: PaymentStatus
+    razorpayOrderId: Optional[str]
+    email: EmailStr
+    phone: Optional[str]
     createdAt: datetime
+    updatedAt: datetime
+    items: List[OrderItemResponse]
 
     class Config:
         from_attributes = True
 
 
+# ============================================
 # Quote Schemas
-class QuoteItemCreate(BaseModel):
-    description: str
-    quantity: int
-    fileUrl: Optional[str] = None
+# ============================================
+
+class QuoteFileCreate(BaseModel):
+    originalFilename: str
+    storedFilename: str
+    s3Key: str
+    s3Bucket: str
+    fileSize: int
+    fileType: str
 
 
 class QuoteCreate(BaseModel):
-    items: List[QuoteItemCreate]
+    name: str
+    email: EmailStr
+    company: Optional[str] = None
+    phone: Optional[str] = None
+    service: str
+    material: str
+    quantity: int
     notes: Optional[str] = None
+    files: List[QuoteFileCreate]
+
+
+class QuoteFileResponse(BaseModel):
+    id: str
+    originalFilename: str
+    fileSize: int
+    fileType: str
+    uploadedAt: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class QuoteResponse(BaseModel):
     id: str
-    userId: str
+    quoteNumber: str
+    userId: Optional[str]
     status: QuoteStatus
-    notes: Optional[str]
-    createdAt: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# Address Schemas
-class AddressBase(BaseModel):
     name: str
-    phone: str
-    street: str
-    city: str
-    state: str
-    postalCode: str
-    country: str = "India"
-    isDefault: bool = False
-
-
-class AddressCreate(AddressBase):
-    pass
-
-
-class AddressResponse(AddressBase):
-    id: str
-    userId: str
+    email: EmailStr
+    service: str
+    material: str
+    quantity: int
+    createdAt: datetime
+    updatedAt: datetime
+    quotedPrice: Optional[float] = None
+    files: List[QuoteFileResponse]
 
     class Config:
         from_attributes = True
 
 
-# File Upload
+# ============================================
+# Utility Schemas
+# ============================================
+
 class FileUploadResponse(BaseModel):
     url: str
     key: str
     filename: str
 
 
-# Health Check
 class HealthResponse(BaseModel):
     status: str
     version: str
@@ -191,11 +297,10 @@ class HealthResponse(BaseModel):
     redis: str
 
 
-# 3D Model Analysis
 class ModelAnalysis(BaseModel):
     volume: float
     surfaceArea: float
-    boundingBox: dict
+    boundingBox: Dict[str, Any]
     triangleCount: int
     isWatertight: bool
     estimatedPrintTime: Optional[float] = None
