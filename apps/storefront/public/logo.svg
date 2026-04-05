@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7dd3fc"/>
+      <stop offset="50%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#0284c7"/>
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e2e8f0"/>
+      <stop offset="100%" style="stop-color:#94a3b8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized A Logo Mark -->
+  <g transform="translate(5, 5)">
+    <!-- Outer A frame -->
+    <path d="M25 0 L50 43 L45 43 L40 35 L10 35 L5 43 L0 43 L25 0Z M25 10 L13 30 L37 30 L25 10Z" fill="url(#logoGradient)"/>
+    <!-- Inner decorative lines -->
+    <path d="M25 5 L42 38 M25 5 L8 38" stroke="url(#logoGradient)" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M15 28 L35 28" stroke="url(#logoGradient)" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- AKAR Text -->
+  <text x="62" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="700" letter-spacing="3" fill="url(#textGradient)">AKAR</text>
+
+  <!-- Tagline -->
+  <text x="62" y="47" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="500" letter-spacing="1.5" fill="#64748b">We Give AKAAR to Ideas</text>
+</svg>

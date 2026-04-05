@@ -1,0 +1,249 @@
+@import "tailwindcss";
+
+:root {
+  /* Default Theme Colors (Cyberpunk) - will be overridden by ThemeProvider */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --accent: #00fff5;
+  --accent-secondary: #ff00ff;
+  --accent-glow: rgba(0, 255, 245, 0.5);
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-muted: #555555;
+  --grid: #1a1a1a;
+  --border: #222222;
+  --border-accent: #333333;
+
+  /* Legacy support */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+}
+
+/* Theme transition */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Grid overlay effect - only when theme-grid is enabled */
+.grid-overlay {
+  background-image: none;
+}
+
+:root.theme-grid .grid-overlay {
+  background-image:
+    linear-gradient(rgba(0, 255, 245, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 245, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Industrial theme grid color */
+:root[data-theme="industrial"].theme-grid .grid-overlay {
+  background-image:
+    linear-gradient(rgba(245, 158, 11, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+}
+
+/* Scanline effect - only when theme-scanlines is enabled */
+.scanlines::after {
+  content: none;
+}
+
+:root.theme-scanlines .scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+/* Glow effect - only when theme-glow is enabled */
+.glow {
+  box-shadow: none;
+}
+
+:root.theme-glow .glow {
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.glow-text {
+  text-shadow: none;
+}
+
+:root.theme-glow .glow-text {
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Glassmorphism - adapts to theme */
+.glass {
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+:root[data-theme="nature"] .glass {
+  background: rgba(254, 252, 232, 0.9);
+}
+
+:root[data-theme="industrial"] .glass {
+  background: rgba(24, 24, 27, 0.85);
+}
+
+/* Noise texture overlay - only when theme-noise is enabled */
+.noise::before {
+  content: none;
+}
+
+:root.theme-noise .noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* Gradient accent line */
+.accent-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* Button glow animation - only when theme-glow is enabled */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow);
+  }
+}
+
+.animate-pulse-glow {
+  animation: none;
+}
+
+:root.theme-glow .animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============ ACCESSIBILITY ============ */
+
+/* Reduced Motion */
+:root.reduce-motion *,
+:root.reduce-motion *::before,
+:root.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* High Contrast */
+:root.high-contrast {
+  --text-secondary: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --border: var(--text-muted);
+}
+
+/* Font Size Adjustments */
+:root[data-font-size="small"] {
+  font-size: 14px;
+}
+
+:root[data-font-size="medium"] {
+  font-size: 16px;
+}
+
+:root[data-font-size="large"] {
+  font-size: 18px;
+}
+
+/* Respect system preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
