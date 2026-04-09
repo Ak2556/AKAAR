@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.database import get_db
 from ..core.security import get_current_user
@@ -11,6 +11,11 @@ from ..core.logger import logger
 from ..models.schemas import AddressCreate, AddressUpdate, AddressResponse
 
 router = APIRouter(prefix="/addresses", tags=["User Addresses"])
+
+_ALLOWED_UPDATE_FIELDS = {
+    "firstName", "lastName", "address", "apartment", "city", "state",
+    "zip", "country", "phone", "label", "type", "isDefault", "updatedAt",
+}
 
 
 @router.get("", response_model=List[AddressResponse])
@@ -43,7 +48,7 @@ async def create_address(
     db: Session = Depends(get_db)
 ):
     address_id = generate_cuid()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
 
     try:
         # If this is set as default, unset others
@@ -113,8 +118,12 @@ async def update_address(
 
         # Build dynamic update query
         update_fields = address_data.model_dump(exclude_unset=True)
-        update_fields["updatedAt"] = datetime.now()
-        
+        update_fields["updatedAt"] = datetime.now(timezone.utc)
+
+        invalid = set(update_fields.keys()) - _ALLOWED_UPDATE_FIELDS
+        if invalid:
+            raise HTTPException(status_code=400, detail=f"Invalid fields: {invalid}")
+
         set_clause = ", ".join([f"\"{k}\" = :{k}" for k in update_fields.keys()])
         
         db.execute(

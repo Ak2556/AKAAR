@@ -23,7 +23,10 @@ export interface ModelValidation {
   isWatertight: boolean;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
+}
 
 export function useGeometry() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);

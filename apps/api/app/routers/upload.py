@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from ..core.security import get_current_user
 from ..core.config import settings
+from ..core.logger import logger
 from ..models.schemas import FileUploadResponse
 import boto3
 from botocore.exceptions import ClientError
@@ -37,13 +38,11 @@ async def upload_model(
             detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
         )
 
-    # Generate unique key
     file_id = str(uuid.uuid4())
     key = f"models/{current_user['user_id']}/{file_id}{file_ext}"
 
     s3 = get_s3_client()
     if not s3:
-        # Return mock response if S3 not configured
         return FileUploadResponse(
             url=f"https://example.com/{key}",
             key=key,
@@ -51,23 +50,17 @@ async def upload_model(
         )
 
     try:
-        content = await file.read()
-        s3.put_object(
-            Bucket=settings.AWS_S3_BUCKET,
-            Key=key,
-            Body=content,
-            ContentType=file.content_type
+        s3.upload_fileobj(
+            file.file,
+            settings.AWS_S3_BUCKET,
+            key,
+            ExtraArgs={"ContentType": file.content_type or "application/octet-stream"}
         )
-
         url = f"https://{settings.AWS_S3_BUCKET}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
-
-        return FileUploadResponse(
-            url=url,
-            key=key,
-            filename=file.filename
-        )
+        return FileUploadResponse(url=url, key=key, filename=file.filename)
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        logger.error(f"S3 upload failed for model (user={current_user['user_id']}): {str(e)}")
+        raise HTTPException(status_code=500, detail="Upload failed. Please try again.")
 
 
 @router.post("/image", response_model=FileUploadResponse)
@@ -85,7 +78,6 @@ async def upload_image(
             detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
         )
 
-    # Generate unique key
     file_id = str(uuid.uuid4())
     key = f"images/{current_user['user_id']}/{file_id}{file_ext}"
 
@@ -98,23 +90,17 @@ async def upload_image(
         )
 
     try:
-        content = await file.read()
-        s3.put_object(
-            Bucket=settings.AWS_S3_BUCKET,
-            Key=key,
-            Body=content,
-            ContentType=file.content_type
+        s3.upload_fileobj(
+            file.file,
+            settings.AWS_S3_BUCKET,
+            key,
+            ExtraArgs={"ContentType": file.content_type or "image/jpeg"}
         )
-
         url = f"https://{settings.AWS_S3_BUCKET}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
-
-        return FileUploadResponse(
-            url=url,
-            key=key,
-            filename=file.filename
-        )
+        return FileUploadResponse(url=url, key=key, filename=file.filename)
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        logger.error(f"S3 upload failed for image (user={current_user['user_id']}): {str(e)}")
+        raise HTTPException(status_code=500, detail="Upload failed. Please try again.")
 
 
 @router.delete("/{key:path}")
@@ -123,7 +109,6 @@ async def delete_file(
     current_user: dict = Depends(get_current_user)
 ):
     """Delete a file from S3"""
-    # Verify user owns the file
     if f"/{current_user['user_id']}/" not in key:
         raise HTTPException(status_code=403, detail="Not authorized to delete this file")
 
@@ -135,4 +120,5 @@ async def delete_file(
         s3.delete_object(Bucket=settings.AWS_S3_BUCKET, Key=key)
         return {"message": "File deleted successfully"}
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
+        logger.error(f"S3 delete failed for key={key}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Delete failed. Please try again.")

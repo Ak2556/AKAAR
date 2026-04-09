@@ -165,6 +165,3 @@ async def validate_model(request: Request, file: UploadFile = File(...)):
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error validating model: {str(e)}")
-se
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error validating model: {str(e)}")

@@ -28,10 +28,10 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Github, href: "https://github.com", label: "GitHub" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-  { icon: Mail, href: "mailto:hello@akaar.com", label: "Email" },
+  { icon: Github, href: "https://github.com/ak2556", label: "GitHub" },
+  { icon: Twitter, href: "https://twitter.com/akaar_in", label: "Twitter" },
+  { icon: Linkedin, href: "https://linkedin.com/company/akaar-in", label: "LinkedIn" },
+  { icon: Mail, href: "mailto:hello@akaar.in", label: "Email" },
 ];
 
 export function Footer() {

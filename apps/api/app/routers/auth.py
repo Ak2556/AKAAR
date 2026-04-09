@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 from ..core.database import get_db
 from ..core.security import (
     verify_password,
@@ -15,10 +18,12 @@ from ..models.schemas import UserCreate, UserLogin, UserResponse, Token
 from sqlalchemy import text
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register", response_model=Token)
-async def register(user_data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+async def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
     # Check if user exists
     result = db.execute(
         text("SELECT id FROM \"User\" WHERE email = :email"),
@@ -33,7 +38,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # Create user with CUID
     user_id = generate_cuid()
     hashed_password = get_password_hash(user_data.password)
-    
+
     try:
         db.execute(
             text("""
@@ -67,7 +72,8 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-async def login(user_data: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+async def login(request: Request, user_data: UserLogin, db: Session = Depends(get_db)):
     result = db.execute(
         text("SELECT id, email, password FROM \"User\" WHERE email = :email"),
         {"email": user_data.email}
