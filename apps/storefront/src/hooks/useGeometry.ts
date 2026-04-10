@@ -24,8 +24,12 @@ export interface ModelValidation {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
+
+function requireApiUrl(): string {
+  if (!API_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
+  }
+  return API_URL;
 }
 
 export function useGeometry() {
@@ -42,7 +46,7 @@ export function useGeometry() {
     formData.append("file", file);
 
     try {
-      const response = await fetch(`${API_URL}/geometry/analyze`, {
+      const response = await fetch(`${requireApiUrl()}/geometry/analyze`, {
         method: "POST",
         body: formData,
       });
@@ -70,7 +74,7 @@ export function useGeometry() {
     formData.append("file", file);
 
     try {
-      const response = await fetch(`${API_URL}/geometry/validate`, {
+      const response = await fetch(`${requireApiUrl()}/geometry/validate`, {
         method: "POST",
         body: formData,
       });
