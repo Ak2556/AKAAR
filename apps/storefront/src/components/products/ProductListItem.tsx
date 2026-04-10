@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart, Heart, Eye } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -53,10 +54,12 @@ export function ProductListItem({
         {/* Image */}
         <div className="relative w-32 h-32 flex-shrink-0 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
           {imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt={name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="128px"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

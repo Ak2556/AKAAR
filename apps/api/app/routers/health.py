@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from ..core.database import get_db
 from ..core.config import settings
+from ..core.logger import logger
 from ..models.schemas import HealthResponse
 import redis
 
@@ -40,7 +41,8 @@ async def readiness_check(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         return {"status": "ready"}
     except Exception as e:
-        return {"status": "not ready", "error": str(e)}
+        logger.error(f"Readiness check failed: {str(e)}")
+        return {"status": "not ready"}
 
 
 @router.get("/live")

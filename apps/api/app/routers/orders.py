@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import uuid
 
@@ -102,7 +102,7 @@ async def create_order(
 ):
     order_id = generate_cuid()
     order_number = f"ORD-{uuid.uuid4().hex[:8].upper()}"
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
 
     try:
         # Create order

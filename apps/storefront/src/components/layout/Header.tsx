@@ -139,10 +139,12 @@ export function Header() {
                     className="flex items-center gap-2 p-1 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors"
                   >
                     {session.user?.image ? (
-                      <img
+                      <Image
                         src={session.user.image}
                         alt={session.user.name || "User"}
-                        className="w-8 h-8 rounded-full border border-[var(--border)]"
+                        width={32}
+                        height={32}
+                        className="rounded-full border border-[var(--border)]"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-[var(--bg-primary)] font-semibold text-sm">

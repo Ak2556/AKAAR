@@ -20,9 +20,12 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # JWT
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Trusted hosts (comma-separated in env)
+    ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1"]
 
     # AWS S3
     AWS_ACCESS_KEY_ID: Optional[str] = None
