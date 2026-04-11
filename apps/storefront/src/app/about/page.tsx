@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Target, Eye, Rocket, Users, Award, Globe,
   Printer, Cpu, Cog, ArrowRight, CheckCircle
@@ -58,10 +59,34 @@ const capabilities = [
 ];
 
 const team = [
-  { name: "Akash Thakur", role: "AI/ML Engineer & Systems Architect", domain: "Core software infrastructure, automated quoting engine algorithms, and the digital storefront", image: null },
-  { name: "Mohit", role: "Lead Industrial Designer", domain: "CAD optimization, mesh validation, and model slicing for structural integrity", image: null },
-  { name: "Harish", role: "Head of Hardware Infrastructure", domain: "Print farm operations, electronics maintenance, and machine uptime maximization", image: null },
-  { name: "Tarveen", role: "Head of Operations & Unit Economics", domain: "Supply chain logistics, material procurement, and cost-margin optimization", image: null },
+  {
+    name: "Akash Thakur",
+    role: "Founder & Web Developer",
+    domain: "Core software infrastructure, automated quoting engine, and the digital storefront",
+    image: "/team/akash.jpg",
+    initials: "AT",
+  },
+  {
+    name: "Mohit Sherawat",
+    role: "Designer",
+    domain: "UI/UX, brand identity, CAD design, and visual product communication",
+    image: "/team/mohit.jpg",
+    initials: "MS",
+  },
+  {
+    name: "Harish Kumar Meena",
+    role: "Infrastructure & Machine Uptime Specialist",
+    domain: "Print farm operations, electronics maintenance, and machine uptime maximization",
+    image: "/team/harish.jpg",
+    initials: "HM",
+  },
+  {
+    name: "Tarvin Sherawat",
+    role: "Logistics Manager & Video Editor",
+    domain: "Supply chain logistics, material procurement, and video content production",
+    image: "/team/tarvin.jpg",
+    initials: "TS",
+  },
 ];
 
 const milestones = [
@@ -72,6 +97,73 @@ const milestones = [
   { year: "2022", title: "Global Reach", description: "Expanded to serve international clients" },
   { year: "2023", title: "Innovation Hub", description: "Launched R&D center for new materials" },
 ];
+
+function TeamCard({
+  member,
+  index,
+  isInView,
+}: {
+  member: (typeof team)[0];
+  index: number;
+  isInView: boolean;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay: index * 0.12, duration: 0.6, ease: [0.215, 0.61, 0.355, 1] }}
+      whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
+      className="group"
+    >
+      {/* Photo card */}
+      <div className="relative aspect-square mb-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)] overflow-hidden group-hover:border-[var(--accent)]/50 transition-colors duration-300">
+        {imgError ? (
+          /* Fallback: initials */
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-tertiary)]">
+            <span className="text-4xl font-bold text-[var(--accent)]/60 font-mono select-none">
+              {member.initials}
+            </span>
+          </div>
+        ) : (
+          <Image
+            src={member.image}
+            alt={member.name}
+            fill
+            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            onError={() => setImgError(true)}
+          />
+        )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)]/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Corner accents */}
+        <div className="absolute top-3 left-3 w-5 h-5 border-l border-t border-[var(--accent)]/0 group-hover:border-[var(--accent)]/60 transition-colors duration-300" />
+        <div className="absolute top-3 right-3 w-5 h-5 border-r border-t border-[var(--accent)]/0 group-hover:border-[var(--accent)]/60 transition-colors duration-300" />
+        <div className="absolute bottom-3 left-3 w-5 h-5 border-l border-b border-[var(--accent)]/0 group-hover:border-[var(--accent)]/60 transition-colors duration-300" />
+        <div className="absolute bottom-3 right-3 w-5 h-5 border-r border-b border-[var(--accent)]/0 group-hover:border-[var(--accent)]/60 transition-colors duration-300" />
+
+        {/* Scan line on hover */}
+        <motion.div
+          initial={{ top: "-100%" }}
+          whileHover={{ top: "100%" }}
+          transition={{ duration: 0.6, ease: "linear" }}
+          className="absolute left-0 right-0 h-px bg-[var(--accent)]/30 pointer-events-none"
+        />
+      </div>
+
+      {/* Info */}
+      <h3 className="font-semibold group-hover:text-[var(--accent)] transition-colors duration-200">
+        {member.name}
+      </h3>
+      <p className="text-sm text-[var(--accent)] font-mono mb-1">{member.role}</p>
+      <p className="text-xs text-[var(--text-muted)] leading-relaxed">{member.domain}</p>
+    </motion.div>
+  );
+}
 
 export default function AboutPage() {
   const heroRef = useRef(null);
@@ -345,23 +437,7 @@ export default function AboutPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.map((member, index) => (
-              <motion.div
-                key={member.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={teamInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1 }}
-                className="group"
-              >
-                <div className="aspect-square mb-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)] overflow-hidden relative">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Users className="w-16 h-16 text-[var(--border)]" />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <h3 className="font-semibold">{member.name}</h3>
-                <p className="text-sm text-[var(--accent)] mb-2">{member.role}</p>
-                <p className="text-xs text-[var(--text-muted)]">{member.domain}</p>
-              </motion.div>
+              <TeamCard key={member.name} member={member} index={index} isInView={teamInView} />
             ))}
           </div>
         </div>
