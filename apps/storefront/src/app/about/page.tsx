@@ -9,6 +9,7 @@ import {
   Printer, Cpu, Cog, ArrowRight, CheckCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { team } from "./team-data";
 
 const stats = [
   { value: "10K+", label: "Parts Produced" },
@@ -58,37 +59,6 @@ const capabilities = [
   },
 ];
 
-const team = [
-  {
-    name: "Akash Thakur",
-    role: "Founder & Web Developer",
-    domain: "Leads the vision and builds the digital backbone of AKAAR — from the storefront and quoting engine to the full-stack infrastructure powering the platform.",
-    image: "/team/akash-thakur.jpeg",
-    initials: "AT",
-  },
-  {
-    name: "Mohit Sherawat",
-    role: "Designer",
-    domain: "Drives the creative direction across products and brand — from CAD optimization and model slicing to visual identity and design systems.",
-    image: "/team/mohit-sherawat.jpeg",
-    initials: "MS",
-  },
-  {
-    name: "Harish Kumar Meena",
-    role: "Infrastructure & Machine Uptime Specialist",
-    domain: "Keeps the print farm running at peak performance — managing hardware maintenance, electronics diagnostics, and maximizing machine uptime.",
-    image: "/team/harish-kumar-meena.jpeg",
-    initials: "HM",
-  },
-  {
-    name: "Tarvin Sherawat",
-    role: "Logistics Manager & Video Editor",
-    domain: "Manages end-to-end supply chain logistics and material procurement while producing video content that showcases AKAAR's capabilities.",
-    image: "/team/tarvin-sherawat.jpeg",
-    initials: "TS",
-  },
-];
-
 const milestones = [
   { year: "2018", title: "Founded", description: "Started with a single 3D printer and a vision" },
   { year: "2019", title: "First Facility", description: "Opened our first production facility" },
@@ -100,22 +70,15 @@ const milestones = [
 
 function TeamCard({
   member,
-  index,
-  isInView,
 }: {
   member: (typeof team)[0];
-  index: number;
-  isInView: boolean;
 }) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.12, duration: 0.6, ease: [0.215, 0.61, 0.355, 1] }}
-      whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
-      className="group"
+    <Link
+      href={`/about/team/${member.slug}`}
+      className="group block"
     >
       {/* Photo card */}
       <div className="relative aspect-square mb-4 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)] overflow-hidden group-hover:border-[var(--accent)]/50 transition-colors duration-300">
@@ -161,7 +124,7 @@ function TeamCard({
       </h3>
       <p className="text-sm text-[var(--accent)] font-mono mb-1">{member.role}</p>
       <p className="text-xs text-[var(--text-muted)] leading-relaxed">{member.domain}</p>
-    </motion.div>
+    </Link>
   );
 }
 
@@ -437,7 +400,15 @@ export default function AboutPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.map((member, index) => (
-              <TeamCard key={member.name} member={member} index={index} isInView={teamInView} />
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, y: 40 }}
+                animate={teamInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: index * 0.12, duration: 0.6, ease: [0.215, 0.61, 0.355, 1] }}
+                whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
+              >
+                <TeamCard member={member} />
+              </motion.div>
             ))}
           </div>
         </div>
