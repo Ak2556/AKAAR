@@ -40,7 +40,7 @@ const materials = [
 ];
 
 export default function ProductsPage() {
-  const { settings } = useSettings();
+  const { settings, t } = useSettings();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">(settings.defaultView);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -104,11 +104,10 @@ export default function ProductsPage() {
               Catalog
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mt-4">
-              Our <span className="gradient-text">Products</span>
+              <span className="gradient-text">{t("products.title")}</span>
             </h1>
             <p className="text-[var(--text-secondary)] mt-4 max-w-2xl">
-              Browse our collection of precision-manufactured parts and components.
-              Each product is engineered for excellence.
+              {t("products.subtitle") || "Browse our collection of precision-manufactured parts and components."}
             </p>
           </motion.div>
         </div>
@@ -136,7 +135,7 @@ export default function ProductsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={t("products.search")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] text-sm"

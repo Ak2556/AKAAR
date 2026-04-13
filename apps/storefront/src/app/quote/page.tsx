@@ -35,7 +35,7 @@ interface UploadedFile {
 
 export default function QuotePage() {
   const { analyzeModel, analysis, isAnalyzing, resetGeometry } = useGeometry();
-  const { formatPrice, formatDimension } = useSettings();
+  const { formatPrice, formatDimension, t } = useSettings();
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedService, setSelectedService] = useState("");
   const [selectedMaterial, setSelectedMaterial] = useState("");
@@ -470,11 +470,11 @@ export default function QuotePage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Submitting...
+                      {t("quote.submitting")}
                     </>
                   ) : (
                     <>
-                      Submit Quote Request
+                      {t("quote.submit")}
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </>
                   )}

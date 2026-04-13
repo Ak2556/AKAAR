@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Github, Twitter, Linkedin, Mail, Send } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { useSettings } from "@/context/SettingsContext";
 
 const footerLinks = {
   products: [
@@ -38,6 +39,7 @@ export function Footer() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
+  const { t } = useSettings();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +81,7 @@ export function Footer() {
             <form onSubmit={handleNewsletterSubmit} className="flex w-full md:w-auto gap-3">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t("footer.newsletter_placeholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 md:w-80 px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
@@ -93,7 +95,7 @@ export function Footer() {
                   "Subscribing..."
                 ) : (
                   <>
-                    Subscribe
+                    {t("footer.newsletter_button")}
                     <Send className="w-4 h-4" />
                   </>
                 )}
@@ -197,7 +199,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-16 pt-8 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[var(--text-muted)] text-sm">
-            &copy; {new Date().getFullYear()} Akaar. All rights reserved.
+            &copy; {new Date().getFullYear()} Akaar. {t("footer.rights")}
           </p>
           <div className="flex gap-6 text-sm">
             <Link href="/privacy" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
