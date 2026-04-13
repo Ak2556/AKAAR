@@ -19,7 +19,7 @@ interface ProductFiltersProps {
 export function ProductFilters({ categories, materials, onFilterChange }: ProductFiltersProps) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     materials: true,
@@ -45,8 +45,8 @@ export function ProductFilters({ categories, materials, onFilterChange }: Produc
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedMaterials([]);
-    setPriceRange([0, 1000]);
-    onFilterChange({ categories: [], materials: [], priceRange: [0, 1000] });
+    setPriceRange([0, 100000]);
+    onFilterChange({ categories: [], materials: [], priceRange: [0, 100000] });
   };
 
   const hasActiveFilters = selectedCategories.length > 0 || selectedMaterials.length > 0;

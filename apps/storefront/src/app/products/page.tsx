@@ -57,7 +57,7 @@ export default function ProductsPage() {
     setViewMode(settings.defaultView);
   }, [settings.defaultView]);
 
-  // Filter products based on search and filters
+  // Filter and sort products
   const filteredProducts = mockProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -70,9 +70,18 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "price-low": return a.price - b.price;
+      case "price-high": return b.price - a.price;
+      case "name": return a.name.localeCompare(b.name);
+      default: return 0;
+    }
+  });
+
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / settings.productsPerPage);
-  const paginatedProducts = filteredProducts.slice(
+  const totalPages = Math.ceil(sortedProducts.length / settings.productsPerPage);
+  const paginatedProducts = sortedProducts.slice(
     (currentPage - 1) * settings.productsPerPage,
     currentPage * settings.productsPerPage
   );
@@ -80,7 +89,7 @@ export default function ProductsPage() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filters, settings.productsPerPage]);
+  }, [searchQuery, filters, sortBy, settings.productsPerPage]);
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -192,7 +201,7 @@ export default function ProductsPage() {
 
             {/* Results count */}
             <p className="text-sm text-[var(--text-muted)] mb-6">
-              Showing {paginatedProducts.length} of {filteredProducts.length} products
+              Showing {paginatedProducts.length} of {sortedProducts.length} products
               {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
             </p>
 

@@ -56,16 +56,20 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
   if (products.length === 0) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center py-20"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-24 border border-dashed border-[var(--border)] rounded-xl"
       >
-        <div className="w-20 h-20 mx-auto mb-6 border border-[var(--border)] rounded-xl flex items-center justify-center">
-          <span className="text-[var(--text-muted)] font-mono">?</span>
-        </div>
+        <motion.div
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 mx-auto mb-6 border border-[var(--accent)]/30 rounded-xl flex items-center justify-center"
+        >
+          <span className="text-[var(--accent)]/50 font-mono text-sm">3D</span>
+        </motion.div>
         <h3 className="text-xl font-semibold mb-2">No products found</h3>
-        <p className="text-[var(--text-secondary)]">
-          Try adjusting your filters or search terms
+        <p className="text-[var(--text-secondary)] text-sm max-w-xs mx-auto">
+          Try adjusting your search or filters, or browse all categories.
         </p>
       </motion.div>
     );
