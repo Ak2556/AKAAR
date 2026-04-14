@@ -1,8 +1,9 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { PackageSearch } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { ProductListItem } from "./ProductListItem";
-import { motion } from "framer-motion";
 
 interface Product {
   id: string;
@@ -21,69 +22,75 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ products, loading = false, viewMode = "grid" }: ProductGridProps) {
+  /* ── Loading skeletons ── */
   if (loading) {
-    return (
-      <div className={viewMode === "grid"
-        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        : "space-y-4"
-      }>
+    return viewMode === "grid" ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="animate-pulse">
-            {viewMode === "grid" ? (
-              <>
-                <div className="aspect-square bg-[var(--bg-tertiary)] rounded-xl" />
-                <div className="mt-4 space-y-2">
-                  <div className="h-5 bg-[var(--bg-tertiary)] rounded w-3/4" />
-                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-1/2" />
-                </div>
-              </>
-            ) : (
-              <div className="flex gap-4 p-4 border border-[var(--border)] rounded-xl">
-                <div className="w-32 h-32 bg-[var(--bg-tertiary)] rounded-lg flex-shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 bg-[var(--bg-tertiary)] rounded w-1/2" />
-                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-3/4" />
-                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-1/4" />
-                </div>
+          <div key={i} className="animate-pulse rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--bg-secondary)]">
+            <div className="aspect-[4/3] bg-[var(--bg-tertiary)]" />
+            <div className="p-5 space-y-3">
+              <div className="h-4 bg-[var(--bg-tertiary)] rounded-full w-3/4" />
+              <div className="h-3 bg-[var(--bg-tertiary)] rounded-full w-full" />
+              <div className="h-3 bg-[var(--bg-tertiary)] rounded-full w-2/3" />
+              <div className="flex justify-between items-center pt-2">
+                <div className="h-6 bg-[var(--bg-tertiary)] rounded-full w-1/3" />
+                <div className="h-8 bg-[var(--bg-tertiary)] rounded-xl w-1/4" />
               </div>
-            )}
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="animate-pulse flex gap-5 p-4 border border-[var(--border)] rounded-2xl bg-[var(--bg-secondary)]">
+            <div className="w-28 h-28 bg-[var(--bg-tertiary)] rounded-xl flex-shrink-0" />
+            <div className="flex-1 space-y-2.5 py-1">
+              <div className="h-3.5 bg-[var(--bg-tertiary)] rounded-full w-1/3" />
+              <div className="h-4 bg-[var(--bg-tertiary)] rounded-full w-2/3" />
+              <div className="h-3 bg-[var(--bg-tertiary)] rounded-full w-full" />
+              <div className="h-5 bg-[var(--bg-tertiary)] rounded-full w-1/4" />
+            </div>
+            <div className="w-28 space-y-2 py-1 flex-shrink-0">
+              <div className="h-8 bg-[var(--bg-tertiary)] rounded-xl" />
+              <div className="h-8 bg-[var(--bg-tertiary)] rounded-xl" />
+            </div>
           </div>
         ))}
       </div>
     );
   }
 
+  /* ── Empty state ── */
   if (products.length === 0) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center py-24 border border-dashed border-[var(--border)] rounded-xl"
+        className="flex flex-col items-center justify-center py-28 text-center"
       >
-        <motion.div
-          animate={{ rotate: [0, 360] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 mx-auto mb-6 border border-[var(--accent)]/30 rounded-xl flex items-center justify-center"
-        >
-          <span className="text-[var(--accent)]/50 font-mono text-sm">3D</span>
-        </motion.div>
-        <h3 className="text-xl font-semibold mb-2">No products found</h3>
-        <p className="text-[var(--text-secondary)] text-sm max-w-xs mx-auto">
-          Try adjusting your search or filters, or browse all categories.
+        <div className="w-20 h-20 mb-6 border border-dashed border-[var(--accent)]/30 rounded-2xl flex items-center justify-center">
+          <PackageSearch className="w-9 h-9 text-[var(--accent)]/40" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2">No products found</h3>
+        <p className="text-sm text-[var(--text-muted)] max-w-xs leading-relaxed">
+          Try a different search term or adjust the active filters.
         </p>
       </motion.div>
     );
   }
 
+  /* ── List view ── */
   if (viewMode === "list") {
     return (
-      <div className="space-y-4">
-        {products.map((product, index) => (
+      <div className="space-y-3">
+        {products.map((product, i) => (
           <motion.div
             key={product.id}
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
+            transition={{ delay: i * 0.04, duration: 0.25 }}
           >
             <ProductListItem {...product} />
           </motion.div>
@@ -92,14 +99,15 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
     );
   }
 
+  /* ── Grid view ── */
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map((product, index) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {products.map((product, i) => (
         <motion.div
           key={product.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
+          transition={{ delay: i * 0.05, duration: 0.3 }}
         >
           <ProductCard {...product} />
         </motion.div>
