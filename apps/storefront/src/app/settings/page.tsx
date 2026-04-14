@@ -1,18 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import {
   Palette, Check, Globe, Bell, Eye, Shield,
   Monitor, MousePointer, Type, Sun,
-  Mail, Smartphone, Package, CreditCard, Trash2, RotateCcw, Info
+  Mail, Smartphone, Package, CreditCard, Trash2, RotateCcw, Info,
+  DollarSign, Ruler, Languages, Zap
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { themeList } from "@/config/themes";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
-import { useSettings, currencies, defaultSettings, type Settings } from "@/context/SettingsContext";
+import { useSettings, currencies, type Settings } from "@/context/SettingsContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession } from "next-auth/react";
@@ -25,8 +25,8 @@ const languages = [
 ];
 
 export default function SettingsPage() {
-  const { themeId, setTheme } = useTheme();
-  const { settings, updateSetting, resetSettings } = useSettings();
+  const { themeId, setTheme, theme } = useTheme();
+  const { settings, updateSetting, resetSettings, formatPrice, formatDimension } = useSettings();
   const { clearCart } = useCart();
   const { clearWishlist } = useWishlist();
   const { data: session } = useSession();
@@ -127,6 +127,58 @@ export default function SettingsPage() {
         </motion.div>
 
         <div className="max-w-4xl space-y-8">
+
+          {/* ============ LIVE PREVIEW ============ */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="p-6 border border-[var(--accent)]/30 rounded-xl bg-[var(--accent)]/5"
+          >
+            <div className="flex items-center gap-2 mb-5">
+              <Zap className="w-4 h-4 text-[var(--accent)]" />
+              <span className="text-sm font-mono text-[var(--accent)] uppercase tracking-wider">Live Preview</span>
+              <span className="text-xs text-[var(--text-muted)] ml-1">— changes appear here instantly</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Currency</span>
+                </div>
+                <p className="font-mono font-bold text-[var(--accent)] text-lg">{formatPrice(12499)}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{currencies[settings.currency].name}</p>
+              </div>
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Ruler className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Units</span>
+                </div>
+                <p className="font-mono font-bold text-[var(--accent)] text-lg">{formatDimension(25.4)}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{settings.units === "metric" ? "Metric system" : "Imperial system"}</p>
+              </div>
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Languages className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Language</span>
+                </div>
+                <p className="font-mono font-bold text-[var(--accent)] text-lg capitalize">{settings.language.toUpperCase()}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Nav labels updated</p>
+              </div>
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Palette className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Theme</span>
+                </div>
+                <div className="flex gap-1 mb-1">
+                  <div className="w-5 h-5 rounded border border-[var(--border)]" style={{ background: theme.colors.bgPrimary }} />
+                  <div className="w-5 h-5 rounded border border-[var(--border)]" style={{ background: theme.colors.accent }} />
+                  <div className="w-5 h-5 rounded border border-[var(--border)]" style={{ background: theme.colors.accentSecondary }} />
+                </div>
+                <p className="text-xs text-[var(--text-muted)]">{theme.name}</p>
+              </div>
+            </div>
+          </motion.div>
 
           {/* ============ THEME ============ */}
           <SettingsSection
