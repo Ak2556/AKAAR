@@ -1,18 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import {
   Palette, Check, Globe, Bell, Eye, Shield,
   Monitor, MousePointer, Type, Sun,
-  Mail, Smartphone, Package, CreditCard, Trash2, Save, RotateCcw
+  Mail, Smartphone, Package, CreditCard, Trash2, RotateCcw, Info,
+  DollarSign, Ruler, Languages, Zap
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { themeList } from "@/config/themes";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
-import { useSettings, currencies, defaultSettings, type Settings } from "@/context/SettingsContext";
+import { useSettings, currencies, type Settings } from "@/context/SettingsContext";
+import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { useSession } from "next-auth/react";
 
 const languages = [
   { code: "en", name: "English" },
@@ -22,34 +25,81 @@ const languages = [
 ];
 
 export default function SettingsPage() {
-  const { themeId, setTheme } = useTheme();
-  const { settings, updateSetting, resetSettings } = useSettings();
+  const { themeId, setTheme, theme } = useTheme();
+  const { settings, updateSetting, resetSettings, formatPrice, formatDimension } = useSettings();
+  const { clearCart } = useCart();
+  const { clearWishlist } = useWishlist();
+  const { data: session } = useSession();
   const toast = useToast();
-  const [hasChanges, setHasChanges] = useState(false);
 
-  // Wrapper to track changes
   const handleUpdateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     updateSetting(key, value);
-    setHasChanges(true);
-    // Settings are auto-saved, but we track for UI feedback
-    toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} updated`);
+    toast.success("Setting saved");
+  };
+
+  // Push notifications — request actual browser permission
+  const handlePushNotifications = async (enable: boolean) => {
+    if (!enable) {
+      updateSetting("pushNotifications", false);
+      toast.info("Push notifications disabled");
+      return;
+    }
+
+    if (!("Notification" in window)) {
+      toast.error("Your browser does not support push notifications");
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      updateSetting("pushNotifications", true);
+      toast.success("Push notifications enabled");
+      return;
+    }
+
+    if (Notification.permission === "denied") {
+      toast.error("Notifications are blocked. Please allow them in your browser settings.");
+      return;
+    }
+
+    // Ask for permission
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      updateSetting("pushNotifications", true);
+      // Send a test notification
+      new Notification("Akaar Notifications Enabled", {
+        body: "You'll now receive updates about your orders.",
+        icon: "/logo.svg",
+      });
+      toast.success("Push notifications enabled");
+    } else {
+      toast.error("Notification permission denied");
+    }
   };
 
   const handleReset = () => {
     resetSettings();
-    setHasChanges(false);
     toast.info("Settings reset to defaults");
   };
 
-  const handleClearData = (type: string, key: string) => {
-    localStorage.removeItem(key);
-    toast.success(`${type} cleared`);
-    // Dispatch storage event for other tabs
-    window.dispatchEvent(new StorageEvent('storage', { key }));
+  const handleClearCart = () => {
+    clearCart();
+    toast.success("Cart cleared");
+  };
+
+  const handleClearWishlist = () => {
+    clearWishlist();
+    toast.success("Wishlist cleared");
+  };
+
+  const handleClearHistory = () => {
+    localStorage.removeItem("akaar-recent");
+    toast.success("Browsing history cleared");
   };
 
   const handleClearAllData = () => {
     if (confirm("This will reset ALL settings and clear all local data. Are you sure?")) {
+      clearCart();
+      clearWishlist();
       localStorage.clear();
       toast.success("All data cleared");
       setTimeout(() => window.location.reload(), 500);
@@ -77,6 +127,58 @@ export default function SettingsPage() {
         </motion.div>
 
         <div className="max-w-4xl space-y-8">
+
+          {/* ============ LIVE PREVIEW ============ */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="p-6 border border-[var(--accent)]/30 rounded-xl bg-[var(--accent)]/5"
+          >
+            <div className="flex items-center gap-2 mb-5">
+              <Zap className="w-4 h-4 text-[var(--accent)]" />
+              <span className="text-sm font-mono text-[var(--accent)] uppercase tracking-wider">Live Preview</span>
+              <span className="text-xs text-[var(--text-muted)] ml-1">— changes appear here instantly</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Currency</span>
+                </div>
+                <p className="font-mono font-bold text-[var(--accent)] text-lg">{formatPrice(12499)}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{currencies[settings.currency].name}</p>
+              </div>
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Ruler className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Units</span>
+                </div>
+                <p className="font-mono font-bold text-[var(--accent)] text-lg">{formatDimension(25.4)}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{settings.units === "metric" ? "Metric system" : "Imperial system"}</p>
+              </div>
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Languages className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Language</span>
+                </div>
+                <p className="font-mono font-bold text-[var(--accent)] text-lg capitalize">{settings.language.toUpperCase()}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Nav labels updated</p>
+              </div>
+              <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Palette className="w-4 h-4 text-[var(--text-muted)]" />
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Theme</span>
+                </div>
+                <div className="flex gap-1 mb-1">
+                  <div className="w-5 h-5 rounded border border-[var(--border)]" style={{ background: theme.colors.bgPrimary }} />
+                  <div className="w-5 h-5 rounded border border-[var(--border)]" style={{ background: theme.colors.accent }} />
+                  <div className="w-5 h-5 rounded border border-[var(--border)]" style={{ background: theme.colors.accentSecondary }} />
+                </div>
+                <p className="text-xs text-[var(--text-muted)]">{theme.name}</p>
+              </div>
+            </div>
+          </motion.div>
 
           {/* ============ THEME ============ */}
           <SettingsSection
@@ -235,6 +337,12 @@ export default function SettingsPage() {
             delay={0.2}
           >
             <div className="space-y-4">
+              {!session && (
+                <div className="flex items-start gap-3 p-3 border border-[var(--accent)]/20 rounded-lg bg-[var(--accent)]/5 text-sm text-[var(--text-secondary)]">
+                  <Info className="w-4 h-4 text-[var(--accent)] mt-0.5 flex-shrink-0" />
+                  <span>Email preferences are saved locally. Sign in to sync them with your account.</span>
+                </div>
+              )}
               <ToggleSetting
                 icon={Mail}
                 title="Order Updates"
@@ -259,9 +367,9 @@ export default function SettingsPage() {
               <ToggleSetting
                 icon={Smartphone}
                 title="Push Notifications"
-                description="Browser notifications for important updates"
+                description="Browser notifications for important order updates"
                 checked={settings.pushNotifications}
-                onChange={(v) => handleUpdateSetting("pushNotifications", v)}
+                onChange={handlePushNotifications}
               />
             </div>
           </SettingsSection>
@@ -353,13 +461,22 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   {([
-                    { value: "essential", label: "Essential Only", desc: "Required for site functionality" },
-                    { value: "functional", label: "Functional", desc: "Essential + preferences & analytics" },
-                    { value: "all", label: "All Cookies", desc: "Include marketing and personalization" },
+                    { value: "essential", label: "Essential Only", desc: "Required for site functionality only", gatesAnalytics: true, gatesAds: true },
+                    { value: "functional", label: "Functional", desc: "Essential + preferences & anonymous analytics", gatesAnalytics: false, gatesAds: true },
+                    { value: "all", label: "All Cookies", desc: "Include marketing and personalization", gatesAnalytics: false, gatesAds: false },
                   ] as const).map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => handleUpdateSetting("cookies", option.value)}
+                      onClick={() => {
+                        handleUpdateSetting("cookies", option.value);
+                        // Enforce analytics gating based on cookie level
+                        if (option.gatesAnalytics) {
+                          updateSetting("analytics", false);
+                          updateSetting("personalizedAds", false);
+                        } else if (option.gatesAds) {
+                          updateSetting("personalizedAds", false);
+                        }
+                      }}
                       className={`w-full p-4 border rounded-lg transition-all text-left ${
                         settings.cookies === option.value
                           ? "border-[var(--accent)] bg-[var(--accent)]/10"
@@ -392,21 +509,21 @@ export default function SettingsPage() {
           >
             <div className="space-y-4">
               <button
-                onClick={() => handleClearData("Cart data", "akaar-cart")}
+                onClick={handleClearCart}
                 className="w-full p-4 border border-[var(--border)] rounded-lg hover:border-red-500/50 hover:bg-red-500/5 transition-all text-left"
               >
-                <p className="font-medium">Clear Cart Data</p>
+                <p className="font-medium">Clear Cart</p>
                 <p className="text-sm text-[var(--text-muted)]">Remove all items from your cart</p>
               </button>
               <button
-                onClick={() => handleClearData("Wishlist data", "akaar-wishlist")}
+                onClick={handleClearWishlist}
                 className="w-full p-4 border border-[var(--border)] rounded-lg hover:border-red-500/50 hover:bg-red-500/5 transition-all text-left"
               >
                 <p className="font-medium">Clear Wishlist</p>
                 <p className="text-sm text-[var(--text-muted)]">Remove all saved items</p>
               </button>
               <button
-                onClick={() => handleClearData("Browsing history", "akaar-recent")}
+                onClick={handleClearHistory}
                 className="w-full p-4 border border-[var(--border)] rounded-lg hover:border-red-500/50 hover:bg-red-500/5 transition-all text-left"
               >
                 <p className="font-medium">Clear Browsing History</p>

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useState, useRef } from "react";
 import {
   Upload, FileText, X, CheckCircle, AlertCircle,
-  Cpu, Layers, Zap, Clock, ArrowRight, Activity, Box
+  Cpu, Layers, Zap, Clock, ArrowRight, Activity, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useGeometry } from "@/hooks/useGeometry";
@@ -35,7 +35,7 @@ interface UploadedFile {
 
 export default function QuotePage() {
   const { analyzeModel, analysis, isAnalyzing, resetGeometry } = useGeometry();
-  const { formatPrice, formatDimension } = useSettings();
+  const { formatPrice, formatDimension, t } = useSettings();
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedService, setSelectedService] = useState("");
   const [selectedMaterial, setSelectedMaterial] = useState("");
@@ -47,6 +47,7 @@ export default function QuotePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [referenceNumber] = useState(() => `QR-${Math.random().toString(36).substr(2, 8).toUpperCase()}`);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -139,7 +140,7 @@ export default function QuotePage() {
             <div className="p-6 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] mb-8">
               <p className="text-sm text-[var(--text-muted)] mb-2">Reference Number</p>
               <p className="text-2xl font-mono text-[var(--accent)]">
-                QR-{Math.random().toString(36).substr(2, 8).toUpperCase()}
+                {referenceNumber}
               </p>
             </div>
             <Button variant="primary" onClick={() => setIsSubmitted(false)}>
@@ -237,6 +238,9 @@ export default function QuotePage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {file.status === "uploading" && (
+                            <Loader2 className="w-5 h-5 text-[var(--accent)] animate-spin" />
+                          )}
                           {file.status === "success" && (
                             <CheckCircle className="w-5 h-5 text-green-500" />
                           )}
@@ -394,9 +398,16 @@ export default function QuotePage() {
                 <div className="mt-8 pt-6 border-t border-[var(--border)]">
                   <h3 className="font-medium mb-4">Quote Summary</h3>
                   
+                  {files.length === 0 && !isAnalyzing && !analysis && (
+                    <div className="py-6 text-center border border-dashed border-[var(--border)] rounded-lg mb-4">
+                      <Upload className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
+                      <p className="text-xs text-[var(--text-muted)]">Upload a CAD file to see instant pricing</p>
+                    </div>
+                  )}
+
                   {isAnalyzing ? (
                     <div className="flex items-center gap-3 py-4 text-[var(--text-muted)]">
-                      <Activity className="w-5 h-5 animate-pulse" />
+                      <Loader2 className="w-5 h-5 animate-spin text-[var(--accent)]" />
                       <span className="text-sm font-mono">Analyzing geometry...</span>
                     </div>
                   ) : analysis ? (
@@ -457,10 +468,13 @@ export default function QuotePage() {
                   disabled={isSubmitting || files.length === 0}
                 >
                   {isSubmitting ? (
-                    "Submitting..."
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      {t("quote.submitting")}
+                    </>
                   ) : (
                     <>
-                      Submit Quote Request
+                      {t("quote.submit")}
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </>
                   )}

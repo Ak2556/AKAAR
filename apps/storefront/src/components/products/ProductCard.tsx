@@ -62,10 +62,32 @@ export function ProductCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:border-[var(--accent)] transition-all">
-                <span className="text-[var(--accent)]/50 font-mono text-sm">3D</span>
-              </div>
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[var(--bg-tertiary)] to-[var(--bg-secondary)]">
+              {/* Outer rotating ring */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                className="absolute w-28 h-28 border border-[var(--accent)]/15 rounded-xl"
+              />
+              {/* Inner counter-rotating ring */}
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                className="absolute w-16 h-16 border border-[var(--accent)]/25 rounded-lg group-hover:border-[var(--accent)]/60 transition-colors duration-300"
+              />
+              {/* Center label */}
+              <motion.span
+                animate={{ opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 2.5, repeat: Infinity }}
+                className="relative font-mono text-xs text-[var(--accent)]/60 group-hover:text-[var(--accent)] transition-colors duration-300"
+              >
+                3D
+              </motion.span>
+              {/* Corner dots */}
+              <div className="absolute top-4 left-4 w-1 h-1 bg-[var(--accent)]/20 rounded-full group-hover:bg-[var(--accent)]/60 transition-colors" />
+              <div className="absolute top-4 right-4 w-1 h-1 bg-[var(--accent)]/20 rounded-full group-hover:bg-[var(--accent)]/60 transition-colors" />
+              <div className="absolute bottom-4 left-4 w-1 h-1 bg-[var(--accent)]/20 rounded-full group-hover:bg-[var(--accent)]/60 transition-colors" />
+              <div className="absolute bottom-4 right-4 w-1 h-1 bg-[var(--accent)]/20 rounded-full group-hover:bg-[var(--accent)]/60 transition-colors" />
             </div>
           )}
 

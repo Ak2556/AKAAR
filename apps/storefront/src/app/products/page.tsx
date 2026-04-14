@@ -40,7 +40,7 @@ const materials = [
 ];
 
 export default function ProductsPage() {
-  const { settings } = useSettings();
+  const { settings, t } = useSettings();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">(settings.defaultView);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -57,7 +57,7 @@ export default function ProductsPage() {
     setViewMode(settings.defaultView);
   }, [settings.defaultView]);
 
-  // Filter products based on search and filters
+  // Filter and sort products
   const filteredProducts = mockProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -70,9 +70,18 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "price-low": return a.price - b.price;
+      case "price-high": return b.price - a.price;
+      case "name": return a.name.localeCompare(b.name);
+      default: return 0;
+    }
+  });
+
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / settings.productsPerPage);
-  const paginatedProducts = filteredProducts.slice(
+  const totalPages = Math.ceil(sortedProducts.length / settings.productsPerPage);
+  const paginatedProducts = sortedProducts.slice(
     (currentPage - 1) * settings.productsPerPage,
     currentPage * settings.productsPerPage
   );
@@ -80,7 +89,7 @@ export default function ProductsPage() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filters, settings.productsPerPage]);
+  }, [searchQuery, filters, sortBy, settings.productsPerPage]);
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -95,11 +104,10 @@ export default function ProductsPage() {
               Catalog
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mt-4">
-              Our <span className="gradient-text">Products</span>
+              <span className="gradient-text">{t("products.title")}</span>
             </h1>
             <p className="text-[var(--text-secondary)] mt-4 max-w-2xl">
-              Browse our collection of precision-manufactured parts and components.
-              Each product is engineered for excellence.
+              {t("products.subtitle") || "Browse our collection of precision-manufactured parts and components."}
             </p>
           </motion.div>
         </div>
@@ -127,7 +135,7 @@ export default function ProductsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={t("products.search")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] text-sm"
@@ -192,7 +200,7 @@ export default function ProductsPage() {
 
             {/* Results count */}
             <p className="text-sm text-[var(--text-muted)] mb-6">
-              Showing {paginatedProducts.length} of {filteredProducts.length} products
+              Showing {paginatedProducts.length} of {sortedProducts.length} products
               {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
             </p>
 
