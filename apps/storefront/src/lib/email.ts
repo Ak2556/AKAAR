@@ -233,7 +233,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
     <h3>What's Next?</h3>
     <ul>
       <li>Browse our <a href="${process.env.NEXT_PUBLIC_APP_URL}/products">product catalog</a></li>
-      <li>Get an <a href="${process.env.NEXT_PUBLIC_APP_URL}/quote">instant quote</a> for your project</li>
+      <li>Request a <a href="${process.env.NEXT_PUBLIC_APP_URL}/quote">reviewed quote</a> for your project</li>
       <li>Learn about our <a href="${process.env.NEXT_PUBLIC_APP_URL}/services">services</a></li>
     </ul>
 

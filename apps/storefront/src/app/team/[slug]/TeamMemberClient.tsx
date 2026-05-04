@@ -54,7 +54,7 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
             className="absolute top-24 left-6"
           >
             <Link
-              href="/about"
+              href="/team"
               className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-primary)]/50 backdrop-blur-sm border border-[var(--border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)]/50 transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -426,7 +426,7 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                   Get a Quote
                 </Link>
                 <Link
-                  href="/about"
+                  href="/team"
                   className="inline-flex items-center gap-2 px-8 py-4 border border-[var(--border)] text-[var(--text-primary)] font-semibold rounded-xl hover:border-[var(--accent)]/50 hover:text-[var(--accent)] transition-all"
                 >
                   Meet the Team

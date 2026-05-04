@@ -1,12 +1,48 @@
 import { prisma } from "@akaar/db";
 import { NextResponse } from "next/server";
+import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
+import {
+  getLocalProductBySlug,
+  listLocalRelatedProducts,
+} from "@/lib/local-data-store";
+import { isLocalDataMode } from "@/lib/local-runtime";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  if (!getRuntimeCapabilities().catalogAvailable) {
+    return NextResponse.json(
+      { error: "Catalog unavailable", catalogAvailable: false },
+      { status: 503 }
+    );
+  }
+
   try {
     const { slug } = await params;
+
+    if (isLocalDataMode()) {
+      const product = await getLocalProductBySlug(slug);
+
+      if (!product) {
+        return NextResponse.json(
+          { error: "Product not found" },
+          { status: 404 }
+        );
+      }
+
+      const relatedProducts = await listLocalRelatedProducts(
+        product.id,
+        product.category,
+        4
+      );
+
+      return NextResponse.json({
+        product,
+        relatedProducts,
+        catalogAvailable: true,
+      });
+    }
 
     const product = await prisma.product.findUnique({
       where: {
@@ -41,12 +77,13 @@ export async function GET(
     return NextResponse.json({
       product,
       relatedProducts,
+      catalogAvailable: true,
     });
   } catch (error) {
     console.error("Error fetching product:", error);
     return NextResponse.json(
-      { error: "Failed to fetch product" },
-      { status: 500 }
+      { error: "Catalog unavailable", catalogAvailable: false },
+      { status: 503 }
     );
   }
 }

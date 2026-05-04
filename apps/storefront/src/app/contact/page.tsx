@@ -4,46 +4,47 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Mail, Phone, MapPin, Clock, Send,
-  MessageSquare, Headphones, Building2, CheckCircle
+  Building2,
+  CheckCircle,
+  Clock,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  Send,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { FieldBlock, MetricTile, SummaryRow } from "@/components/ui/storefront-primitives";
 
 const contactMethods = [
   {
     icon: Mail,
-    title: "Email Us",
-    description: "Get a response within 24 hours",
+    title: "Email",
+    description: "Project briefs, quote follow-up, and product questions",
     value: "akaar3d.printing@gmail.com",
     href: "mailto:akaar3d.printing@gmail.com",
   },
   {
     icon: Phone,
-    title: "Call Us",
-    description: "Mon-Sat from 10am to 7pm",
+    title: "Phone",
+    description: "Best for urgent order coordination during business hours",
     value: "+91 7300431301",
     href: "tel:+917300431301",
   },
   {
     icon: MapPin,
-    title: "Visit Us",
-    description: "Come see our facility",
-    value: "9-B, 69, Block-B, Ring Road, Boorthal, Jaipur, Rajasthan 303012",
+    title: "Studio",
+    description: "Jaipur, Rajasthan",
+    value: "9-B, 69, Block-B, Ring Road, Boorthal, Jaipur 303012",
     href: "https://maps.google.com/?q=Boorthal+Jaipur+Rajasthan+303012",
-  },
-  {
-    icon: Clock,
-    title: "Business Hours",
-    description: "When we're available",
-    value: "Mon-Sat: 10AM-7PM IST",
-    href: "#",
   },
 ];
 
 const departments = [
-  { id: "sales", label: "Sales & Quotes", icon: Building2 },
-  { id: "support", label: "Technical Support", icon: Headphones },
-  { id: "general", label: "General Inquiry", icon: MessageSquare },
+  { id: "sales", label: "Sales & Quotes", detail: "Custom builds, pricing, timelines" },
+  { id: "support", label: "Technical Support", detail: "File prep, print constraints, material guidance" },
+  { id: "general", label: "General Inquiry", detail: "Partnerships, media, or everything else" },
 ];
 
 export default function ContactPage() {
@@ -59,43 +60,36 @@ export default function ContactPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsSubmitting(true);
-
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
     setIsSubmitting(false);
     setIsSubmitted(true);
   };
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen pt-32 pb-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="max-w-2xl mx-auto text-center"
-          >
-            <div className="w-20 h-20 mx-auto mb-8 border border-[var(--accent)] rounded-full flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-[var(--accent)]" />
+      <div className="min-h-screen px-4 pb-20 pt-28 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="luxury-card rounded-[2.2rem] px-8 py-12 text-center">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
+              <CheckCircle className="h-10 w-10 text-[var(--accent)]" />
             </div>
-            <h1 className="text-4xl font-bold mb-4">Message Sent</h1>
-            <p className="text-[var(--text-secondary)] mb-8">
-              Thank you for reaching out. We've received your message and will
-              get back to you within 24 hours.
+            <span className="luxury-kicker mt-8 block">Message received</span>
+            <h1 className="display-font mt-4 text-4xl text-[var(--text-primary)]">We&apos;ll reply with the right lane owner.</h1>
+            <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
+              Your note is in. The team will route it to the right person for quotes, technical review, or studio operations and respond within one business day.
             </p>
-            <Button variant="primary" onClick={() => setIsSubmitted(false)}>
+            <Button variant="primary" className="mt-8" onClick={() => setIsSubmitted(false)}>
               Send Another Message
             </Button>
           </motion.div>
@@ -105,254 +99,211 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
-      {/* Header */}
-      <div className="border-b border-[var(--border)] bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-              We Give AKAAR to Ideas
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-              Let's <span className="gradient-text">Connect</span>
-            </h1>
-            <p className="text-lg text-[var(--text-secondary)]">
-              Have a question or ready to give your ideas AKAAR? We're here to help.
-              Reach out and let's discuss your next project.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6 py-16">
-        {/* Contact Methods */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
-        >
-          {contactMethods.map((method, index) => (
-            <a
-              key={method.title}
-              href={method.href}
-              className="group p-6 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] hover:border-[var(--accent)]/50 transition-all"
-            >
-              <div className="w-12 h-12 mb-4 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)]/10 transition-all">
-                <method.icon className="w-6 h-6 text-[var(--accent)]" />
-              </div>
-              <h3 className="font-semibold mb-1">{method.title}</h3>
-              <p className="text-sm text-[var(--text-muted)] mb-2">
-                {method.description}
+    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+      <div className="mx-auto max-w-7xl space-y-10">
+        <section className="luxury-panel relative overflow-hidden rounded-[2.4rem] px-6 py-8 sm:px-8 lg:px-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(214,178,114,0.12),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(125,211,199,0.08),transparent_26%)]" />
+          <div className="relative z-10 grid gap-8 xl:grid-cols-[1.02fr_0.98fr]">
+            <div className="editorial-stage-copy space-y-5">
+              <span className="luxury-kicker">Contact AKAAR</span>
+              <h1 className="display-font text-[clamp(2.8rem,4.8vw,4.8rem)] leading-[0.95] text-[var(--text-primary)]">
+                Reach the studio without falling into a generic support loop.
+              </h1>
+              <p className="max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
+                Use this when the project needs a real response, not a support maze. Whether you are requesting a quote, checking feasibility, or discussing production, the contact experience should feel as composed as the rest of the site.
               </p>
-              <p className="text-sm text-[var(--accent)]">{method.value}</p>
-            </a>
-          ))}
-        </motion.div>
+              <p className="editorial-eyebrow">Direct routing · Quote review · Technical response</p>
+            </div>
 
-        <div className="grid lg:grid-cols-5 gap-12">
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-3"
-          >
-            <div className="border border-[var(--border)] rounded-xl p-8 bg-[var(--bg-secondary)]">
-              <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Department Selection */}
-                <div>
-                  <label className="block text-sm font-medium mb-3">
-                    Department
-                  </label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {departments.map((dept) => (
-                      <button
-                        key={dept.id}
-                        type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({ ...prev, department: dept.id }))
-                        }
-                        className={`p-4 border rounded-lg text-center transition-all ${
-                          formData.department === dept.id
-                            ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                            : "border-[var(--border)] hover:border-[var(--accent)]/50"
-                        }`}
-                      >
-                        <dept.icon
-                          className={`w-5 h-5 mx-auto mb-2 ${
-                            formData.department === dept.id
-                              ? "text-[var(--accent)]"
-                              : "text-[var(--text-secondary)]"
-                          }`}
-                        />
-                        <span className="text-sm">{dept.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Company
-                    </label>
-                    <input
-                      type="text"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Subject *
-                    </label>
-                    <input
-                      type="text"
-                      name="subject"
-                      required
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Message *
-                  </label>
-                  <textarea
-                    name="message"
-                    required
-                    rows={6}
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Tell us about your project or question..."
-                    className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none"
+            <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="luxury-stage relative min-h-[320px] overflow-hidden rounded-[2rem] border border-white/8 p-5">
+                <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">Studio context</div>
+                <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
+                  <img
+                    src="/showcase/studio/workspace-setup.png"
+                    alt="AKAAR studio workspace"
+                    className="hero-image-shadow"
                   />
                 </div>
-
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="w-full sm:w-auto"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
-              </form>
+              </div>
+              <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] lg:self-end">
+                <MetricTile label="Reply window" value="Within 24 hours" />
+                <MetricTile label="Handled by" value="Sales, support, or ops" />
+                <MetricTile label="Best for" value="Quote and product coordination" />
+              </div>
             </div>
-          </motion.div>
+          </div>
+        </section>
 
-          {/* Sidebar Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            {/* Map Placeholder */}
-            <div className="aspect-video border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] overflow-hidden relative">
-              <div className="absolute inset-0 grid-overlay opacity-30" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="w-12 h-12 text-[var(--accent)] mx-auto mb-4" />
-                  <p className="text-[var(--text-secondary)]">
-                    Interactive map coming soon
-                  </p>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {contactMethods.map((method, index) => (
+            <motion.a
+              key={method.title}
+              href={method.href}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.06 }}
+              className="luxury-card rounded-[1.9rem] p-6"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
+                <method.icon className="h-5 w-5 text-[var(--accent)]" />
+              </div>
+              <h2 className="display-font mt-5 text-3xl text-[var(--text-primary)]">{method.title}</h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{method.description}</p>
+              <p className="mt-5 text-sm text-[var(--text-primary)]">{method.value}</p>
+            </motion.a>
+          ))}
+        </div>
+
+        <div className="grid gap-8 xl:grid-cols-[1.04fr_0.96fr]">
+          <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="luxury-card rounded-[2rem] p-6 sm:p-7">
+            <span className="luxury-kicker">Send a note</span>
+            <h2 className="display-font mt-3 text-4xl text-[var(--text-primary)]">Choose the right conversation lane.</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
+              Keep it direct. Select the lane, give the context, and the right person on the team can pick it up without extra back-and-forth.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+              <div>
+                <span className="luxury-label">Department</span>
+                <div className="mt-3 grid gap-3 md:grid-cols-3">
+                  {departments.map((department) => (
+                    <button
+                      key={department.id}
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, department: department.id }))}
+                      className={`rounded-[1.35rem] border px-4 py-4 text-left transition-all ${
+                        formData.department === department.id
+                          ? "border-[var(--accent)] bg-[var(--surface-highlight)]"
+                          : "border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--border-accent)]"
+                      }`}
+                    >
+                      <p className="text-sm uppercase tracking-[0.12em] text-[var(--text-primary)]">{department.label}</p>
+                      <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">{department.detail}</p>
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* FAQ Quick Links */}
-            <div className="border border-[var(--border)] rounded-xl p-6 bg-[var(--bg-secondary)]">
-              <h3 className="font-semibold mb-4">Frequently Asked</h3>
-              <div className="space-y-3">
-                <Link
-                  href="/faq"
-                  className="block p-3 border border-[var(--border)] rounded-lg hover:border-[var(--accent)]/50 transition-colors"
-                >
-                  <p className="text-sm">What file formats do you accept?</p>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FieldBlock label="Name *">
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="luxury-input w-full rounded-full px-5 py-3"
+                  />
+                </FieldBlock>
+                <FieldBlock label="Email *">
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="luxury-input w-full rounded-full px-5 py-3"
+                  />
+                </FieldBlock>
+                <FieldBlock label="Company">
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className="luxury-input w-full rounded-full px-5 py-3"
+                  />
+                </FieldBlock>
+                <FieldBlock label="Subject *">
+                  <input
+                    type="text"
+                    name="subject"
+                    required
+                    value={formData.subject}
+                    onChange={handleChange}
+                    className="luxury-input w-full rounded-full px-5 py-3"
+                  />
+                </FieldBlock>
+                <div className="sm:col-span-2">
+                  <FieldBlock label="Message *" hint="Add product context, quantity, deadline, or a quick note about what is blocking the project.">
+                    <textarea
+                      name="message"
+                      required
+                      rows={6}
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Tell us what you are building and what you need from the team."
+                      className="luxury-input min-h-[180px] w-full px-5 py-4"
+                    />
+                  </FieldBlock>
+                </div>
+              </div>
+
+              <Button type="submit" size="lg" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Message
+                  </>
+                )}
+              </Button>
+            </form>
+          </motion.section>
+
+          <div className="space-y-6">
+            <section className="luxury-card overflow-hidden rounded-[2rem]">
+              <div className="luxury-stage relative min-h-[260px] overflow-hidden p-5">
+                <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">Studio objects</div>
+                <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
+                  <img
+                    src="/showcase/studio/planter-lineup.png"
+                    alt="AKAAR planter lineup"
+                    className="hero-image-shadow"
+                  />
+                </div>
+              </div>
+              <div className="border-t border-[var(--border)] px-6 py-6">
+                <span className="luxury-kicker">Studio routing</span>
+                <h3 className="display-font mt-3 text-3xl text-[var(--text-primary)]">Where the conversations go</h3>
+                <div className="mt-5 grid gap-px overflow-hidden rounded-[1.4rem] border border-[var(--border)] bg-[var(--border)]">
+                  <SummaryRow label="Sales & quotes" value="Product fit, pricing, timeline" />
+                  <SummaryRow label="Technical support" value="Geometry, material, manufacturability" />
+                  <SummaryRow label="Operations" value="Order coordination and delivery status" />
+                </div>
+              </div>
+            </section>
+
+            <section className="luxury-card rounded-[2rem] p-6">
+              <span className="luxury-kicker">Quick links</span>
+              <div className="mt-5 space-y-3">
+                <Link href="/faq" className="flex items-center justify-between rounded-[1.3rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-4 text-sm text-[var(--text-primary)] hover:border-[var(--border-accent)]">
+                  <span>Accepted file formats and build prep</span>
+                  <MessageSquare className="h-4 w-4 text-[var(--accent)]" />
                 </Link>
-                <Link
-                  href="/faq"
-                  className="block p-3 border border-[var(--border)] rounded-lg hover:border-[var(--accent)]/50 transition-colors"
-                >
-                  <p className="text-sm">How long does production take?</p>
-                </Link>
-                <Link
-                  href="/faq"
-                  className="block p-3 border border-[var(--border)] rounded-lg hover:border-[var(--accent)]/50 transition-colors"
-                >
-                  <p className="text-sm">Do you offer rush orders?</p>
+                <Link href="/quote" className="flex items-center justify-between rounded-[1.3rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-4 text-sm text-[var(--text-primary)] hover:border-[var(--border-accent)]">
+                  <span>Start a reviewed quote request</span>
+                  <Sparkles className="h-4 w-4 text-[var(--accent)]" />
                 </Link>
               </div>
-            </div>
+            </section>
 
-            {/* Social Links */}
-            <div className="border border-[var(--border)] rounded-xl p-6 bg-[var(--bg-secondary)]">
-              <h3 className="font-semibold mb-4">Follow Us</h3>
-              <div className="flex gap-4">
-                {["Twitter", "LinkedIn", "Instagram", "YouTube"].map((social) => (
-                  <a
-                    key={social}
-                    href="#"
-                    className="w-10 h-10 border border-[var(--border)] rounded-lg flex items-center justify-center hover:border-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all"
-                  >
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {social[0]}
-                    </span>
-                  </a>
-                ))}
+            <section className="luxury-card rounded-[2rem] p-6">
+              <span className="luxury-kicker">Business hours</span>
+              <div className="mt-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-[var(--accent)]" />
+                  <p className="text-sm text-[var(--text-primary)]">Mon-Sat, 10:00 AM to 7:00 PM IST</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Building2 className="h-5 w-5 text-[var(--accent)]" />
+                  <p className="text-sm leading-7 text-[var(--text-secondary)]">Jaipur-based studio serving custom builds and product orders across India.</p>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </section>
+          </div>
         </div>
       </div>
     </div>

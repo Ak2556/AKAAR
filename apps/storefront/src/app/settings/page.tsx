@@ -195,20 +195,6 @@ export default function SettingsPage() {
                         </div>
                       )}
 
-                      {/* Nothing theme dot pattern */}
-                      {themeStyle.id === 'nothing' && (
-                        <>
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              backgroundImage: `radial-gradient(circle, ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} 1px, transparent 1px)`,
-                              backgroundSize: '12px 12px'
-                            }}
-                          />
-                          <div className="absolute top-3 left-3 w-2 h-2 rounded-full" style={{ background: '#d71921' }} />
-                        </>
-                      )}
-
                       {/* Light/Dark indicator badge */}
                       <div
                         className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-medium uppercase"
@@ -234,12 +220,6 @@ export default function SettingsPage() {
                         <h3 className="font-semibold" style={{ color: previewTheme.colors.textPrimary }}>
                           {themeStyle.name}
                         </h3>
-                        {themeStyle.id === 'nothing' && (
-                          <span className="flex items-center gap-1 text-[10px] font-medium uppercase" style={{ color: '#d71921' }}>
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#d71921' }} />
-                            New
-                          </span>
-                        )}
                       </div>
                       <p className="text-xs" style={{ color: previewTheme.colors.textMuted }}>
                         {themeStyle.description}
@@ -268,7 +248,7 @@ export default function SettingsPage() {
                           />
                           <div
                             className="w-4 h-4 rounded-full border"
-                            style={{ background: themeStyle.id === 'nothing' ? '#d71921' : themeStyle.accents.accentSecondary, borderColor: previewTheme.colors.border }}
+                            style={{ background: themeStyle.accents.accentSecondary, borderColor: previewTheme.colors.border }}
                             title="Secondary accent"
                           />
                         </div>
@@ -287,12 +267,10 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <p className="font-medium text-sm">
-                    {themeStyleList.find(t => t.id === style)?.name} · {isDark ? 'Dark' : 'Light'} Mode
+                    {themeStyleList.find(t => t.id === style)?.name} {isDark ? 'Dark' : 'Light'} Mode
                   </p>
                   <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {themeStyleList.find(t => t.id === style)?.effects.enableGlow ? 'Glow effects enabled' : 'Minimal effects'}
-                    {' · '}
-                    {themeStyleList.find(t => t.id === style)?.effects.enableGrid ? 'Grid overlay enabled' : 'No grid overlay'}
+                    {themeStyleList.find(t => t.id === style)?.description}
                   </p>
                 </div>
               </div>

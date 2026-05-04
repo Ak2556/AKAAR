@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@akaar/db";
+import {
+  deleteLocalPasswordResetToken,
+  getLocalPasswordResetToken,
+} from "@/lib/local-data-store";
+import { isLocalDataMode } from "@/lib/local-runtime";
 
 export async function GET(request: NextRequest) {
   try {
+    const localDataMode = isLocalDataMode();
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token");
 
@@ -13,9 +19,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
-    });
+    const resetToken = localDataMode
+      ? await getLocalPasswordResetToken(token)
+      : await prisma.passwordResetToken.findUnique({
+          where: { token },
+        });
 
     if (!resetToken) {
       return NextResponse.json(
@@ -24,11 +32,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (resetToken.expires < new Date()) {
+    if (new Date(resetToken.expires) < new Date()) {
       // Clean up expired token
-      await prisma.passwordResetToken.delete({
-        where: { token },
-      });
+      if (localDataMode) {
+        await deleteLocalPasswordResetToken(token);
+      } else {
+        await prisma.passwordResetToken.delete({
+          where: { token },
+        });
+      }
       return NextResponse.json(
         { valid: false, error: "Reset token has expired" },
         { status: 400 }

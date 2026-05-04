@@ -1,4 +1,6 @@
 import { prisma } from "@akaar/db";
+import { appendLocalAuditLog } from "@/lib/local-data-store";
+import { isLocalDataMode } from "@/lib/local-runtime";
 
 // Audit action types matching Prisma enum
 export type AuditAction =
@@ -45,6 +47,21 @@ interface AuditLogParams {
  */
 export async function createAuditLog(params: AuditLogParams): Promise<void> {
   try {
+    if (isLocalDataMode()) {
+      await appendLocalAuditLog({
+        userId: params.userId,
+        action: params.action,
+        entityType: params.entityType,
+        entityId: params.entityId,
+        ipAddress: params.ipAddress,
+        userAgent: params.userAgent,
+        metadata: params.metadata ?? null,
+        status: params.status,
+        errorMessage: params.errorMessage,
+      });
+      return;
+    }
+
     await prisma.auditLog.create({
       data: {
         userId: params.userId,
@@ -100,4 +117,3 @@ export function getAuditContext(request: Request): {
     userAgent: getUserAgentFromRequest(request),
   };
 }
-

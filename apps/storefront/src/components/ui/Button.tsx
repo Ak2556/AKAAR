@@ -12,31 +12,36 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", glow = false, children, ...props }, ref) => {
-    const baseStyles = "relative inline-flex items-center justify-center font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
+    const baseStyles =
+      "inline-flex items-center justify-center rounded-full font-medium tracking-[0.01em] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50";
 
     const variants = {
-      primary: "bg-[var(--accent)] text-[var(--bg-primary)] hover:bg-[var(--accent)]/90",
-      secondary: "bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--border-accent)] border border-[var(--border)]",
-      outline: "bg-transparent border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/10",
-      ghost: "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]",
+      primary:
+        "bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-[0_20px_50px_-30px_rgba(255,255,255,0.35)] hover:-translate-y-0.5 hover:shadow-[0_25px_60px_-30px_rgba(255,255,255,0.4)]",
+      secondary:
+        "luxury-card text-[var(--text-primary)] hover:-translate-y-0.5",
+      outline:
+        "border border-[var(--border-accent)] bg-transparent text-[var(--text-primary)] hover:border-[var(--accent)] hover:bg-[var(--surface-highlight)]",
+      ghost:
+        "bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]",
     };
 
     const sizes = {
-      sm: "px-4 py-2 text-sm rounded-md",
-      md: "px-6 py-3 text-base rounded-lg",
-      lg: "px-8 py-4 text-lg rounded-xl",
+      sm: "px-4 py-2.5 text-sm",
+      md: "px-6 py-3 text-sm sm:text-base",
+      lg: "px-7 py-3.5 text-base sm:px-8 sm:py-4",
     };
 
     return (
       <motion.button
         ref={ref}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ y: props.disabled ? 0 : -1 }}
+        whileTap={{ scale: props.disabled ? 1 : 0.985 }}
         className={cn(
           baseStyles,
           variants[variant],
           sizes[size],
-          glow && "animate-pulse-glow",
+          glow && "ring-1 ring-[var(--accent)]/25",
           className
         )}
         {...props}

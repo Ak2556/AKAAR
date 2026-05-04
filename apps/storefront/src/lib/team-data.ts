@@ -25,7 +25,7 @@ export const teamMembers: TeamMember[] = [
     image: "/team/akash-thakur.png",
     bio: `Akash is the visionary founder behind AKAAR 3D. What started as a simple observation—that local manufacturing was broken by friction, opacity, and inconsistency—became a mission to build something better. He assembled the team, defined the vision, and leads every aspect of the company from technology to strategy.
 
-As both the technical architect and business leader, Akash wears multiple hats. He personally designed and built the automated quoting engine, the customer-facing storefront, and the backend infrastructure that powers AKAAR's operations. His background in AI/ML and systems architecture enables him to solve complex problems at the intersection of software and manufacturing.
+As both the technical architect and business leader, Akash wears multiple hats. He personally designed and built the quote-request workflow, the customer-facing storefront, and the backend infrastructure that powers AKAAR's operations. His background in AI/ML and systems architecture enables him to solve complex problems at the intersection of software and manufacturing.
 
 Beyond code, Akash sets the company's direction, builds partnerships, and ensures every team member is aligned with the mission: to make professional 3D printing accessible to everyone. He brought together Mohit, Harish, and Tarveen—each an expert in their domain—to create a team capable of delivering on this ambitious vision.
 
@@ -118,7 +118,7 @@ export const testimonials: Testimonial[] = [
     name: "Rahul Sharma",
     company: "TechStart Innovations",
     role: "Founder & CTO",
-    quote: "AKAAR 3D transformed our prototyping workflow. What used to take weeks now takes days. Their instant quoting system is a game-changer for hardware startups like ours.",
+    quote: "AKAAR 3D transformed our prototyping workflow. What used to take weeks now takes days. Their quote review workflow is a game-changer for hardware startups like ours.",
     rating: 5,
     project: "IoT Device Housing",
   },

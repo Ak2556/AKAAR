@@ -40,13 +40,14 @@ export const quoteRequestSchema = z.object({
     .array(
       z.object({
         originalFilename: z.string(),
-        s3Key: z.string(),
+        s3Key: z.string().optional(),
         s3Bucket: z.string().optional(),
         fileSize: z.number(),
         fileType: z.string(),
+        reviewOnly: z.boolean().optional(),
       })
     )
-    .optional(),
+    .min(1, "At least one file is required"),
 });
 
 // Payment schemas

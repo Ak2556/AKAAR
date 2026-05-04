@@ -3,6 +3,8 @@ import { verifyPaymentSignature } from "@/lib/razorpay";
 import { prisma } from "@akaar/db";
 import { auth } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import { createLocalOrder } from "@/lib/local-data-store";
+import { hasRazorpayCredentials, isLocalDataMode } from "@/lib/local-runtime";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,11 +19,14 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Verify payment signature
-    const isValid = await verifyPaymentSignature(
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature
-    );
+    const useMockPayment = isLocalDataMode() && !hasRazorpayCredentials();
+    const isValid = useMockPayment
+      ? Boolean(razorpay_order_id && razorpay_payment_id)
+      : await verifyPaymentSignature(
+          razorpay_order_id,
+          razorpay_payment_id,
+          razorpay_signature
+        );
 
     if (!isValid) {
       return NextResponse.json(
@@ -34,41 +39,70 @@ export async function POST(request: NextRequest) {
     const orderNumber = `AKR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
     // Create order in database
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: session?.user?.id || null,
-        status: "CONFIRMED",
-        subtotal: orderData.subtotal,
-        shippingCost: orderData.shippingCost,
-        tax: orderData.tax,
-        total: orderData.total,
-        shippingMethod: orderData.shippingMethod,
-        shippingAddress: orderData.shippingAddress,
-        paymentMethod: "razorpay",
-        paymentStatus: "CAPTURED",
-        razorpayOrderId: razorpay_order_id,
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
-        email: orderData.email,
-        phone: orderData.phone || null,
-        notes: orderData.notes || null,
-        items: {
-          create: orderData.items.map((item: any) => ({
+    const order = isLocalDataMode()
+      ? await createLocalOrder({
+          orderNumber,
+          userId: session?.user?.id || null,
+          status: "CONFIRMED",
+          subtotal: Number(orderData.subtotal),
+          shippingCost: Number(orderData.shippingCost),
+          tax: Number(orderData.tax),
+          total: Number(orderData.total),
+          shippingMethod: orderData.shippingMethod,
+          shippingAddress: orderData.shippingAddress,
+          paymentMethod: useMockPayment ? "local-dev" : "razorpay",
+          paymentStatus: "CAPTURED",
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature,
+          email: orderData.email,
+          phone: orderData.phone || null,
+          notes: orderData.notes || null,
+          items: orderData.items.map((item: any) => ({
             productId: item.productId || null,
             name: item.name,
             slug: item.slug || null,
             material: item.material || null,
             quantity: item.quantity,
-            unitPrice: item.price,
-            totalPrice: item.price * item.quantity,
+            unitPrice: Number(item.price),
+            totalPrice: Number(item.price) * Number(item.quantity),
           })),
-        },
-      },
-      include: {
-        items: true,
-      },
-    });
+        })
+      : await prisma.order.create({
+          data: {
+            orderNumber,
+            userId: session?.user?.id || null,
+            status: "CONFIRMED",
+            subtotal: orderData.subtotal,
+            shippingCost: orderData.shippingCost,
+            tax: orderData.tax,
+            total: orderData.total,
+            shippingMethod: orderData.shippingMethod,
+            shippingAddress: orderData.shippingAddress,
+            paymentMethod: "razorpay",
+            paymentStatus: "CAPTURED",
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+            email: orderData.email,
+            phone: orderData.phone || null,
+            notes: orderData.notes || null,
+            items: {
+              create: orderData.items.map((item: any) => ({
+                productId: item.productId || null,
+                name: item.name,
+                slug: item.slug || null,
+                material: item.material || null,
+                quantity: item.quantity,
+                unitPrice: item.price,
+                totalPrice: item.price * item.quantity,
+              })),
+            },
+          },
+          include: {
+            items: true,
+          },
+        });
 
     // Send confirmation email
     try {

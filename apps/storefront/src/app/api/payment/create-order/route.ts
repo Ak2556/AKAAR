@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRazorpayOrder } from "@/lib/razorpay";
 import { auth } from "@/lib/auth";
+import { hasRazorpayCredentials, isLocalDataMode } from "@/lib/local-runtime";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +20,17 @@ export async function POST(request: NextRequest) {
     // Generate unique receipt ID
     const receipt = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+    if (isLocalDataMode() && !hasRazorpayCredentials()) {
+      return NextResponse.json({
+        orderId: `local_${receipt}`,
+        amount: Math.round(amount * 100),
+        currency: "INR",
+        receipt,
+        key: "local-dev-mode",
+        paymentMode: "mock",
+      });
+    }
+
     // Create Razorpay order
     const razorpayOrder = await createRazorpayOrder({
       amount: Math.round(amount * 100), // Convert to paise
@@ -36,7 +48,8 @@ export async function POST(request: NextRequest) {
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       receipt: razorpayOrder.receipt,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+      paymentMode: "razorpay",
     });
   } catch (error) {
     console.error("Error creating Razorpay order:", error);

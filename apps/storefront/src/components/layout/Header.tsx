@@ -3,20 +3,33 @@
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
-import { Menu, X, Box, Layers, Wrench, ShoppingCart, Search, Heart, User, LogOut, Package, Settings, Sun, Moon } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import {
+  Menu,
+  X,
+  Search,
+  Heart,
+  ShoppingCart,
+  User,
+  LogOut,
+  Package,
+  Settings,
+  Sun,
+  Moon,
+  ShieldCheck,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { SearchModal } from "@/components/search/SearchModal";
-import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "@/hooks/useTheme";
+import { signOut } from "next-auth/react";
+import { useAuthState } from "@/components/providers/AuthProvider";
+import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
 
 const navItems = [
-  { href: "/products", label: "Products", icon: Box },
-  { href: "/services", label: "Services", icon: Wrench },
-  { href: "/about", label: "About", icon: Layers },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/products", label: "Collection" },
+  { href: "/services", label: "Capabilities" },
+  { href: "/about", label: "Studio" },
 ];
 
 export function Header() {
@@ -26,25 +39,26 @@ export function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { openCart, totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
-  const { data: session, status } = useSession();
+  const { session, status, enabled: authEnabled } = useAuthState();
+  const { authAvailable } = useRuntimeCapabilities();
   const { isDark, toggleMode } = useTheme();
+  const isAdmin = session?.user?.role === "ADMIN";
 
-  // Close user menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Keyboard shortcut for search (Cmd/Ctrl + K)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
         setIsSearchOpen(true);
       }
     };
@@ -56,281 +70,294 @@ export function Header() {
   return (
     <>
       <motion.header
-        initial={{ y: -100 }}
+        initial={{ y: -80 }}
         animate={{ y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 glass"
+        className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6"
       >
-        <nav className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Logo size="md" showTagline={false} />
+        <nav className="glass mx-auto max-w-7xl rounded-[1.75rem] px-5 py-4 sm:px-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-8">
+              <Logo size="md" showTagline={false} />
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="font-medium">{item.label}</span>
-                  <span className="h-px w-0 bg-[var(--accent)] group-hover:w-full transition-all duration-300" />
-                </Link>
-              ))}
+              <div className="hidden lg:flex items-center gap-7">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm font-medium tracking-[0.08em] text-[var(--text-secondary)] uppercase transition-colors hover:text-[var(--text-primary)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             </div>
 
-            {/* Actions */}
             <div className="hidden md:flex items-center gap-2">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleMode}
-                className="p-2 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-
-              {/* Search Button */}
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg hover:border-[var(--accent)]/50 transition-all"
+                className="luxury-pill flex items-center gap-2 rounded-full px-4 py-2 text-sm hover:text-[var(--text-primary)]"
               >
-                <Search className="w-4 h-4" />
-                <span className="text-sm">Search</span>
-                <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-xs bg-[var(--bg-tertiary)] rounded">
-                  ⌘K
+                <Search className="h-4 w-4" />
+                Search
+                <kbd className="hidden rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)] lg:inline-flex">
+                  Cmd K
                 </kbd>
               </button>
 
-              {/* Wishlist */}
-              <Link
-                href="/wishlist"
-                className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-              >
-                <Heart className="w-5 h-5" />
-                {wishlistItems > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                    {wishlistItems > 9 ? "9+" : wishlistItems}
-                  </span>
-                )}
-              </Link>
-
-              {/* Cart */}
               <button
-                onClick={openCart}
-                className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+                onClick={toggleMode}
+                className="luxury-pill rounded-full p-2.5 hover:text-[var(--text-primary)]"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >
-                <ShoppingCart className="w-5 h-5" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--accent)] text-[var(--bg-primary)] text-xs font-bold rounded-full flex items-center justify-center">
-                    {totalItems > 9 ? "9+" : totalItems}
-                  </span>
-                )}
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
 
-              {/* User Menu */}
-              {status === "loading" ? (
-                <div className="w-8 h-8 rounded-full bg-[var(--bg-tertiary)] animate-pulse" />
+              <Link
+                href="/wishlist"
+                className="relative luxury-pill rounded-full p-2.5 hover:text-[var(--text-primary)]"
+              >
+                <Heart className="h-4 w-4" />
+                {wishlistItems > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--text-primary)] px-1 text-[10px] font-semibold text-[var(--bg-primary)]">
+                    {wishlistItems > 9 ? "9+" : wishlistItems}
+                  </span>
+                ) : null}
+              </Link>
+
+              <button
+                onClick={openCart}
+                className="relative luxury-pill rounded-full p-2.5 hover:text-[var(--text-primary)]"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {totalItems > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-semibold text-[var(--bg-primary)]">
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </span>
+                ) : null}
+              </button>
+
+              {authEnabled && status === "loading" ? (
+                <div className="h-10 w-10 animate-pulse rounded-full bg-[var(--bg-tertiary)]" />
               ) : session ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-2 p-1 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors"
+                    onClick={() => setIsUserMenuOpen((value) => !value)}
+                    className="luxury-pill flex items-center gap-3 rounded-full pl-2 pr-4 py-2 hover:text-[var(--text-primary)]"
                   >
                     {session.user?.image ? (
                       <img
                         src={session.user.image}
                         alt={session.user.name || "User"}
-                        className="w-8 h-8 rounded-full border border-[var(--border)]"
+                        className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-[var(--bg-primary)] font-semibold text-sm">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--text-primary)] text-sm font-semibold text-[var(--bg-primary)]">
                         {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || "U"}
                       </div>
                     )}
+                    <span className="hidden text-sm text-[var(--text-secondary)] xl:inline">
+                      {session.user?.name || "Account"}
+                    </span>
                   </button>
 
                   <AnimatePresence>
-                    {isUserMenuOpen && (
+                    {isUserMenuOpen ? (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 mt-2 w-56 glass rounded-lg shadow-xl border border-[var(--border)] overflow-hidden"
+                        exit={{ opacity: 0, y: 12 }}
+                        className="glass absolute right-0 mt-3 w-64 overflow-hidden rounded-[1.5rem]"
                       >
-                        <div className="p-3 border-b border-[var(--border)]">
-                          <p className="font-medium truncate">{session.user?.name || "User"}</p>
-                          <p className="text-sm text-[var(--text-tertiary)] truncate">{session.user?.email}</p>
+                        <div className="border-b border-[var(--border)] px-5 py-4">
+                          <p className="font-medium text-[var(--text-primary)]">{session.user?.name || "User"}</p>
+                          <p className="mt-1 text-sm text-[var(--text-muted)]">{session.user?.email}</p>
                         </div>
                         <div className="p-2">
-                          <Link
-                            href="/account"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
-                          >
-                            <User className="w-4 h-4" />
-                            My Account
-                          </Link>
-                          <Link
-                            href="/account/orders"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
-                          >
-                            <Package className="w-4 h-4" />
-                            Orders
-                          </Link>
-                          <Link
-                            href="/settings"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
-                          >
-                            <Settings className="w-4 h-4" />
-                            Settings
-                          </Link>
+                          <MenuLink href="/account" label="My Account" icon={User} onClick={() => setIsUserMenuOpen(false)} />
+                          <MenuLink href="/account/orders" label="Orders" icon={Package} onClick={() => setIsUserMenuOpen(false)} />
+                          <MenuLink href="/settings" label="Settings" icon={Settings} onClick={() => setIsUserMenuOpen(false)} />
+                          {isAdmin ? (
+                            <MenuLink href="/admin/products" label="Admin Products" icon={ShieldCheck} onClick={() => setIsUserMenuOpen(false)} />
+                          ) : null}
                         </div>
-                        <div className="p-2 border-t border-[var(--border)]">
+                        <div className="border-t border-[var(--border)] p-2">
                           <button
-                            onClick={() => { setIsUserMenuOpen(false); signOut(); }}
-                            className="flex items-center gap-3 w-full px-3 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              signOut({ callbackUrl: "/" });
+                            }}
+                            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-red-300 transition-colors hover:bg-red-500/10"
                           >
-                            <LogOut className="w-4 h-4" />
+                            <LogOut className="h-4 w-4" />
                             Sign Out
                           </button>
                         </div>
                       </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
                 </div>
-              ) : (
+              ) : authAvailable ? (
                 <Link
                   href="/auth/signin"
-                  className="flex items-center gap-2 px-4 py-2 text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg hover:border-[var(--accent)]/50 transition-all"
+                  className="luxury-pill rounded-full px-4 py-2 text-sm hover:text-[var(--text-primary)]"
                 >
-                  <User className="w-4 h-4" />
                   Sign In
                 </Link>
+              ) : (
+                <span className="luxury-pill rounded-full px-4 py-2 text-sm text-[var(--text-muted)]">
+                  Auth unavailable
+                </span>
               )}
 
               <Link
                 href="/quote"
-                className="px-6 py-2 bg-[var(--accent)] text-[var(--bg-primary)] font-medium rounded hover:bg-[var(--accent)]/90 transition-colors ml-2"
+                className="rounded-full bg-[var(--text-primary)] px-5 py-2.5 text-sm font-medium text-[var(--bg-primary)] shadow-[0_22px_50px_-30px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
               >
-                Get Quote
+                Start a Build
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex items-center gap-2 md:hidden">
               <button
                 onClick={toggleMode}
-                className="p-2 text-[var(--text-secondary)]"
+                className="luxury-pill rounded-full p-2.5"
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 text-[var(--text-secondary)]"
+                className="luxury-pill rounded-full p-2.5"
               >
-                <Search className="w-5 h-5" />
+                <Search className="h-4 w-4" />
               </button>
               <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="p-2 text-[var(--text-secondary)]"
+                onClick={() => setIsOpen((value) => !value)}
+                className="luxury-pill rounded-full p-2.5"
               >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
-          <motion.div
-            initial={false}
-            animate={{ height: isOpen ? "auto" : 0 }}
-            className="md:hidden overflow-hidden"
-          >
-            <div className="py-4 space-y-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              ))}
-              <div className="pt-4 border-t border-[var(--border)] space-y-3">
-                <Link
-                  href="/wishlist"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 w-full text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                >
-                  <Heart className="w-5 h-5" />
-                  <span className="font-medium">Wishlist</span>
-                  {wishlistItems > 0 && (
-                    <span className="ml-auto px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                      {wishlistItems}
-                    </span>
-                  )}
-                </Link>
-                <button
-                  onClick={() => { setIsOpen(false); openCart(); }}
-                  className="flex items-center gap-3 w-full text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  <span className="font-medium">Cart</span>
-                  {totalItems > 0 && (
-                    <span className="ml-auto px-2 py-0.5 bg-[var(--accent)] text-[var(--bg-primary)] text-xs font-bold rounded-full">
-                      {totalItems}
-                    </span>
-                  )}
-                </button>
-                {session ? (
-                  <>
-                    <Link
-                      href="/account"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 w-full text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                    >
-                      <User className="w-5 h-5" />
-                      <span className="font-medium">My Account</span>
-                    </Link>
+          <AnimatePresence initial={false}>
+            {isOpen ? (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden md:hidden"
+              >
+                <div className="mt-5 border-t border-[var(--border)] pt-5">
+                  <div className="grid gap-3">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsOpen(false)}
+                        className="rounded-2xl px-3 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+
                     <button
-                      onClick={() => { setIsOpen(false); signOut(); }}
-                      className="flex items-center gap-3 w-full text-red-400 transition-colors"
+                      onClick={() => {
+                        setIsOpen(false);
+                        openCart();
+                      }}
+                      className="flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
                     >
-                      <LogOut className="w-5 h-5" />
-                      <span className="font-medium">Sign Out</span>
+                      <span>Cart</span>
+                      <span>{totalItems}</span>
                     </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/auth/signin"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 w-full text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                  >
-                    <User className="w-5 h-5" />
-                    <span className="font-medium">Sign In</span>
-                  </Link>
-                )}
-                <Link
-                  href="/quote"
-                  onClick={() => setIsOpen(false)}
-                  className="block w-full text-center px-6 py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-medium rounded"
-                >
-                  Get Quote
-                </Link>
-              </div>
-            </div>
-          </motion.div>
+
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                    >
+                      <span>Wishlist</span>
+                      <span>{wishlistItems}</span>
+                    </Link>
+
+                    {session ? (
+                      <>
+                        <Link
+                          href="/account"
+                          onClick={() => setIsOpen(false)}
+                          className="rounded-2xl px-3 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                        >
+                          Account
+                        </Link>
+                        {isAdmin ? (
+                          <Link
+                            href="/admin/products"
+                            onClick={() => setIsOpen(false)}
+                            className="rounded-2xl px-3 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                          >
+                            Admin Products
+                          </Link>
+                        ) : null}
+                        <button
+                          onClick={() => {
+                            setIsOpen(false);
+                            signOut({ callbackUrl: "/" });
+                          }}
+                          className="rounded-2xl px-3 py-3 text-left text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10"
+                        >
+                          Sign Out
+                        </button>
+                      </>
+                    ) : authAvailable ? (
+                      <Link
+                        href="/auth/signin"
+                        onClick={() => setIsOpen(false)}
+                        className="rounded-2xl px-3 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                      >
+                        Sign In
+                      </Link>
+                    ) : null}
+
+                    <Link
+                      href="/quote"
+                      onClick={() => setIsOpen(false)}
+                      className="mt-2 rounded-full bg-[var(--text-primary)] px-5 py-3 text-center text-sm font-medium text-[var(--bg-primary)]"
+                    >
+                      Start a Build
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </nav>
       </motion.header>
 
-      {/* Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
+  );
+}
+
+function MenuLink({
+  href,
+  label,
+  icon: Icon,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  icon: typeof User;
+  onClick: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+    >
+      <Icon className="h-4 w-4" />
+      {label}
+    </Link>
   );
 }

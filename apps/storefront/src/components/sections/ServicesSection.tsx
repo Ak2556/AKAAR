@@ -7,39 +7,39 @@ import { Printer, Cpu, Layers, Zap, Cog, Shield } from "lucide-react";
 const services = [
   {
     icon: Printer,
-    title: "FDM Prototyping",
-    description: "PLA, PETG, ABS for rapid iterations. Algorithmic pricing from ₹3/gram.",
-    features: ["Multi-material", "Structural testing", "Fast iterations"],
+    title: "PLA Prototypes",
+    description: "Fast-turn concept prints for enclosure checks, presentation models, and early engineering reviews.",
+    features: ["Crisp matte finish", "Fast iteration cycles", "Best for concept validation"],
   },
   {
     icon: Layers,
-    title: "SLA/Resin",
-    description: "High-detail resin printing for complex geometries and surface-critical parts.",
-    features: ["Sub-50μm layers", "Smooth finish", "Visual prototypes"],
+    title: "ABS Functional Parts",
+    description: "Stronger workshop-ready parts for fit checks, utility enclosures, and higher-heat use than PLA.",
+    features: ["Better heat tolerance", "Functional housings", "Engineering-use parts"],
   },
   {
     icon: Zap,
-    title: "Production Runs",
-    description: "Volume manufacturing with automated quoting based on geometry and infill.",
-    features: ["Dynamic pricing", "Batch tracking", "Consistent quality"],
+    title: "TPU Flexible Builds",
+    description: "Flexible parts for grips, pads, sleeves, and compression-friendly pieces that need controlled softness.",
+    features: ["Elastic geometries", "Soft-touch utility", "Flexible fit parts"],
   },
   {
     icon: Cpu,
-    title: "Mesh Optimization",
-    description: "CAD validation, mesh repair, and slicing optimization for print integrity.",
-    features: ["STL validation", "Manifold repair", "Auto-orientation"],
+    title: "PETG Utility Prints",
+    description: "Durable everyday parts for holders, brackets, fixtures, and repeat-use components that need more resilience.",
+    features: ["Utility-grade strength", "Cleaner outdoor tolerance", "Bracket and jig friendly"],
   },
   {
     icon: Cog,
-    title: "DFM Consulting",
-    description: "Expert consultation on optimizing CAD for additive manufacturing.",
-    features: ["Wall analysis", "Cost reduction", "Material guidance"],
+    title: "File and Print Review",
+    description: "We review geometry, wall thickness, and print direction before confirming the material and build path.",
+    features: ["Wall-thickness check", "Orientation advice", "Material recommendation"],
   },
   {
     icon: Shield,
-    title: "Pan-India Shipping",
-    description: "Reliable logistics with 4-5 business day delivery nationwide.",
-    features: ["Real-time tracking", "Secure packaging", "Insurance included"],
+    title: "Studio Packing and Dispatch",
+    description: "Each order is packed from the current studio workflow with tracked delivery and direct handoff context.",
+    features: ["Protected packing", "Tracked shipping", "Order photos on request"],
   },
 ];
 
@@ -48,66 +48,52 @@ export function ServicesSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 grid-overlay opacity-50" />
-
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Header */}
+    <section ref={ref} className="px-4 py-14 sm:px-6 sm:py-18">
+      <div className="mx-auto max-w-7xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          transition={{ duration: 0.55 }}
+          className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
         >
-          <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-            Capabilities
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-            Materials & <span className="gradient-text">Services</span>
-          </h2>
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
-            Production-grade 3D printing with algorithmic pricing.
-            Upload your mesh, select material, get instant quotes.
+          <div className="max-w-3xl">
+            <span className="luxury-kicker">Capabilities</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              Basic 3D printing materials, handled with more clarity than catalog noise.
+            </h2>
+          </div>
+          <p className="max-w-xl text-[var(--text-secondary)]">
+            The live studio stack right now is centered on PLA, ABS, TPU, and PETG, with file review and dispatch handled around those real materials instead of mock capability claims.
           </p>
         </motion.div>
 
-        {/* Services Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-5 lg:grid-cols-3">
           {services.map((service, index) => (
             <motion.div
               key={service.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -5, borderColor: "var(--accent)" }}
-              className="group relative p-8 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]/50 backdrop-blur transition-all"
+              transition={{ delay: index * 0.08 }}
+              className="luxury-card group rounded-[1.9rem] p-7"
             >
-              {/* Icon */}
-              <div className="w-14 h-14 mb-6 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)]/10 transition-all">
-                <service.icon className="w-7 h-7 text-[var(--accent)]" />
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
+                  <service.icon className="h-6 w-6 text-[var(--accent)]" />
+                </div>
+                <span className="luxury-metric-label">0{index + 1}</span>
               </div>
 
-              {/* Content */}
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-[var(--accent)] transition-colors">
-                {service.title}
-              </h3>
-              <p className="text-[var(--text-secondary)] mb-6">
-                {service.description}
-              </p>
+              <h3 className="display-font mt-8 text-2xl text-[var(--text-primary)]">{service.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{service.description}</p>
 
-              {/* Features */}
-              <ul className="space-y-2">
+              <div className="mt-8 space-y-3 border-t border-[var(--border)] pt-6">
                 {service.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                    <span className="w-1 h-1 bg-[var(--accent)] rounded-full" />
-                    {feature}
-                  </li>
+                  <div key={feature} className="flex items-center justify-between gap-4 text-sm">
+                    <span className="text-[var(--text-primary)]">{feature}</span>
+                    <span className="h-px flex-1 bg-[var(--border)]" />
+                  </div>
                 ))}
-              </ul>
-
-              {/* Hover accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
             </motion.div>
           ))}
         </div>

@@ -48,10 +48,10 @@ export const defaultSettings: Settings = {
 };
 
 export const currencies = {
-  INR: { symbol: "₹", name: "Indian Rupee", locale: "en-IN" },
+  INR: { symbol: "\u20B9", name: "Indian Rupee", locale: "en-IN" },
   USD: { symbol: "$", name: "US Dollar", locale: "en-US" },
-  EUR: { symbol: "€", name: "Euro", locale: "de-DE" },
-  GBP: { symbol: "£", name: "British Pound", locale: "en-GB" },
+  EUR: { symbol: "\u20AC", name: "Euro", locale: "de-DE" },
+  GBP: { symbol: "\u00A3", name: "British Pound", locale: "en-GB" },
 } as const;
 
 // Approximate exchange rates (INR base)

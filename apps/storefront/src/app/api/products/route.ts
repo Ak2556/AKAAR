@@ -1,7 +1,43 @@
 import { prisma } from "@akaar/db";
 import { NextResponse } from "next/server";
+import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
+import { listLocalProducts } from "@/lib/local-data-store";
+import { isLocalDataMode } from "@/lib/local-runtime";
+
+function buildSearchWhere(search: string | null) {
+  if (!search) {
+    return undefined;
+  }
+
+  return [
+    { name: { contains: search, mode: "insensitive" as const } },
+    { description: { contains: search, mode: "insensitive" as const } },
+    { shortDescription: { contains: search, mode: "insensitive" as const } },
+  ];
+}
 
 export async function GET(request: Request) {
+  const capabilities = getRuntimeCapabilities();
+
+  if (!capabilities.catalogAvailable) {
+    return NextResponse.json(
+      {
+        products: [],
+        pagination: {
+          page: 1,
+          limit: 12,
+          total: 0,
+          totalPages: 0,
+        },
+        categories: [],
+        catalogAvailable: false,
+        empty: true,
+        message: "Catalog unavailable",
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
@@ -11,7 +47,33 @@ export async function GET(request: Request) {
     const sortBy = searchParams.get("sortBy") || "sortOrder";
     const sortOrder = searchParams.get("sortOrder") || "asc";
 
+    if (isLocalDataMode()) {
+      const { products, total, categories } = await listLocalProducts({
+        page,
+        limit,
+        category,
+        search,
+        sortBy,
+        sortOrder,
+      });
+
+      return NextResponse.json({
+        products,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+        categories,
+        catalogAvailable: true,
+        empty: total === 0,
+      });
+    }
+
     // Build where clause
+    const searchWhere = buildSearchWhere(search);
+
     const where: Record<string, unknown> = {
       isActive: true,
     };
@@ -23,12 +85,13 @@ export async function GET(request: Request) {
       };
     }
 
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { shortDescription: { contains: search, mode: "insensitive" } },
-      ];
+    if (searchWhere) {
+      where.OR = searchWhere;
+    }
+
+    const categoryWhere: Record<string, unknown> = { isActive: true };
+    if (searchWhere) {
+      categoryWhere.OR = searchWhere;
     }
 
     // Build orderBy
@@ -44,7 +107,7 @@ export async function GET(request: Request) {
     }
 
     // Execute queries in parallel
-    const [products, total] = await Promise.all([
+    const [products, total, categories] = await Promise.all([
       prisma.product.findMany({
         where,
         include: {
@@ -55,14 +118,17 @@ export async function GET(request: Request) {
         orderBy,
       }),
       prisma.product.count({ where }),
+      prisma.product.groupBy({
+        by: ["category"],
+        where: categoryWhere,
+        _count: {
+          category: true,
+        },
+        orderBy: {
+          category: "asc",
+        },
+      }),
     ]);
-
-    // Get unique categories for filtering
-    const categories = await prisma.product.findMany({
-      where: { isActive: true },
-      select: { category: true },
-      distinct: ["category"],
-    });
 
     return NextResponse.json({
       products,
@@ -72,13 +138,33 @@ export async function GET(request: Request) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-      categories: categories.map((c) => c.category).filter(Boolean),
+      categories: categories
+        .filter((entry) => Boolean(entry.category))
+        .map((entry) => ({
+          id: entry.category!.toLowerCase(),
+          label: entry.category!,
+          count: entry._count.category,
+        })),
+      catalogAvailable: true,
+      empty: total === 0,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
-      { error: "Failed to fetch products" },
-      { status: 500 }
+      {
+        products: [],
+        pagination: {
+          page: 1,
+          limit: 12,
+          total: 0,
+          totalPages: 0,
+        },
+        categories: [],
+        catalogAvailable: false,
+        empty: true,
+        message: "Catalog unavailable",
+      },
+      { status: 503 }
     );
   }
 }

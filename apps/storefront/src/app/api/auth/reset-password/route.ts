@@ -3,9 +3,18 @@ import { prisma } from "@akaar/db";
 import bcrypt from "bcryptjs";
 import { resetPasswordSchema, validateRequest } from "@/lib/validations";
 import { withRateLimit, rateLimitPresets } from "@/lib/rate-limit";
+import {
+  deleteLocalPasswordResetToken,
+  getLocalPasswordResetToken,
+  getLocalUserByEmail,
+  updateLocalUser,
+} from "@/lib/local-data-store";
+import { isLocalDataMode } from "@/lib/local-runtime";
 
 export async function POST(request: NextRequest) {
   try {
+    const localDataMode = isLocalDataMode();
+
     // Rate limit: 5 requests per minute (strict)
     const rateLimitError = await withRateLimit(request, rateLimitPresets.strict);
     if (rateLimitError) return rateLimitError;
@@ -20,9 +29,11 @@ export async function POST(request: NextRequest) {
     const { token, password } = validation.data;
 
     // Find the reset token
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
-    });
+    const resetToken = localDataMode
+      ? await getLocalPasswordResetToken(token)
+      : await prisma.passwordResetToken.findUnique({
+          where: { token },
+        });
 
     if (!resetToken) {
       return NextResponse.json(
@@ -31,11 +42,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (resetToken.expires < new Date()) {
+    if (new Date(resetToken.expires) < new Date()) {
       // Clean up expired token
-      await prisma.passwordResetToken.delete({
-        where: { token },
-      });
+      if (localDataMode) {
+        await deleteLocalPasswordResetToken(token);
+      } else {
+        await prisma.passwordResetToken.delete({
+          where: { token },
+        });
+      }
       return NextResponse.json(
         { error: "Reset token has expired" },
         { status: 400 }
@@ -43,9 +58,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const user = await prisma.user.findUnique({
-      where: { email: resetToken.email },
-    });
+    const user = localDataMode
+      ? await getLocalUserByEmail(resetToken.email)
+      : await prisma.user.findUnique({
+          where: { email: resetToken.email },
+        });
 
     if (!user) {
       return NextResponse.json(
@@ -58,15 +75,26 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Update user password
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { password: hashedPassword },
-    });
+    if (localDataMode) {
+      await updateLocalUser({
+        id: user.id,
+        password: hashedPassword,
+      });
+    } else {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+      });
+    }
 
     // Delete the used token
-    await prisma.passwordResetToken.delete({
-      where: { token },
-    });
+    if (localDataMode) {
+      await deleteLocalPasswordResetToken(token);
+    } else {
+      await prisma.passwordResetToken.delete({
+        where: { token },
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Heart, Eye } from "lucide-react";
+import { ArrowUpRight, Heart, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
@@ -31,16 +31,16 @@ export function ProductListItem({
   const toast = useToast();
   const { formatPrice } = useSettings();
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAddToCart = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     addItem({ id, name, slug, price });
     toast.success(`Added ${name} to cart`);
   };
 
-  const handleAddToWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAddToWishlist = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (!isInWishlist(id)) {
       addToWishlist({ id, name, slug, price, category, imageUrl });
       toast.success(`Added ${name} to wishlist`);
@@ -48,79 +48,89 @@ export function ProductListItem({
   };
 
   return (
-    <Link href={`/products/${slug}`}>
-      <div className="group flex gap-6 p-4 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] hover:border-[var(--accent)]/50 transition-all">
-        {/* Image */}
-        <div className="relative w-32 h-32 flex-shrink-0 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:border-[var(--accent)] transition-all">
-                <span className="text-[var(--accent)]/50 font-mono text-xs">3D</span>
+    <Link href={`/products/${slug}`} className="block">
+      <article className="luxury-card group overflow-hidden rounded-[2.15rem]">
+        <div className="grid gap-px bg-[var(--border)] xl:grid-cols-[0.95fr_1.05fr]">
+          <div className="luxury-stage relative min-h-[320px] overflow-hidden p-6">
+            <div className="absolute left-6 top-6 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.42)] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)] backdrop-blur-md">
+              {category}
+            </div>
+            <div className="absolute right-6 top-6 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.48)] px-2.5 py-2 text-[var(--text-secondary)] backdrop-blur-md transition-colors group-hover:text-[var(--text-primary)]">
+              <ArrowUpRight className="h-4 w-4" />
+            </div>
+            <p className="pointer-events-none absolute left-6 right-6 top-18 text-[clamp(3rem,8vw,6.5rem)] font-semibold uppercase tracking-[-0.09em] text-white/[0.08]">
+              {name}
+            </p>
+
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={name}
+                className="hero-image-shadow absolute inset-x-6 bottom-6 top-18 h-[calc(100%-6rem)] w-[calc(100%-3rem)] object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            ) : (
+              <div className="absolute inset-x-6 bottom-6 top-18 overflow-hidden rounded-[1.7rem] border border-[var(--border)] bg-[linear-gradient(145deg,#15181d_0%,#232a33_50%,#101114_100%)]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(214,178,114,0.16),transparent_30%),radial-gradient(circle_at_80%_74%,rgba(125,211,199,0.1),transparent_28%)]" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[1.12fr_0.88fr]">
+            <div className="bg-[var(--bg-secondary)] px-6 py-6 sm:px-7">
+              <span className="luxury-kicker">Collection entry</span>
+              <h3 className="display-font mt-4 text-4xl uppercase leading-none text-[var(--text-primary)] sm:text-5xl">
+                {name}
+              </h3>
+              <p className="mt-5 max-w-xl text-sm leading-7 text-[var(--text-secondary)]">
+                {description || "Preview-led part listing with production-aware geometry, staging, and configurable finish options."}
+              </p>
+
+              <div className="mt-8 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+                <SpecCell label="Starting from" value={formatPrice(price)} />
+                <SpecCell label="Preview" value={imageUrl ? "Configured" : "Awaiting asset"} />
+                <SpecCell label="Production" value="On request" />
               </div>
             </div>
-          )}
-          {/* Category badge */}
-          <div className="absolute top-2 left-2 px-2 py-0.5 bg-[var(--bg-primary)]/80 backdrop-blur rounded text-xs font-mono text-[var(--accent)]">
-            {category}
-          </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-lg group-hover:text-[var(--accent)] transition-colors truncate">
-            {name}
-          </h3>
-          {description && (
-            <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">
-              {description}
-            </p>
-          )}
-          <div className="flex items-center gap-4 mt-3">
-            <p className="text-[var(--accent)] font-semibold text-lg">
-              {formatPrice(price)}
-            </p>
-            <span className="text-xs text-[var(--text-muted)] font-mono">
-              + customization
-            </span>
-          </div>
-        </div>
+            <div className="flex flex-col justify-between gap-5 bg-[var(--bg-secondary)] px-6 py-6 sm:px-7">
+              <div>
+                <p className="luxury-metric-label">Use this listing as a production reference or move it directly into cart.</p>
+              </div>
 
-        {/* Actions */}
-        <div className="flex flex-col justify-center gap-2">
-          <button
-            onClick={handleAddToCart}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-[var(--bg-primary)] rounded-lg font-medium hover:bg-[var(--accent)]/90 transition-colors"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            Add to Cart
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={handleAddToWishlist}
-              className={`flex-1 p-2 border rounded-lg transition-colors ${
-                isInWishlist(id)
-                  ? "border-red-500 text-red-500 bg-red-500/10"
-                  : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-              }`}
-            >
-              <Heart className={`w-4 h-4 mx-auto ${isInWishlist(id) ? "fill-current" : ""}`} />
-            </button>
-            <Link
-              href={`/products/${slug}`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 p-2 border border-[var(--border)] rounded-lg text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
-            >
-              <Eye className="w-4 h-4 mx-auto" />
-            </Link>
+              <div className="space-y-3">
+                <button
+                  onClick={handleAddToCart}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--text-primary)] px-5 py-3.5 text-sm font-medium text-[var(--bg-primary)] transition-transform hover:-translate-y-0.5"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Add to Cart
+                </button>
+
+                <button
+                  onClick={handleAddToWishlist}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-full border px-5 py-3.5 text-sm font-medium transition-colors ${
+                    isInWishlist(id)
+                      ? "border-red-400/50 bg-red-500/10 text-red-300"
+                      : "border-[var(--border-accent)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:bg-[var(--surface-highlight)]"
+                  }`}
+                >
+                  <Heart className={`h-4 w-4 ${isInWishlist(id) ? "fill-current" : ""}`} />
+                  {isInWishlist(id) ? "Saved" : "Save"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </article>
     </Link>
+  );
+}
+
+function SpecCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-[var(--bg-primary)] px-4 py-4">
+      <p className="luxury-metric-label">{label}</p>
+      <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">{value}</p>
+    </div>
   );
 }

@@ -1,212 +1,105 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { Scene } from "@/components/three/Scene";
-import { useMousePosition } from "@/hooks/useMousePosition";
-import { useTheme } from "@/hooks/useTheme";
+import { useRef } from "react";
+import { BRAND_TAGLINE } from "@/lib/brand";
 
-// Typing effect component
-function TypeWriter({
-  text,
-  delay = 0,
-  speed = 50,
-  className = "",
-  onComplete,
-}: {
-  text: string;
-  delay?: number;
-  speed?: number;
-  className?: string;
-  onComplete?: () => void;
-}) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    const startTimer = setTimeout(() => setStarted(true), delay);
-    return () => clearTimeout(startTimer);
-  }, [delay]);
-
-  useEffect(() => {
-    if (!started) return;
-
-    if (displayedText.length < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText(text.slice(0, displayedText.length + 1));
-      }, speed);
-      return () => clearTimeout(timer);
-    } else {
-      onComplete?.();
-    }
-  }, [displayedText, text, speed, started, onComplete]);
-
-  return (
-    <span className={className}>
-      {displayedText}
-      {started && displayedText.length < text.length && (
-        <span className="animate-pulse text-[var(--accent)]">|</span>
-      )}
-    </span>
-  );
-}
+const metrics = [
+  { label: "Lead time", value: "48h review" },
+  { label: "Core materials", value: "PLA, ABS, TPU" },
+  { label: "Studio coverage", value: "Local build, shipped across India" },
+];
 
 export function HeroSection() {
-  const { normalizedX, normalizedY } = useMousePosition();
-  const { isDark } = useTheme();
-  const [brandComplete, setBrandComplete] = useState(false);
-  const [taglineComplete, setTaglineComplete] = useState(false);
-  const [line1Complete, setLine1Complete] = useState(false);
-  const [line2Complete, setLine2Complete] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end end"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, 30]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1.06, 1.14]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* 3D Background */}
-      <Scene mouseX={normalizedX} mouseY={normalizedY} isDark={isDark} />
-
-      {/* Grid overlay */}
-      <div className="absolute inset-0 grid-overlay pointer-events-none" />
-
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--bg-primary)] pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-primary)]/50 via-transparent to-[var(--bg-primary)]/50 pointer-events-none" />
-
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-6 text-center">
+    <section ref={ref} className="luxury-shell overflow-hidden px-4 pt-28 pb-16 sm:px-6">
+      <div className="mx-auto max-w-7xl">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-4xl mx-auto"
+          transition={{ duration: 0.7 }}
+          className="luxury-card overflow-hidden rounded-[2.25rem]"
         >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-[var(--accent)]/30 rounded-full bg-[var(--accent)]/5"
-          >
-            <span className="w-2 h-2 bg-[var(--accent)] rounded-full animate-pulse" />
-            <span className="text-sm text-[var(--accent)] font-mono">WE GIVE AKAAR TO IDEAS</span>
-          </motion.div>
+          <div className="grid gap-8 px-6 py-8 lg:grid-cols-[1.12fr_0.88fr] lg:px-10 lg:py-10">
+            <div className="flex flex-col justify-between gap-8">
+              <div className="editorial-stage-copy space-y-6">
+                <span className="luxury-kicker">AKAAR Product Atelier</span>
+                <p className="editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
+                <h1 className="display-font max-w-[11ch] text-[clamp(2.9rem,4.35vw,4.8rem)] leading-[0.98] text-[var(--text-primary)]">
+                  Product-grade 3D printing for teams that want the object to feel resolved before it ships.
+                </h1>
+                <p className="max-w-xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
+                  Launch-ready prototyping and short-run production for engineering teams. Upload your CAD, choose from the live material set, and move from digital model to finished part with calmer, faster decisions.
+                </p>
+              </div>
 
-          {/* Brand Name with typing effect */}
-          <div className="mb-4">
-            <span className="text-2xl md:text-3xl font-mono font-bold text-[var(--accent)]">
-              <TypeWriter
-                text="AKAAR 3D"
-                delay={500}
-                speed={100}
-                onComplete={() => setBrandComplete(true)}
-              />
-            </span>
-            {brandComplete && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="block text-sm md:text-base text-[var(--text-muted)] italic mt-1"
-              >
-                <TypeWriter
-                  text="Giving AKAAR to Ideas"
-                  delay={200}
-                  speed={40}
-                  onComplete={() => setTaglineComplete(true)}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Link
+                  href="/quote"
+                  className="inline-flex items-center justify-center gap-3 rounded-full bg-[var(--text-primary)] px-7 py-3.5 text-sm font-medium text-[var(--bg-primary)] transition-transform hover:-translate-y-0.5"
+                >
+                  Start a Build
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/products"
+                  className="inline-flex items-center justify-center gap-3 rounded-full border border-[var(--border-accent)] px-7 py-3.5 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--surface-highlight)]"
+                >
+                  View Collection
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-5">
+              <div className="luxury-stage relative flex min-h-[340px] items-end overflow-hidden rounded-[1.8rem] px-5 pt-10 sm:px-8">
+                <motion.img
+                  src="/showcase/bambu-p1s.jpg"
+                  alt="Bambu Lab P1S"
+                  className="absolute inset-0 h-full w-full object-cover opacity-54"
+                  style={{ y: imageY, scale: imageScale }}
                 />
-              </motion.span>
-            )}
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.16)_0%,rgba(7,7,10,0.56)_58%,rgba(7,7,10,0.74)_100%)]" />
+                <div className="absolute inset-x-6 top-6 h-px bg-gradient-to-r from-transparent via-[var(--text-primary)]/12 to-transparent" />
+                <div className="absolute left-6 top-6 editorial-eyebrow">
+                  Bambu Lab P1S
+                </div>
+                <div className="absolute right-6 top-6 rounded-full border border-[var(--border-accent)] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">
+                  3D Preview Ready
+                </div>
+
+                <div className="relative z-10 w-full pb-6">
+                  <div className="mx-auto max-w-[360px] rounded-[1.6rem] border border-white/10 bg-[rgba(10,10,12,0.58)] px-5 py-5 backdrop-blur-md sm:max-w-[420px]">
+                    <p className="luxury-metric-label text-white/56">Machine environment</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">P1S-driven prototype bay</p>
+                    <p className="mt-3 text-sm leading-6 text-white/72">
+                      Enclosed speed, clean repeatability, and the industrial calm that should sit behind a high-trust manufacturing brand.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+                {metrics.map((metric) => (
+                  <div key={metric.label} className="bg-[var(--bg-secondary)] px-5 py-5">
+                    <p className="luxury-metric-label">{metric.label}</p>
+                    <p className="mt-3 text-xl font-semibold text-[var(--text-primary)]">{metric.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-
-          {/* Headline with typing effect */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-            <span className="block text-[var(--text-primary)] min-h-[1.2em]">
-              {taglineComplete && (
-                <TypeWriter
-                  text="Frictionless"
-                  delay={400}
-                  speed={80}
-                  onComplete={() => setLine1Complete(true)}
-                />
-              )}
-            </span>
-            <span className="block gradient-text min-h-[1.2em]">
-              {line1Complete && (
-                <TypeWriter
-                  text="3D Printing"
-                  delay={200}
-                  speed={80}
-                  onComplete={() => setLine2Complete(true)}
-                />
-              )}
-            </span>
-          </h1>
-
-          {/* Subheadline - fades in after typing completes */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: line2Complete ? 1 : 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-12"
-          >
-            From CAD to physical part in days. A seamless storefront driven by an
-            automated algorithmic quoting engine. Upload your model, get instant pricing,
-            and push to production.
-          </motion.p>
-
-          {/* CTAs - fade in after typing completes */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: line2Complete ? 1 : 0, y: line2Complete ? 0 : 20 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Link href="/quote">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-3 px-8 py-4 bg-[var(--accent)] text-[var(--bg-primary)] font-semibold rounded-lg hover:bg-[var(--accent)]/90 transition-all animate-pulse-glow"
-              >
-                Upload CAD / Get Instant Quote
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-            </Link>
-            <Link href="/services">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-3 px-8 py-4 border border-[var(--border-accent)] text-[var(--text-primary)] font-semibold rounded-lg hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
-              >
-                <Play className="w-5 h-5" />
-                Explore Materials
-              </motion.button>
-            </Link>
-          </motion.div>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="flex flex-col items-center gap-2 text-[var(--text-muted)]"
-          >
-            <span className="text-xs font-mono uppercase tracking-wider">Scroll</span>
-            <div className="w-px h-10 bg-gradient-to-b from-[var(--accent)] to-transparent" />
-          </motion.div>
         </motion.div>
       </div>
-
-      {/* Corner accents */}
-      <div className="absolute top-20 left-6 w-20 h-20 border-l border-t border-[var(--accent)]/20" />
-      <div className="absolute top-20 right-6 w-20 h-20 border-r border-t border-[var(--accent)]/20" />
-      <div className="absolute bottom-20 left-6 w-20 h-20 border-l border-b border-[var(--accent)]/20" />
-      <div className="absolute bottom-20 right-6 w-20 h-20 border-r border-b border-[var(--accent)]/20" />
     </section>
   );
 }

@@ -55,11 +55,6 @@ function applyTheme(theme: Theme) {
   root.setAttribute("data-theme", theme.styleId);
   root.setAttribute("data-mode", theme.mode);
 
-  // Toggle effect classes based on theme settings
-  root.classList.toggle("theme-glow", theme.effects.enableGlow);
-  root.classList.toggle("theme-scanlines", theme.effects.enableScanlines);
-  root.classList.toggle("theme-grid", theme.effects.enableGrid);
-  root.classList.toggle("theme-noise", theme.effects.enableNoise);
 }
 
 function getThemeId(style: ThemeStyle, mode: ThemeMode): ThemeId {

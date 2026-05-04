@@ -4,9 +4,17 @@ import bcrypt from "bcryptjs";
 import { registerSchema, validateRequest } from "@/lib/validations";
 import { withRateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { createAuditLog, getAuditContext } from "@/lib/audit";
+import {
+  countLocalAdminUsers,
+  createLocalUser,
+  getLocalUserByEmail,
+} from "@/lib/local-data-store";
+import { isLocalDataMode } from "@/lib/local-runtime";
 
 export async function POST(request: Request) {
   try {
+    const localDataMode = isLocalDataMode();
+
     // Rate limit: 10 requests per minute
     const rateLimitError = await withRateLimit(request, rateLimitPresets.standard);
     if (rateLimitError) return rateLimitError;
@@ -21,9 +29,11 @@ export async function POST(request: Request) {
     const { name, email, password } = validation.data;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser = localDataMode
+      ? await getLocalUserByEmail(email)
+      : await prisma.user.findUnique({
+          where: { email },
+        });
 
     if (existingUser) {
       return NextResponse.json(
@@ -35,20 +45,36 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    const adminUserCount =
+      process.env.NODE_ENV !== "production"
+        ? localDataMode
+          ? await countLocalAdminUsers()
+          : await prisma.user.count({ where: { role: "ADMIN" } })
+        : 1;
+
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      },
-    });
+    const user = localDataMode
+      ? await createLocalUser({
+          name,
+          email,
+          password: hashedPassword,
+          role: adminUserCount === 0 ? "ADMIN" : "CUSTOMER",
+        })
+      : await prisma.user.create({
+          data: {
+            name,
+            email,
+            password: hashedPassword,
+            role: adminUserCount === 0 ? "ADMIN" : "CUSTOMER",
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true,
+          },
+        });
 
     // Audit log: successful registration
     const auditContext = getAuditContext(request);

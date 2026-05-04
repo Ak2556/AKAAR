@@ -1,11 +1,18 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Printer, Cpu, Layers, Zap, Cog, Shield,
-  ArrowRight, Upload, CheckCircle, Clock, Award
+  ArrowRight,
+  CheckCircle,
+  Clock,
+  Cog,
+  Cpu,
+  Layers,
+  Printer,
+  Shield,
+  Upload,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -13,340 +20,299 @@ const services = [
   {
     icon: Printer,
     title: "FDM Prototyping",
-    description: "PLA, PETG, ABS materials for rapid iterations and structural testing.",
-    features: [
-      "PLA for eco-friendly prototypes",
-      "PETG for strength and flexibility",
-      "ABS for heat-resistant parts",
-      "Fast turnaround for iterations",
-    ],
+    description:
+      "Robust prototype builds for enclosures, fixtures, mechanical trials, and early field testing.",
+    notes: ["PLA, PETG, ABS", "Fast iteration loops", "Engineering review included"],
     price: "From ₹3/gram",
-    comingSoon: false,
+    image: "/showcase/bambu-p1s.jpg",
   },
   {
     icon: Layers,
-    title: "SLA/Resin Printing",
-    description: "High-detail resin printing for complex geometries and surface-finish critical parts.",
-    features: [
-      "Sub-50 micron layer resolution",
-      "Smooth surface finish",
-      "Complex geometry support",
-      "Ideal for visual prototypes",
-    ],
-    price: "Coming Soon",
-    comingSoon: true,
-  },
-  {
-    icon: Cpu,
-    title: "CNC Machining",
-    description: "Precision CNC machining for metal and plastic parts with tight tolerances.",
-    features: [
-      "3-axis and 5-axis milling",
-      "Aluminum, steel, brass",
-      "Tight tolerances (±0.05mm)",
-      "Surface finishing options",
-    ],
-    price: "Coming Soon",
-    comingSoon: true,
+    title: "Display & Surface Models",
+    description:
+      "High-detail presentation parts and display-led builds for investor demos or client approvals.",
+    notes: ["Visual quality first", "Smooth-ready finishes", "Low-volume premium runs"],
+    price: "By geometry",
+    image: "/showcase/bambu-a1-combo.jpg",
   },
   {
     icon: Zap,
-    title: "Rapid Prototyping",
-    description: "Fast-track your product development with quick turnaround prototypes.",
-    features: [
-      "24-48 hour turnaround",
-      "Multiple material options",
-      "Design iteration support",
-      "Functional testing parts",
-    ],
-    price: "Coming Soon",
-    comingSoon: true,
+    title: "Short-Run Production",
+    description:
+      "Repeatable production for functional parts when you need output before tooling makes sense.",
+    notes: ["Batch consistency", "Calibration tracking", "Shipment coordination"],
+    price: "Custom quote",
+    image: "/showcase/bambu-p1s.jpg",
+  },
+  {
+    icon: Cpu,
+    title: "Mesh Readiness Review",
+    description:
+      "We validate geometry, wall conditions, support strategy, and probable manufacturing issues.",
+    notes: ["Repair advice", "Orientation guidance", "Material-fit notes"],
+    price: "Included with quote",
+    image: "/showcase/bambu-a1-combo.jpg",
   },
   {
     icon: Cog,
-    title: "Design for Manufacturing",
-    description: "Expert consultation on optimizing your CAD for additive manufacturing constraints.",
-    features: [
-      "Wall thickness analysis",
-      "Overhang optimization",
-      "Material selection guidance",
-      "Cost reduction strategies",
-    ],
+    title: "DFM Consulting",
+    description:
+      "A focused manufacturing review when the part needs engineering judgment before production.",
+    notes: ["Strength tradeoffs", "Cost reduction", "Revision planning"],
     price: "From ₹500/hour",
-    comingSoon: false,
+    image: "/showcase/bambu-p1s.jpg",
   },
   {
     icon: Shield,
-    title: "Pan-India Logistics",
-    description: "Reliable shipping infrastructure with tracking and delivery guarantees.",
-    features: [
-      "4-5 business day delivery",
-      "Real-time tracking",
-      "Secure packaging",
-      "Insurance included",
-    ],
+    title: "Protected Dispatch",
+    description:
+      "Parts are packed, tracked, and dispatched with the same care expected of functional hardware shipments.",
+    notes: ["Pan-India delivery", "Secure packaging", "Post-dispatch support"],
     price: "Calculated at checkout",
-    comingSoon: false,
+    image: "/showcase/bambu-a1-combo.jpg",
   },
 ];
 
-const comingSoonMaterials = [
-  { name: "Nylon", description: "High-strength engineering plastic for functional parts" },
-  { name: "Resin", description: "High-detail SLA printing for visual prototypes" },
-  { name: "Metal", description: "Metal 3D printing for industrial applications" },
-];
-
 const process = [
-  { step: 1, title: "Upload", description: "Drop your STL, OBJ, or STEP file into our quoting engine" },
-  { step: 2, title: "Quote", description: "Instant algorithmic pricing based on volume and material" },
-  { step: 3, title: "Validate", description: "Automated mesh validation and orientation optimization" },
-  { step: 4, title: "Print", description: "Production on calibrated print farms with quality tracking" },
-  { step: 5, title: "Ship", description: "Pan-India delivery in 4-5 business days" },
+  { step: "01", title: "Upload", description: "Share geometry, tolerances, and use-case context." },
+  { step: "02", title: "Review", description: "We assess printability, material fit, and risk." },
+  { step: "03", title: "Quote", description: "You receive a reviewed recommendation, not just an automated number." },
+  { step: "04", title: "Produce", description: "Parts move through a controlled print setup and finishing path." },
+  { step: "05", title: "Dispatch", description: "We pack, track, and ship nationwide." },
 ];
 
 const stats = [
-  { icon: CheckCircle, value: "99.9%", label: "Quality Rate" },
-  { icon: Clock, value: "48h", label: "Avg Lead Time" },
-  { icon: Award, value: "ISO 9001", label: "Certified" },
+  { icon: CheckCircle, value: "99.9%", label: "quality target" },
+  { icon: Clock, value: "48h", label: "average review window" },
+  { icon: Shield, value: "Pan-India", label: "delivery network" },
+];
+
+const flagshipServices = [
+  {
+    kicker: "Prototype velocity",
+    title: "FDM programs calibrated for real engineering loops.",
+    body:
+      "When teams need parts quickly, the service has to feel decisive rather than improvised. This line prioritizes repeatability, review speed, and enough discipline around geometry that the next revision is informed, not guessed.",
+    image: "/showcase/bambu-p1s.jpg",
+    metrics: ["Enclosed machine environment", "Material-fit review", "Rapid revision cycles"],
+  },
+  {
+    kicker: "Presentation quality",
+    title: "Display models that hold up under scrutiny.",
+    body:
+      "Some parts need to impress before they need to survive. For those builds, surface quality, staging, and finish path matter just as much as tolerances, and the workflow reflects that from the first review.",
+    image: "/showcase/bambu-a1-combo.jpg",
+    metrics: ["Investor-ready stage pieces", "Surface-led build strategy", "Low-volume premium runs"],
+  },
+  {
+    kicker: "Production discipline",
+    title: "Short-run manufacturing before tooling is justified.",
+    body:
+      "This is the in-between space where process matters most. Output has to stay consistent enough for real usage while remaining flexible enough to absorb design updates without wasting momentum.",
+    image: "/showcase/bambu-p1s.jpg",
+    metrics: ["Repeatable batch output", "Calibration tracked", "Dispatch coordinated"],
+  },
 ];
 
 export default function ServicesPage() {
-  const heroRef = useRef(null);
-  const servicesRef = useRef(null);
-  const processRef = useRef(null);
-
-  const heroInView = useInView(heroRef, { once: true });
-  const servicesInView = useInView(servicesRef, { once: true, margin: "-100px" });
-  const processInView = useInView(processRef, { once: true, margin: "-100px" });
-
   return (
-    <div className="min-h-screen">
-      {/* Hero */}
-      <section ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 grid-overlay opacity-30" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--accent)]/10 rounded-full blur-3xl" />
-
-        <div className="container mx-auto px-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={heroInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl"
-          >
-            <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-              Materials & Pricing
-            </span>
-            <h1 className="text-5xl md:text-6xl font-bold mt-4 mb-6">
-              Deterministic <span className="gradient-text">Pricing</span>
-            </h1>
-            <p className="text-lg text-[var(--text-secondary)] mb-8">
-              Transparent, algorithm-driven quotes. Upload your mesh, select your material,
-              and get instant pricing. No hidden fees, no manual back-and-forth.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/quote">
-                <Button variant="primary" size="lg" glow>
-                  <Upload className="w-5 h-5 mr-2" />
-                  Upload CAD / Get Instant Quote
-                </Button>
-              </Link>
-              <Link href="/products">
-                <Button variant="outline" size="lg">
-                  Explore Materials
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={heroInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap gap-8 mt-16"
-          >
-            {stats.map((stat, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className="w-12 h-12 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center">
-                  <stat.icon className="w-6 h-6 text-[var(--accent)]" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-[var(--accent)]">{stat.value}</div>
-                  <div className="text-sm text-[var(--text-muted)]">{stat.label}</div>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section ref={servicesRef} className="py-20 bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={servicesInView ? { opacity: 1, y: 0 } : {}}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Materials & <span className="gradient-text">Services</span>
-            </h2>
-            <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              Production-grade materials with algorithmic pricing for engineers and hardware teams
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => (
-              <motion.div
-                key={service.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={servicesInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1 }}
-                className={`group p-8 border rounded-xl bg-[var(--bg-primary)] transition-all relative ${
-                  service.comingSoon
-                    ? "border-[var(--border)] opacity-75"
-                    : "border-[var(--border)] hover:border-[var(--accent)]/50"
-                }`}
-              >
-                {service.comingSoon && (
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-amber-500/20 text-amber-500 text-xs font-semibold rounded-full border border-amber-500/30">
-                    Coming Soon
-                  </div>
-                )}
-                <div className="w-14 h-14 mb-6 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)]/10 transition-all">
-                  <service.icon className="w-7 h-7 text-[var(--accent)]" />
-                </div>
-
-                <h3 className="text-xl font-semibold mb-2 group-hover:text-[var(--accent)] transition-colors">
-                  {service.title}
-                </h3>
-                <p className="text-[var(--text-secondary)] mb-6">
-                  {service.description}
+    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-14">
+        <section className="luxury-panel relative overflow-hidden rounded-[2.45rem]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(214,178,114,0.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(125,211,199,0.12),transparent_24%)]" />
+          <div className="grid gap-8 px-6 py-8 lg:grid-cols-[0.98fr_1.02fr] lg:px-10 lg:py-10">
+            <div className="relative z-10 flex flex-col justify-between gap-8">
+              <div className="editorial-stage-copy space-y-5">
+                <span className="luxury-kicker">Capabilities</span>
+                <h1 className="display-font text-[clamp(2.9rem,4.9vw,5rem)] leading-[0.95] text-[var(--text-primary)]">
+                  Manufacturing services should feel deliberate, productized, and easy to trust.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
+                  AKAAR should present manufacturing like a product platform: calm, deliberate, and strong on detail. Each service line exists to reduce friction between geometry, approval, and production.
                 </p>
+                <p className="editorial-eyebrow">Review-led workflow · Prototype velocity · Production discipline</p>
+              </div>
 
-                <ul className="space-y-2 mb-6">
-                  {service.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                      <span className="w-1 h-1 bg-[var(--accent)] rounded-full" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Link href="/quote">
+                  <Button size="lg">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Request a Quote
+                  </Button>
+                </Link>
+                <Link href="/products">
+                  <Button variant="outline" size="lg">
+                    Explore Collection
+                  </Button>
+                </Link>
+              </div>
+            </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-                  <span className={service.comingSoon ? "text-amber-500 font-medium" : "text-[var(--accent)] font-medium"}>{service.price}</span>
-                  {!service.comingSoon && (
-                    <Link href="/quote" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1 text-sm">
-                      Learn more <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  )}
+            <div className="relative z-10 flex flex-col gap-5">
+              <div className="luxury-stage relative min-h-[360px] overflow-hidden rounded-[2rem] border border-white/8 p-5 sm:p-7">
+                <div className="absolute left-6 top-5 editorial-eyebrow text-white/52">Machine context</div>
+                <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
+                  <img
+                    src="/showcase/bambu-p1s.jpg"
+                    alt="Bambu Lab P1S"
+                    className="hero-image-shadow"
+                  />
                 </div>
-              </motion.div>
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.05)_0%,rgba(7,7,10,0.34)_100%)]" />
+                <div className="absolute bottom-0 left-0 right-0 grid gap-px border-t border-white/10 bg-white/10 sm:grid-cols-3">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className="bg-[rgba(11,12,15,0.78)] px-5 py-4 backdrop-blur-md">
+                      <stat.icon className="h-5 w-5 text-[var(--accent)]" />
+                      <p className="display-font mt-3 text-2xl text-white">{stat.value}</p>
+                      <p className="mt-2 text-sm text-white/62">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <div className="max-w-3xl">
+            <span className="luxury-kicker">Flagship programs</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              The main service lines should carry the same design weight as the homepage.
+            </h2>
+          </div>
+
+          <div className="space-y-6">
+            {flagshipServices.map((service, index) => (
+              <motion.article
+                key={service.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.08 }}
+                className="luxury-card overflow-hidden rounded-[2.2rem]"
+              >
+                <div className="grid gap-px bg-[var(--border)] lg:grid-cols-2">
+                  <div className={`${index % 2 === 0 ? "order-1" : "order-2"} bg-[var(--bg-secondary)] px-6 py-7 sm:px-8 sm:py-8`}>
+                    <span className="luxury-kicker">{service.kicker}</span>
+                    <h3 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+                      {service.title}
+                    </h3>
+                    <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
+                      {service.body}
+                    </p>
+
+                    <div className="mt-8 grid gap-px overflow-hidden rounded-[1.6rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+                      {service.metrics.map((metric) => (
+                        <div key={metric} className="bg-[var(--bg-primary)] px-4 py-4">
+                          <p className="luxury-metric-label">Detail</p>
+                          <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">{metric}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={`${index % 2 === 0 ? "order-2" : "order-1"} luxury-stage relative min-h-[320px] overflow-hidden p-5`}>
+                    <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">{service.kicker}</div>
+                    <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
+                      <img
+                        src={service.image}
+                        alt={service.title}
+                        className="hero-image-shadow"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.04)_0%,rgba(7,7,10,0.3)_100%)]" />
+                  </div>
+                </div>
+              </motion.article>
             ))}
           </div>
+        </section>
 
-          {/* Coming Soon Materials */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={servicesInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.6 }}
-            className="mt-16 p-8 border border-amber-500/30 rounded-xl bg-amber-500/5"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="px-3 py-1 bg-amber-500/20 text-amber-500 text-sm font-semibold rounded-full">
-                Coming Soon
-              </div>
-              <h3 className="text-xl font-semibold">New Materials</h3>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {comingSoonMaterials.map((material) => (
-                <div key={material.name} className="p-4 border border-[var(--border)] rounded-lg bg-[var(--bg-primary)]">
-                  <h4 className="font-semibold text-amber-500 mb-2">{material.name}</h4>
-                  <p className="text-sm text-[var(--text-muted)]">{material.description}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-sm text-[var(--text-muted)] mt-6 text-center">
-              Interested in these materials? <Link href="/contact" className="text-[var(--accent)] hover:underline">Contact us</Link> to get notified when they launch.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section ref={processRef} className="py-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={processInView ? { opacity: 1, y: 0 } : {}}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Our <span className="gradient-text">Process</span>
+        <section>
+          <div className="mb-8 max-w-3xl">
+            <span className="luxury-kicker">Service lines</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              Choose the manufacturing path that fits the part, not the other way around.
             </h2>
-            <p className="text-[var(--text-secondary)] mt-4 max-w-2xl mx-auto">
-              From upload to delivery, we've streamlined every step
-            </p>
-          </motion.div>
-
-          <div className="relative">
-            {/* Connection line */}
-            <div className="absolute top-8 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent hidden lg:block" />
-
-            <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
-              {process.map((item, index) => (
-                <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={processInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center relative"
-                >
-                  <div className="w-16 h-16 mx-auto mb-4 border border-[var(--accent)] rounded-full flex items-center justify-center bg-[var(--bg-primary)] relative z-10">
-                    <span className="text-[var(--accent)] font-mono font-bold text-xl">{item.step}</span>
-                  </div>
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)]">{item.description}</p>
-                </motion.div>
-              ))}
-            </div>
           </div>
-        </div>
-      </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Give Your Ideas AKAAR
+          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+            {services.map((service) => (
+              <article key={service.title} className="luxury-card overflow-hidden rounded-[2rem]">
+                <div className="luxury-stage relative min-h-[220px] overflow-hidden p-5">
+                  <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">{service.title}</div>
+                  <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-14">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="hero-image-shadow"
+                    />
+                  </div>
+                </div>
+                <div className="border-t border-[var(--border)] px-6 py-6">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
+                    <service.icon className="h-5 w-5 text-[var(--accent)]" />
+                  </div>
+                  <h3 className="display-font mt-6 text-3xl text-[var(--text-primary)]">{service.title}</h3>
+                  <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{service.description}</p>
+                  <div className="mt-7 space-y-3 border-t border-[var(--border)] pt-6">
+                    {service.notes.map((note) => (
+                      <div key={note} className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-[var(--text-primary)]">{note}</span>
+                        <span className="h-px flex-1 bg-[var(--border)]" />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-7 text-sm font-medium text-[var(--accent)]">{service.price}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="luxury-card rounded-[2.2rem] px-6 py-8 sm:px-8 lg:px-10">
+          <div className="mb-8 max-w-3xl">
+            <span className="luxury-kicker">Production sequence</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              A five-step workflow with fewer surprises between upload and delivery.
             </h2>
-            <p className="text-[var(--text-secondary)] mb-8">
-              From mesh to physical part. Upload your CAD, get instant pricing, push to production.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/quote">
-                <Button variant="primary" size="lg" glow>
-                  <Upload className="w-5 h-5 mr-2" />
-                  Upload CAD / Get Instant Quote
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/products">
-                <Button variant="outline" size="lg">
-                  Explore Materials
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+
+          <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] lg:grid-cols-5">
+            {process.map((item) => (
+              <div key={item.step} className="bg-[var(--bg-secondary)] px-5 py-6">
+                <p className="luxury-kicker">{item.step}</p>
+                <h3 className="display-font mt-5 text-2xl text-[var(--text-primary)]">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="luxury-panel overflow-hidden rounded-[2.2rem] px-6 py-8 text-center sm:px-8 lg:px-10">
+          <span className="luxury-kicker">Start a build</span>
+          <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+            Bring the next part into review.
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
+            Share your files, intended use, and timing. We’ll reply with a production recommendation designed for the part you actually need.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <Link href="/quote">
+              <Button size="lg">
+                <Upload className="mr-2 h-4 w-4" />
+                Request a Quote
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button variant="outline" size="lg">
+                Talk to AKAAR
+              </Button>
+            </Link>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

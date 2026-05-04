@@ -5,24 +5,26 @@ import Link from "next/link";
 import { Linkedin, Mail, Send } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { Logo } from "@/components/ui/Logo";
+import { BRAND_TAGLINE } from "@/lib/brand";
 
 const footerLinks = {
-  products: [
+  collection: [
     { label: "All Products", href: "/products" },
-    { label: "Custom Prints", href: "/products?category=custom" },
-    { label: "Prototypes", href: "/products?category=prototypes" },
-    { label: "Production", href: "/products?category=production" },
+    { label: "Functional Parts", href: "/products?category=functional" },
+    { label: "Prototype Runs", href: "/products?category=prototype" },
+    { label: "Custom Builds", href: "/quote" },
   ],
-  services: [
+  capabilities: [
     { label: "3D Printing", href: "/services#printing" },
-    { label: "Design Services", href: "/services#design" },
+    { label: "DFM Review", href: "/services#design" },
     { label: "Rapid Prototyping", href: "/services#prototyping" },
-    { label: "Mass Production", href: "/services#production" },
+    { label: "Shipping", href: "/services#logistics" },
   ],
   company: [
-    { label: "About Us", href: "/about" },
+    { label: "About", href: "/about" },
+    { label: "Team", href: "/team" },
     { label: "Contact", href: "/contact" },
-    { label: "Get a Quote", href: "/quote" },
+    { label: "FAQ", href: "/faq" },
     { label: "Settings", href: "/settings" },
   ],
 };
@@ -37,8 +39,8 @@ export function Footer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleNewsletterSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     if (!email) {
       toast.error("Please enter your email address");
@@ -46,166 +48,128 @@ export function Footer() {
     }
 
     setIsSubmitting(true);
-
-    // Simulate API call and store in localStorage
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Store subscriber in localStorage
     const subscribers = JSON.parse(localStorage.getItem("akaar-newsletter") || "[]");
     if (!subscribers.includes(email)) {
       subscribers.push(email);
       localStorage.setItem("akaar-newsletter", JSON.stringify(subscribers));
     }
 
-    setIsSubmitting(false);
     setEmail("");
-    toast.success("Thanks for subscribing! We'll keep you updated.");
+    setIsSubmitting(false);
+    toast.success("Subscribed. We’ll send capability updates and release notes.");
   };
 
   return (
-    <footer className="border-t border-[var(--border)] bg-[var(--bg-secondary)]">
-      {/* Newsletter Section */}
-      <div className="border-b border-[var(--border)]">
-        <div className="container mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold mb-2">Engineering Updates</h3>
-              <p className="text-[var(--text-secondary)]">
-                New materials, capability expansions, and technical insights.
+    <footer className="px-4 pb-6 pt-20 sm:px-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="luxury-panel overflow-hidden rounded-[2rem]">
+          <div className="grid gap-10 border-b border-[var(--border)] px-6 py-10 lg:grid-cols-[1.4fr_1fr] lg:px-10">
+            <div className="space-y-5">
+              <span className="luxury-kicker">Production Updates</span>
+              <p className="editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
+              <h2 className="display-font max-w-[12ch] text-[clamp(2.1rem,2.8vw,3.2rem)] leading-[1.02] text-[var(--text-primary)]">
+                A quieter engineering brief for new materials, pricing logic, and launch-ready parts.
+              </h2>
+              <p className="max-w-xl text-[var(--text-secondary)]">
+                AKAAR ships product notes for engineers, founders, and procurement teams that need clarity without the noise.
               </p>
             </div>
-            <form onSubmit={handleNewsletterSubmit} className="flex w-full md:w-auto gap-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 md:w-80 px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
+
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end lg:justify-end">
+              <div className="flex-1">
+                <label className="luxury-metric-label mb-2 block">Email</label>
+                <input
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="luxury-input w-full rounded-full px-5 py-3.5"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-medium rounded-lg hover:bg-[var(--accent)]/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--text-primary)] px-6 py-3.5 font-medium text-[var(--bg-primary)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-                {isSubmitting ? (
-                  "Subscribing..."
-                ) : (
-                  <>
-                    Subscribe
-                    <Send className="w-4 h-4" />
-                  </>
-                )}
+                {isSubmitting ? "Subscribing..." : "Subscribe"}
+                <Send className="h-4 w-4" />
               </button>
             </form>
           </div>
-        </div>
-      </div>
 
-      <div className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="mb-6">
-              <Logo size="lg" showTagline={true} />
-            </div>
-            <p className="text-[var(--text-secondary)] max-w-sm mb-4">
-              Frictionless 3D printing for engineers and hardware startups.
-              From CAD to physical part in days.
-            </p>
-            <div className="text-sm text-[var(--text-secondary)] space-y-1 mb-6">
-              <p>9-B, 69, Block-B, Ring Road, Boorthal</p>
-              <p>Jaipur, Rajasthan 303012</p>
-              <p>Phone: +91 7300431301</p>
-              <p>Email: akaar3d.printing@gmail.com</p>
-            </div>
-            <div className="flex gap-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors"
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Products */}
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-4 text-sm uppercase tracking-wider">
-              Products
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.products.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+          <div className="grid gap-10 px-6 py-10 lg:grid-cols-[1.2fr_repeat(3,minmax(0,1fr))] lg:px-10">
+            <div className="space-y-6">
+              <Logo size="lg" showTagline />
+              <p className="max-w-sm text-[var(--text-secondary)]">
+                {BRAND_TAGLINE}. Launch-grade 3D printing for product teams that care about finish, lead time, and manufacturability.
+              </p>
+              <div className="space-y-1 text-sm text-[var(--text-muted)]">
+                <p>9-B, 69, Block-B, Ring Road, Boorthal</p>
+                <p>Jaipur, Rajasthan 303012</p>
+                <p>+91 7300431301</p>
+                <p>akaar3d.printing@gmail.com</p>
+              </div>
+              <div className="flex gap-3">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="luxury-pill flex h-11 w-11 items-center justify-center rounded-full hover:text-[var(--text-primary)]"
                   >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    <social.icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <FooterColumn title="Collection" links={footerLinks.collection} />
+            <FooterColumn title="Capabilities" links={footerLinks.capabilities} />
+            <FooterColumn title="Company" links={footerLinks.company} />
           </div>
 
-          {/* Services */}
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-4 text-sm uppercase tracking-wider">
-              Services
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.services.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-4 text-sm uppercase tracking-wider">
-              Company
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div className="mt-16 pt-8 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[var(--text-muted)] text-sm">
-            &copy; {new Date().getFullYear()} Akaar. All rights reserved.
-          </p>
-          <div className="flex gap-6 text-sm">
-            <Link href="/privacy" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
-              Terms of Service
-            </Link>
+          <div className="flex flex-col gap-4 border-t border-[var(--border)] px-6 py-6 text-sm text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between lg:px-10">
+            <p>&copy; {new Date().getFullYear()} AKAAR. Precision parts, responsibly shipped.</p>
+            <div className="flex gap-5">
+              <Link href="/privacy" className="transition-colors hover:text-[var(--text-primary)]">
+                Privacy
+              </Link>
+              <Link href="/terms" className="transition-colors hover:text-[var(--text-primary)]">
+                Terms
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: Array<{ label: string; href: string }>;
+}) {
+  return (
+    <div>
+      <p className="luxury-metric-label mb-4">{title}</p>
+      <ul className="space-y-3">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              className="text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

@@ -17,6 +17,7 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
 
   // Payment (Razorpay)
+  NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
 
@@ -40,6 +41,8 @@ const envSchema = z.object({
   API_URL: z.string().url().optional(),
   NEXT_PUBLIC_API_URL: z.string().url().optional(),
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
 
   // Sentry (optional)
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
@@ -93,4 +96,12 @@ export function isEmailConfigured(): boolean {
 // Helper to check if Sentry is configured
 export function isSentryConfigured(): boolean {
   return !!(env.NEXT_PUBLIC_SENTRY_DSN || env.SENTRY_DSN);
+}
+
+// Helper to check if Supabase frontend config is present
+export function isSupabaseConfigured(): boolean {
+  return !!(
+    env.NEXT_PUBLIC_SUPABASE_URL &&
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  );
 }

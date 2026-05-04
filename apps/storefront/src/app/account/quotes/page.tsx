@@ -1,22 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  FileText,
-  Search,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Download,
-  Plus,
   AlertCircle,
-  MessageSquare,
+  CheckCircle,
+  Clock,
+  FileText,
+  Plus,
+  Search,
+  XCircle,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { EmptyStatePanel, SummaryRow } from "@/components/ui/storefront-primitives";
 import { useSettings } from "@/context/SettingsContext";
 
 interface Quote {
@@ -27,17 +25,17 @@ interface Quote {
   service: string;
   material: string;
   quantity: number;
-  estimatedPrice?: number;
-  notes?: string;
+  quotedPrice?: number | string | null;
+  notes?: string | null;
 }
 
-const statusConfig: Record<string, { icon: LucideIcon; color: string; label: string }> = {
-  PENDING: { icon: Clock, color: "text-yellow-400 bg-yellow-400/10", label: "Pending Review" },
-  REVIEWING: { icon: FileText, color: "text-blue-400 bg-blue-400/10", label: "Under Review" },
-  QUOTED: { icon: CheckCircle, color: "text-green-400 bg-green-400/10", label: "Quote Ready" },
-  ACCEPTED: { icon: CheckCircle, color: "text-cyan-400 bg-cyan-400/10", label: "Accepted" },
-  REJECTED: { icon: XCircle, color: "text-red-400 bg-red-400/10", label: "Declined" },
-  EXPIRED: { icon: AlertCircle, color: "text-gray-400 bg-gray-400/10", label: "Expired" },
+const statusConfig: Record<string, { icon: LucideIcon; tone: string; label: string }> = {
+  PENDING: { icon: Clock, tone: "bg-amber-500/10 text-amber-200", label: "Pending Review" },
+  REVIEWING: { icon: FileText, tone: "bg-sky-500/10 text-sky-200", label: "Under Review" },
+  QUOTED: { icon: CheckCircle, tone: "bg-emerald-500/10 text-emerald-200", label: "Quote Ready" },
+  ACCEPTED: { icon: CheckCircle, tone: "bg-cyan-500/10 text-cyan-200", label: "Accepted" },
+  REJECTED: { icon: XCircle, tone: "bg-rose-500/10 text-rose-200", label: "Declined" },
+  EXPIRED: { icon: AlertCircle, tone: "bg-zinc-500/10 text-zinc-300", label: "Expired" },
 };
 
 export default function QuotesPage() {
@@ -47,170 +45,103 @@ export default function QuotesPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    async function fetchQuotes() {
+      setLoading(true);
+
+      try {
+        const response = await fetch("/api/user/quotes", { cache: "no-store" });
+        if (!response.ok) {
+          setQuotes([]);
+          return;
+        }
+
+        const data = await response.json();
+        setQuotes(data.quotes || []);
+      } catch {
+        setQuotes([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchQuotes();
   }, []);
 
-  const fetchQuotes = async () => {
-    try {
-      const res = await fetch("/api/user/quotes");
-      if (res.ok) {
-        const data = await res.json();
-        setQuotes(data.quotes || []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch quotes:", error);
-      // Mock data for demo
-      setQuotes([
-        {
-          id: "1",
-          quoteNumber: "QT-2024-001",
-          createdAt: "2024-02-20",
-          status: "QUOTED",
-          service: "3D Printing",
-          material: "PLA",
-          quantity: 50,
-          estimatedPrice: 15000,
-          notes: "Custom bracket design for industrial use",
-        },
-        {
-          id: "2",
-          quoteNumber: "QT-2024-002",
-          createdAt: "2024-02-18",
-          status: "REVIEWING",
-          service: "CNC Machining",
-          material: "Aluminum",
-          quantity: 10,
-          notes: "Precision parts for automotive",
-        },
-        {
-          id: "3",
-          quoteNumber: "QT-2024-003",
-          createdAt: "2024-02-15",
-          status: "ACCEPTED",
-          service: "3D Printing",
-          material: "Resin",
-          quantity: 100,
-          estimatedPrice: 45000,
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredQuotes = quotes.filter((quote) =>
-    quote.quoteNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    quote.service.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredQuotes = useMemo(
+    () =>
+      quotes.filter((quote) =>
+        quote.quoteNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        quote.service.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [quotes, searchQuery]
   );
-
-  const StatusBadge = ({ status }: { status: string }) => {
-    const config = statusConfig[status] || statusConfig.PENDING;
-    const Icon = config.icon;
-    return (
-      <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}
-      >
-        <Icon className="w-3.5 h-3.5" />
-        {config.label}
-      </span>
-    );
-  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-start justify-between gap-4"
-      >
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-            Account
-          </span>
-          <h1 className="text-3xl md:text-4xl font-bold mt-2">
-            <span className="gradient-text">My Quotes</span>
+          <span className="luxury-kicker">Quotes</span>
+          <h1 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+            Build requests under review.
           </h1>
-          <p className="text-[var(--text-secondary)] mt-2">
-            Track your custom project quote requests
+          <p className="mt-3 text-[var(--text-secondary)]">
+            Track quote status, quoted prices, and the service configuration for each request.
           </p>
         </div>
         <Link href="/quote">
           <Button>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             New Quote Request
           </Button>
         </Link>
       </motion.div>
 
-      {/* Search */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
+      <div className="luxury-card rounded-[1.8rem] p-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
             type="text"
-            placeholder="Search by quote number or service..."
+            placeholder="Search by quote number or service"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="luxury-input w-full rounded-full py-3 pl-11 pr-4 text-sm"
           />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Quotes List */}
       {filteredQuotes.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-16 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]"
-        >
-          <FileText className="w-16 h-16 mx-auto mb-4 text-[var(--text-muted)]" />
-          <h3 className="text-xl font-semibold mb-2">No quotes found</h3>
-          <p className="text-[var(--text-muted)] mb-6">
-            {quotes.length === 0
-              ? "You haven't requested any quotes yet."
-              : "No quotes match your search criteria."}
-          </p>
-          {quotes.length === 0 && (
-            <Link href="/quote">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Request a Quote
-              </Button>
-            </Link>
-          )}
-        </motion.div>
+        <EmptyStatePanel
+          icon={FileText}
+          title="No quotes found"
+          description={quotes.length === 0 ? "You haven’t requested any quotes yet." : "No quote requests match your search."}
+          action={quotes.length === 0 ? <Link href="/quote"><Button><Plus className="mr-2 h-4 w-4" />Request a Quote</Button></Link> : undefined}
+        />
       ) : (
         <div className="space-y-4">
           {filteredQuotes.map((quote, index) => (
-            <motion.div
+            <motion.article
               key={quote.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 * index }}
-              className="border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] overflow-hidden"
+              className="luxury-card overflow-hidden rounded-[1.9rem]"
             >
-              {/* Quote Header */}
-              <div className="p-4 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col gap-4 border-b border-[var(--border)] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 border border-[var(--border)] rounded-lg flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-[var(--accent)]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-[var(--bg-primary)]">
+                    <FileText className="h-5 w-5 text-[var(--accent)]" />
                   </div>
                   <div>
-                    <p className="font-mono font-semibold">{quote.quoteNumber}</p>
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <p className="font-mono text-sm text-[var(--text-primary)]">{quote.quoteNumber}</p>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
                       {new Date(quote.createdAt).toLocaleDateString("en-IN", {
                         year: "numeric",
                         month: "long",
@@ -221,69 +152,44 @@ export default function QuotesPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <StatusBadge status={quote.status} />
-                  {quote.estimatedPrice && (
-                    <span className="text-lg font-bold">
-                      {formatPrice(quote.estimatedPrice)}
+                  {quote.quotedPrice ? (
+                    <span className="text-sm font-medium text-[var(--text-primary)]">
+                      {formatPrice(Number(quote.quotedPrice))}
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
-              {/* Quote Details */}
-              <div className="p-4">
-                <div className="grid sm:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm text-[var(--text-muted)]">Service</p>
-                    <p className="font-medium">{quote.service}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-[var(--text-muted)]">Material</p>
-                    <p className="font-medium">{quote.material}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-[var(--text-muted)]">Quantity</p>
-                    <p className="font-medium">{quote.quantity} units</p>
-                  </div>
-                </div>
-
-                {quote.notes && (
-                  <div className="mb-4 p-3 bg-[var(--bg-primary)] rounded-lg">
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      {quote.notes}
-                    </p>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3">
-                  <Button variant="secondary" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Details
-                  </Button>
-                  {quote.status === "QUOTED" && (
-                    <>
-                      <Button size="sm">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Accept Quote
-                      </Button>
-                      <Button variant="secondary" size="sm">
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Negotiate
-                      </Button>
-                    </>
-                  )}
-                  {quote.estimatedPrice && (
-                    <Button variant="secondary" size="sm">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download PDF
-                    </Button>
-                  )}
-                </div>
+              <div className="grid gap-px bg-[var(--border)] sm:grid-cols-3">
+                <SummaryCell label="Service" value={quote.service} />
+                <SummaryCell label="Material" value={quote.material} />
+                <SummaryCell label="Quantity" value={`${quote.quantity} units`} />
               </div>
-            </motion.div>
+
+              {quote.notes ? (
+                <div className="bg-[var(--bg-secondary)] px-5 py-5 text-sm leading-7 text-[var(--text-secondary)]">
+                  {quote.notes}
+                </div>
+              ) : null}
+            </motion.article>
           ))}
         </div>
       )}
     </div>
   );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const config = statusConfig[status] || statusConfig.PENDING;
+  const Icon = config.icon;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${config.tone}`}>
+      <Icon className="h-3.5 w-3.5" />
+      {config.label}
+    </span>
+  );
+}
+
+function SummaryCell({ label, value }: { label: string; value: string }) {
+  return <SummaryRow label={label} value={value} />;
 }

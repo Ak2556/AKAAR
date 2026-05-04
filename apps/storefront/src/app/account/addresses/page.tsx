@@ -1,34 +1,35 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  MapPin,
-  Plus,
-  Edit2,
-  Trash2,
-  Home,
+  AlertCircle,
   Building,
   Check,
+  Edit2,
+  Home,
+  MapPin,
+  Plus,
+  Trash2,
   X,
-  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { EmptyStatePanel, FieldBlock } from "@/components/ui/storefront-primitives";
 import { useToast } from "@/context/ToastContext";
 
 interface Address {
   id: string;
-  label: string;
+  label: string | null;
   type: "home" | "work" | "other";
   firstName: string;
   lastName: string;
   address: string;
-  apartment?: string;
+  apartment?: string | null;
   city: string;
   state: string;
   zip: string;
   country: string;
-  phone?: string;
+  phone?: string | null;
   isDefault: boolean;
 }
 
@@ -65,131 +66,124 @@ export default function AddressesPage() {
   const [formData, setFormData] = useState<Omit<Address, "id">>(emptyAddress);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
-
   const fetchAddresses = async () => {
+    setLoading(true);
+
     try {
-      const res = await fetch("/api/user/addresses");
-      if (res.ok) {
-        const data = await res.json();
-        setAddresses(data.addresses || []);
+      const response = await fetch("/api/user/addresses", { cache: "no-store" });
+      if (!response.ok) {
+        setAddresses([]);
+        return;
       }
-    } catch (error) {
-      console.error("Failed to fetch addresses:", error);
-      // Use mock data for demo
-      setAddresses([
-        {
-          id: "1",
-          label: "Home",
-          type: "home",
-          firstName: "John",
-          lastName: "Doe",
-          address: "123 Main Street",
-          apartment: "Apt 4B",
-          city: "Mumbai",
-          state: "Maharashtra",
-          zip: "400001",
-          country: "India",
-          phone: "+91 98765 43210",
-          isDefault: true,
-        },
-        {
-          id: "2",
-          label: "Office",
-          type: "work",
-          firstName: "John",
-          lastName: "Doe",
-          address: "456 Business Park",
-          city: "Bengaluru",
-          state: "Karnataka",
-          zip: "560001",
-          country: "India",
-          isDefault: false,
-        },
-      ]);
+
+      const data = await response.json();
+      setAddresses(data.addresses || []);
+    } catch {
+      setAddresses([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  const resetForm = () => {
+    setFormData(emptyAddress);
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setSaving(true);
 
     try {
-      const url = editingId
-        ? `/api/user/addresses/${editingId}`
-        : "/api/user/addresses";
+      const url = editingId ? `/api/user/addresses/${editingId}` : "/api/user/addresses";
       const method = editingId ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        toast.success(
-          editingId ? "Address updated successfully" : "Address added successfully"
-        );
-        fetchAddresses();
-        resetForm();
-      } else {
-        throw new Error("Failed to save address");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to save address");
       }
-    } catch {
-      // For demo, just update local state
-      if (editingId) {
-        setAddresses((prev) =>
-          prev.map((a) => (a.id === editingId ? { ...formData, id: editingId } : a))
-        );
-      } else {
-        setAddresses((prev) => [
-          ...prev,
-          { ...formData, id: Date.now().toString() },
-        ]);
-      }
-      toast.success(
-        editingId ? "Address updated successfully" : "Address added successfully"
-      );
+
+      toast.success(editingId ? "Address updated" : "Address added");
+      await fetchAddresses();
       resetForm();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save address");
     } finally {
       setSaving(false);
     }
   };
 
   const handleEdit = (address: Address) => {
-    setFormData(address);
+    setFormData({
+      label: address.label || "",
+      type: address.type,
+      firstName: address.firstName,
+      lastName: address.lastName,
+      address: address.address,
+      apartment: address.apartment || "",
+      city: address.city,
+      state: address.state,
+      zip: address.zip,
+      country: address.country,
+      phone: address.phone || "",
+      isDefault: address.isDefault,
+    });
     setEditingId(address.id);
     setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
+    if (!confirm("Delete this address?")) return;
 
     try {
-      await fetch(`/api/user/addresses/${id}`, { method: "DELETE" });
-      setAddresses((prev) => prev.filter((a) => a.id !== id));
-      toast.success("Address deleted successfully");
-    } catch {
-      setAddresses((prev) => prev.filter((a) => a.id !== id));
-      toast.success("Address deleted successfully");
+      const response = await fetch(`/api/user/addresses/${id}`, { method: "DELETE" });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete address");
+      }
+
+      toast.success("Address deleted");
+      await fetchAddresses();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete address");
     }
   };
 
-  const handleSetDefault = async (id: string) => {
-    setAddresses((prev) =>
-      prev.map((a) => ({ ...a, isDefault: a.id === id }))
-    );
-    toast.success("Default address updated");
-  };
+  const handleSetDefault = async (address: Address) => {
+    try {
+      const response = await fetch(`/api/user/addresses/${address.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...address,
+          label: address.label || "",
+          apartment: address.apartment || "",
+          phone: address.phone || "",
+          isDefault: true,
+        }),
+      });
 
-  const resetForm = () => {
-    setFormData(emptyAddress);
-    setEditingId(null);
-    setShowForm(false);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update address");
+      }
+
+      toast.success("Default address updated");
+      await fetchAddresses();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update address");
+    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -205,395 +199,175 @@ export default function AddressesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-start justify-between"
-      >
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-            Account
-          </span>
-          <h1 className="text-3xl md:text-4xl font-bold mt-2">
-            <span className="gradient-text">My Addresses</span>
+          <span className="luxury-kicker">Addresses</span>
+          <h1 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+            Delivery destinations for current and future builds.
           </h1>
-          <p className="text-[var(--text-secondary)] mt-2">
-            Manage your shipping addresses
+          <p className="mt-3 text-[var(--text-secondary)]">
+            Manage saved addresses to keep checkout fast and accurate.
           </p>
         </div>
-        {!showForm && (
+        {!showForm ? (
           <Button onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Add Address
           </Button>
-        )}
+        ) : null}
       </motion.div>
 
-      {/* Add/Edit Form */}
-      {showForm && (
+      {showForm ? (
         <motion.form
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="p-6 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]"
+          className="luxury-card rounded-[2rem] p-6 sm:p-7"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold">
-              {editingId ? "Edit Address" : "Add New Address"}
-            </h2>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="p-2 hover:bg-[var(--bg-primary)] rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <span className="luxury-kicker">{editingId ? "Edit address" : "New address"}</span>
+              <h2 className="display-font mt-3 text-3xl text-[var(--text-primary)]">
+                {editingId ? "Update saved destination" : "Add a new destination"}
+              </h2>
+            </div>
+            <button type="button" onClick={resetForm} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]">
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            {/* Address Type */}
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+            <FieldBlock label="Address label">
+              <input type="text" value={formData.label || ""} onChange={(event) => setFormData({ ...formData, label: event.target.value })} placeholder="Home, Office, Studio" className="luxury-input w-full rounded-full px-5 py-3" />
+            </FieldBlock>
+            <FieldBlock label="Address type">
+              <select value={formData.type} onChange={(event) => setFormData({ ...formData, type: event.target.value as Address["type"] })} className="luxury-input w-full rounded-full px-5 py-3">
+                <option value="home">Home</option>
+                <option value="work">Work</option>
+                <option value="other">Other</option>
+              </select>
+            </FieldBlock>
+            <FieldBlock label="First name *">
+              <input type="text" required value={formData.firstName} onChange={(event) => setFormData({ ...formData, firstName: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+            </FieldBlock>
+            <FieldBlock label="Last name *">
+              <input type="text" required value={formData.lastName} onChange={(event) => setFormData({ ...formData, lastName: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+            </FieldBlock>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                Address Type
-              </label>
-              <div className="flex gap-2">
-                {(["home", "work", "other"] as const).map((type) => {
-                  const Icon = getTypeIcon(type);
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type })}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all capitalize ${
-                        formData.type === type
-                          ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
-                          : "border-[var(--border)] hover:border-[var(--accent)]/50"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {type}
-                    </button>
-                  );
-                })}
-              </div>
+              <FieldBlock label="Street address *">
+                <input type="text" required value={formData.address} onChange={(event) => setFormData({ ...formData, address: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+              </FieldBlock>
             </div>
-
-            {/* Label */}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                Address Label
-              </label>
-              <input
-                type="text"
-                value={formData.label}
-                onChange={(e) =>
-                  setFormData({ ...formData, label: e.target.value })
-                }
-                placeholder="e.g., Home, Office, Mom's Place"
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
+              <FieldBlock label="Apartment, suite, etc.">
+                <input type="text" value={formData.apartment || ""} onChange={(event) => setFormData({ ...formData, apartment: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+              </FieldBlock>
             </div>
-
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                First Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.firstName}
-                onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Last Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.lastName}
-                onChange={(e) =>
-                  setFormData({ ...formData, lastName: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-
-            {/* Address */}
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                Street Address *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-                placeholder="House/Flat number, Street name"
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                Apartment, Suite, etc.
-              </label>
-              <input
-                type="text"
-                value={formData.apartment}
-                onChange={(e) =>
-                  setFormData({ ...formData, apartment: e.target.value })
-                }
-                placeholder="Optional"
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-
-            {/* City & State */}
-            <div>
-              <label className="block text-sm font-medium mb-2">City *</label>
-              <input
-                type="text"
-                required
-                value={formData.city}
-                onChange={(e) =>
-                  setFormData({ ...formData, city: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">State *</label>
-              <select
-                required
-                value={formData.state}
-                onChange={(e) =>
-                  setFormData({ ...formData, state: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              >
+            <FieldBlock label="City *">
+              <input type="text" required value={formData.city} onChange={(event) => setFormData({ ...formData, city: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+            </FieldBlock>
+            <FieldBlock label="State *">
+              <select required value={formData.state} onChange={(event) => setFormData({ ...formData, state: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3">
                 <option value="">Select State</option>
                 {indianStates.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
+                  <option key={state} value={state}>{state}</option>
                 ))}
               </select>
-            </div>
-
-            {/* ZIP & Country */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                PIN Code *
-              </label>
-              <input
-                type="text"
-                required
-                pattern="[0-9]{6}"
-                value={formData.zip}
-                onChange={(e) =>
-                  setFormData({ ...formData, zip: e.target.value })
-                }
-                placeholder="6-digit PIN code"
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Country</label>
-              <input
-                type="text"
-                value={formData.country}
-                disabled
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg opacity-50"
-              />
-            </div>
-
-            {/* Phone */}
+            </FieldBlock>
+            <FieldBlock label="PIN code *">
+              <input type="text" required pattern="[0-9]{6}" value={formData.zip} onChange={(event) => setFormData({ ...formData, zip: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+            </FieldBlock>
+            <FieldBlock label="Phone">
+              <input type="tel" value={formData.phone || ""} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} className="luxury-input w-full rounded-full px-5 py-3" />
+            </FieldBlock>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                placeholder="+91 98765 43210"
-                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-
-            {/* Default Address */}
-            <div className="sm:col-span-2">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isDefault}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isDefault: e.target.checked })
-                  }
-                  className="w-5 h-5 rounded border-[var(--border)] text-[var(--accent)] focus:ring-[var(--accent)]"
-                />
-                <span>Set as default shipping address</span>
+              <label className="flex items-center gap-3 rounded-[1.4rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-4">
+                <input type="checkbox" checked={formData.isDefault} onChange={(event) => setFormData({ ...formData, isDefault: event.target.checked })} className="h-5 w-5 rounded border-[var(--border)]" />
+                <span className="text-sm text-[var(--text-primary)]">Set as default shipping address</span>
               </label>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[var(--border)]">
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={saving}>
-              {saving
-                ? "Saving..."
-                : editingId
-                ? "Update Address"
-                : "Add Address"}
-            </Button>
+          <div className="mt-8 flex justify-end gap-3 border-t border-[var(--border)] pt-6">
+            <Button type="button" variant="secondary" onClick={resetForm}>Cancel</Button>
+            <Button type="submit" disabled={saving}>{saving ? "Saving..." : editingId ? "Update Address" : "Add Address"}</Button>
           </div>
         </motion.form>
-      )}
+      ) : null}
 
-      {/* Addresses List */}
       {!showForm && addresses.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-16 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]"
-        >
-          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-[var(--text-muted)]" />
-          <h3 className="text-xl font-semibold mb-2">No addresses saved</h3>
-          <p className="text-[var(--text-muted)] mb-6">
-            Add a shipping address to speed up checkout
-          </p>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Your First Address
-          </Button>
-        </motion.div>
-      ) : (
-        !showForm && (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {addresses.map((address, index) => {
-              const Icon = getTypeIcon(address.type);
-              return (
-                <motion.div
-                  key={address.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * index }}
-                  className={`p-6 border rounded-xl transition-all ${
-                    address.isDefault
-                      ? "border-[var(--accent)] bg-[var(--accent)]/5"
-                      : "border-[var(--border)] bg-[var(--bg-secondary)]"
-                  }`}
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 border rounded-lg flex items-center justify-center ${
-                          address.isDefault
-                            ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                            : "border-[var(--border)]"
-                        }`}
-                      >
-                        <Icon
-                          className={`w-5 h-5 ${
-                            address.isDefault
-                              ? "text-[var(--accent)]"
-                              : "text-[var(--text-muted)]"
-                          }`}
-                        />
-                      </div>
-                      <div>
-                        <p className="font-semibold flex items-center gap-2">
-                          {address.label || address.type}
-                          {address.isDefault && (
-                            <span className="text-xs px-2 py-0.5 bg-[var(--accent)]/20 text-[var(--accent)] rounded">
-                              Default
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-sm text-[var(--text-muted)] capitalize">
-                          {address.type}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleEdit(address)}
-                        className="p-2 hover:bg-[var(--bg-primary)] rounded-lg transition-colors"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-4 h-4 text-[var(--text-muted)]" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(address.id)}
-                        className="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </button>
-                    </div>
-                  </div>
+        <EmptyStatePanel
+          icon={AlertCircle}
+          title="No addresses saved"
+          description="Add a shipping address to speed up checkout."
+          action={<Button onClick={() => setShowForm(true)}><Plus className="mr-2 h-4 w-4" />Add Your First Address</Button>}
+        />
+      ) : null}
 
-                  {/* Address Details */}
-                  <div className="space-y-1 text-sm">
-                    <p className="font-medium">
-                      {address.firstName} {address.lastName}
-                    </p>
-                    <p className="text-[var(--text-secondary)]">
-                      {address.address}
-                      {address.apartment && `, ${address.apartment}`}
-                    </p>
-                    <p className="text-[var(--text-secondary)]">
-                      {address.city}, {address.state} {address.zip}
-                    </p>
-                    <p className="text-[var(--text-secondary)]">
-                      {address.country}
-                    </p>
-                    {address.phone && (
-                      <p className="text-[var(--text-muted)] pt-2">
-                        {address.phone}
+      {!showForm && addresses.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {addresses.map((address, index) => {
+            const Icon = getTypeIcon(address.type);
+            return (
+              <motion.article
+                key={address.id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 * index }}
+                className={`luxury-card rounded-[1.9rem] p-6 ${address.isDefault ? "ring-1 ring-[var(--accent)]/35" : ""}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-[var(--bg-primary)]">
+                      <Icon className={`h-5 w-5 ${address.isDefault ? "text-[var(--accent)]" : "text-[var(--text-muted)]"}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {address.label || address.type}
                       </p>
-                    )}
+                      <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                        {address.isDefault ? "Default address" : address.type}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Set as Default */}
-                  {!address.isDefault && (
-                    <button
-                      onClick={() => handleSetDefault(address.id)}
-                      className="mt-4 flex items-center gap-2 text-sm text-[var(--accent)] hover:underline"
-                    >
-                      <Check className="w-4 h-4" />
-                      Set as default
+                  <div className="flex gap-1">
+                    <button onClick={() => handleEdit(address)} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]">
+                      <Edit2 className="h-4 w-4" />
                     </button>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        )
-      )}
+                    <button onClick={() => handleDelete(address.id)} className="rounded-full p-2 text-red-300 hover:bg-red-500/10">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-1 text-sm text-[var(--text-secondary)]">
+                  <p className="font-medium text-[var(--text-primary)]">{address.firstName} {address.lastName}</p>
+                  <p>{address.address}{address.apartment ? `, ${address.apartment}` : ""}</p>
+                  <p>{address.city}, {address.state} {address.zip}</p>
+                  <p>{address.country}</p>
+                  {address.phone ? <p className="pt-2 text-[var(--text-muted)]">{address.phone}</p> : null}
+                </div>
+
+                {!address.isDefault ? (
+                  <button onClick={() => handleSetDefault(address)} className="mt-5 inline-flex items-center gap-2 text-sm text-[var(--text-primary)] transition-colors hover:text-[var(--accent)]">
+                    <Check className="h-4 w-4" />
+                    Set as default
+                  </button>
+                ) : null}
+              </motion.article>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

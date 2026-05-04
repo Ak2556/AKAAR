@@ -1,33 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ArrowRight, Package, FileQuestion, Wrench } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowRight,
+  FileQuestion,
+  Package,
+  Search,
+  Wrench,
+  X,
+} from "lucide-react";
 import Link from "next/link";
-
-// Mock data for search
-const products = [
-  { id: "1", name: "Precision Gear Assembly", slug: "precision-gear-assembly", category: "Industrial", price: 149 },
-  { id: "2", name: "Custom Electronics Enclosure", slug: "custom-electronics-enclosure", category: "Electronics", price: 79 },
-  { id: "3", name: "Rapid Prototype Part", slug: "rapid-prototype-part", category: "Prototyping", price: 49 },
-  { id: "4", name: "Medical Device Housing", slug: "medical-device-housing", category: "Medical", price: 299 },
-  { id: "5", name: "Automotive Bracket", slug: "automotive-bracket", category: "Automotive", price: 89 },
-  { id: "6", name: "Drone Frame Component", slug: "drone-frame-component", category: "Aerospace", price: 199 },
-];
+import { useEffect, useRef, useState } from "react";
+import { useSettings } from "@/context/SettingsContext";
 
 const faqs = [
-  { question: "What file formats do you accept?", category: "ordering" },
-  { question: "How long does production take?", category: "shipping" },
-  { question: "What materials are available?", category: "materials" },
-  { question: "Do you offer volume discounts?", category: "pricing" },
-  { question: "What tolerances can you achieve?", category: "technical" },
+  { question: "What file formats do you accept?", href: "/quote" },
+  { question: "How long does a quote review take?", href: "/quote" },
+  { question: "Which materials are available today?", href: "/services" },
 ];
 
-const services = [
+const quickLinks = [
   { name: "3D Printing", href: "/services" },
-  { name: "CNC Machining", href: "/services" },
-  { name: "Rapid Prototyping", href: "/services" },
-  { name: "Design Services", href: "/services" },
+  { name: "Design for Manufacturing", href: "/services" },
+  { name: "Request a Quote", href: "/quote" },
 ];
 
 interface SearchModalProps {
@@ -35,19 +30,36 @@ interface SearchModalProps {
   onClose: () => void;
 }
 
+interface ProductResult {
+  id: string;
+  name: string;
+  slug: string;
+  category: string | null;
+  price: number | string | null;
+}
+
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
-  const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const { formatPrice } = useSettings();
+  const [query, setQuery] = useState("");
+  const [products, setProducts] = useState<ProductResult[]>([]);
+  const [catalogAvailable, setCatalogAvailable] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
+    } else {
+      setQuery("");
+      setProducts([]);
+      setCatalogAvailable(true);
+      setLoading(false);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         onClose();
       }
     };
@@ -63,22 +75,48 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     };
   }, [isOpen, onClose]);
 
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.category.toLowerCase().includes(query.toLowerCase())
-  );
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setProducts([]);
+      setCatalogAvailable(true);
+      setLoading(false);
+      return;
+    }
 
-  const filteredFaqs = faqs.filter((f) =>
-    f.question.toLowerCase().includes(query.toLowerCase())
-  );
+    const timeout = window.setTimeout(async () => {
+      setLoading(true);
 
-  const filteredServices = services.filter((s) =>
-    s.name.toLowerCase().includes(query.toLowerCase())
+      try {
+        const response = await fetch(
+          `/api/products?search=${encodeURIComponent(trimmed)}&limit=4`,
+          { cache: "no-store" }
+        );
+        const data = await response.json();
+        setProducts(data.products || []);
+        setCatalogAvailable(Boolean(data.catalogAvailable));
+      } catch {
+        setProducts([]);
+        setCatalogAvailable(false);
+      } finally {
+        setLoading(false);
+      }
+    }, 200);
+
+    return () => window.clearTimeout(timeout);
+  }, [query]);
+
+  const filteredFaqs = faqs.filter((faq) =>
+    faq.question.toLowerCase().includes(query.toLowerCase())
+  );
+  const filteredQuickLinks = quickLinks.filter((link) =>
+    link.name.toLowerCase().includes(query.toLowerCase())
   );
 
   const hasResults =
-    filteredProducts.length > 0 || filteredFaqs.length > 0 || filteredServices.length > 0;
+    products.length > 0 ||
+    filteredFaqs.length > 0 ||
+    filteredQuickLinks.length > 0;
 
   const handleLinkClick = () => {
     setQuery("");
@@ -89,7 +127,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -98,7 +135,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           />
 
-          {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -106,15 +142,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             className="fixed top-[10%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4"
           >
             <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden">
-              {/* Search Input */}
               <div className="flex items-center gap-4 p-4 border-b border-[var(--border)]">
                 <Search className="w-5 h-5 text-[var(--text-muted)]" />
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Search products, FAQs, services..."
+                  placeholder="Search products and quick links..."
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(event) => setQuery(event.target.value)}
                   className="flex-1 bg-transparent text-lg focus:outline-none"
                 />
                 <button
@@ -125,14 +160,13 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 </button>
               </div>
 
-              {/* Results */}
               <div className="max-h-[60vh] overflow-y-auto">
                 {query === "" ? (
                   <div className="p-6 text-center text-[var(--text-muted)]">
                     <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Start typing to search...</p>
+                    <p>Start typing to search the catalog</p>
                     <div className="flex flex-wrap justify-center gap-2 mt-4">
-                      {["Gears", "Enclosure", "Prototype", "CNC"].map((term) => (
+                      {["Bracket", "Enclosure", "Prototype"].map((term) => (
                         <button
                           key={term}
                           onClick={() => setQuery(term)}
@@ -143,28 +177,42 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       ))}
                     </div>
                   </div>
-                ) : !hasResults ? (
+                ) : loading ? (
                   <div className="p-6 text-center text-[var(--text-muted)]">
-                    <p>No results found for "{query}"</p>
+                    Searching...
+                  </div>
+                ) : !catalogAvailable && products.length === 0 ? (
+                  <div className="p-6 text-center text-[var(--text-muted)]">
+                    <p>Catalog search is unavailable in this environment.</p>
                     <Link
-                      href="/contact"
+                      href="/quote"
                       onClick={handleLinkClick}
                       className="text-[var(--accent)] hover:underline mt-2 inline-block"
                     >
-                      Contact us for help
+                      Request a reviewed quote instead
+                    </Link>
+                  </div>
+                ) : !hasResults ? (
+                  <div className="p-6 text-center text-[var(--text-muted)]">
+                    <p>No results found for &quot;{query}&quot;</p>
+                    <Link
+                      href={`/products?search=${encodeURIComponent(query)}`}
+                      onClick={handleLinkClick}
+                      className="text-[var(--accent)] hover:underline mt-2 inline-block"
+                    >
+                      Open catalog search
                     </Link>
                   </div>
                 ) : (
                   <div className="p-4 space-y-6">
-                    {/* Products */}
-                    {filteredProducts.length > 0 && (
+                    {products.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-3">
                           <Package className="w-4 h-4" />
                           <span>Products</span>
                         </div>
                         <div className="space-y-2">
-                          {filteredProducts.slice(0, 4).map((product) => (
+                          {products.map((product) => (
                             <Link
                               key={product.id}
                               href={`/products/${product.slug}`}
@@ -176,39 +224,36 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                   {product.name}
                                 </p>
                                 <p className="text-sm text-[var(--text-muted)]">
-                                  {product.category}
+                                  {product.category || "Uncategorized"}
                                 </p>
                               </div>
                               <div className="flex items-center gap-3">
                                 <span className="text-[var(--accent)] font-medium">
-                                  ${product.price}
+                                  {formatPrice(Number(product.price) || 0)}
                                 </span>
                                 <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
                               </div>
                             </Link>
                           ))}
-                          {filteredProducts.length > 4 && (
-                            <Link
-                              href={`/products?search=${encodeURIComponent(query)}`}
-                              onClick={handleLinkClick}
-                              className="block text-center text-sm text-[var(--accent)] hover:underline py-2"
-                            >
-                              View all {filteredProducts.length} products
-                            </Link>
-                          )}
+                          <Link
+                            href={`/products?search=${encodeURIComponent(query)}`}
+                            onClick={handleLinkClick}
+                            className="block text-center text-sm text-[var(--accent)] hover:underline py-2"
+                          >
+                            View catalog results
+                          </Link>
                         </div>
                       </div>
                     )}
 
-                    {/* Services */}
-                    {filteredServices.length > 0 && (
+                    {filteredQuickLinks.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-3">
                           <Wrench className="w-4 h-4" />
-                          <span>Services</span>
+                          <span>Quick Links</span>
                         </div>
                         <div className="space-y-2">
-                          {filteredServices.map((service) => (
+                          {filteredQuickLinks.map((service) => (
                             <Link
                               key={service.name}
                               href={service.href}
@@ -225,7 +270,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       </div>
                     )}
 
-                    {/* FAQs */}
                     {filteredFaqs.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-3">
@@ -233,10 +277,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           <span>FAQ</span>
                         </div>
                         <div className="space-y-2">
-                          {filteredFaqs.slice(0, 3).map((faq, index) => (
+                          {filteredFaqs.map((faq) => (
                             <Link
-                              key={index}
-                              href="/faq"
+                              key={faq.question}
+                              href={faq.href}
                               onClick={handleLinkClick}
                               className="flex items-center justify-between p-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors group"
                             >
@@ -253,7 +297,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 )}
               </div>
 
-              {/* Footer */}
               <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-secondary)]">
                 <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
                   <div className="flex items-center gap-4">

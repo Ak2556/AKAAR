@@ -1,412 +1,437 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Target, Eye, Rocket, Users, Award,
-  Printer, Cpu, Cog, ArrowRight, CheckCircle, Star
+  ArrowRight,
+  CheckCircle,
+  Clock3,
+  Layers3,
+  Shield,
+  Sparkles,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { teamMembers } from "@/lib/team-data";
+import { BRAND_TAGLINE } from "@/lib/brand";
 
-// New engagement components
-import { AnimatedStats } from "@/components/about/AnimatedStats";
-import { InteractiveTimeline } from "@/components/about/InteractiveTimeline";
-import { TestimonialsCarousel } from "@/components/about/TestimonialsCarousel";
-import { WorkGallery } from "@/components/about/WorkGallery";
-import { ScrollProgress } from "@/components/about/ScrollProgress";
-import { SectionHeader } from "@/components/about/SectionHeader";
-import { EnhancedTeamCard } from "@/components/about/EnhancedTeamCard";
-import { EnhancedCTA } from "@/components/about/EnhancedCTA";
+const studioMetrics = [
+  { label: "Studio mode", value: "Real desk, real setup" },
+  { label: "Output", value: "Functional and decorative" },
+  { label: "Workflow", value: "Review before production" },
+];
 
-const values = [
+const showcaseProjects = [
   {
-    icon: Target,
-    title: "Precision",
-    description: "Every part we produce meets exact specifications with tolerances as tight as ±0.05mm.",
+    title: "Illuminated planter series",
+    category: "Ambient product build",
+    description:
+      "A soft-lit planter concept built as a product object, not just a print sample. The shape, glow, and desktop placement all matter together.",
+    image: "/showcase/studio/planter-lineup.png",
+    details: ["Lighting-led form", "Desk-scale object", "Repeatable enclosure geometry"],
   },
   {
-    icon: Rocket,
-    title: "Innovation",
-    description: "We continuously adopt cutting-edge technologies to deliver better results faster.",
+    title: "Shiva sculpt study",
+    category: "Detail and finish",
+    description:
+      "A character piece used to show form fidelity, surface handling, and how a dramatic outdoor shot makes the object feel finished rather than raw.",
+    image: "/showcase/studio/shiva-outdoor.png",
+    mediaMode: "portrait-stage",
+    details: ["Fine silhouette retention", "Strong outdoor presentation", "Showpiece-grade staging"],
   },
   {
-    icon: Users,
-    title: "Partnership",
-    description: "We work closely with clients, treating every project as a collaboration.",
-  },
-  {
-    icon: Award,
-    title: "Excellence",
-    description: "ISO 9001 certified processes ensure consistent quality in everything we do.",
+    title: "Temple pavilion with Ganesha",
+    category: "Multi-part composition",
+    description:
+      "This build demonstrates clean contrast between the pavilion shell and the figure inside, turning the print into a complete scene instead of a single isolated object.",
+    image: "/showcase/studio/ganesha-pavilion.png",
+    details: ["Two-tone composition", "Architectural detailing", "Gift/display ready output"],
   },
 ];
 
-const capabilities = [
+const detailFrames = [
   {
-    icon: Printer,
-    title: "3D Printing",
-    items: ["FDM / FFF (PLA, PETG, ABS)", "High-quality prints", "Large build volumes", "Multi-material options"],
-    comingSoon: false,
+    title: "Krishna close-up",
+    image: "/showcase/studio/krishna-macro.png",
   },
   {
-    icon: Cpu,
-    title: "CNC Machining",
-    items: ["3-axis milling", "5-axis milling", "Turning", "EDM"],
-    comingSoon: true,
+    title: "Shiva alternate finish",
+    image: "/showcase/studio/shiva-back.png",
   },
   {
-    icon: Cog,
-    title: "Post-Processing",
-    items: ["Surface finishing", "Painting", "Assembly", "Quality inspection"],
-    comingSoon: false,
+    title: "Fold lamp study",
+    image: "/showcase/studio/fold-lamp.png",
+  },
+  {
+    title: "Ganesha detail frame",
+    image: "/showcase/studio/ganesha-closeup.png",
+  },
+];
+
+const process = [
+  {
+    icon: Layers3,
+    title: "We prototype in context",
+    body:
+      "The product is judged as an object in a room, on a desk, or in a customer’s hand, not just on the build plate.",
+  },
+  {
+    icon: Shield,
+    title: "We review before we promise",
+    body:
+      "Every part moves through a material and geometry check so the quote reflects the real production path rather than a blind upload.",
+  },
+  {
+    icon: Clock3,
+    title: "We keep the loop tight",
+    body:
+      "Fast iteration matters, but the point is calm progress. The output should be cleaner, more usable, and closer to the intended object each round.",
   },
 ];
 
 export default function AboutPage() {
-  const heroRef = useRef(null);
-  const valuesRef = useRef(null);
-  const capabilitiesRef = useRef(null);
-  const teamRef = useRef(null);
-
-  const heroInView = useInView(heroRef, { once: true });
-  const valuesInView = useInView(valuesRef, { once: true, margin: "-100px" });
-  const capabilitiesInView = useInView(capabilitiesRef, { once: true, margin: "-100px" });
-  const teamInView = useInView(teamRef, { once: true, margin: "-100px" });
+  const founder = teamMembers.find((member) => member.isFounder);
+  const founderBioSections = founder ? founder.bio.split("\n\n").slice(0, 2) : [];
 
   return (
-    <div className="min-h-screen">
-      {/* Scroll Progress Indicator */}
-      <ScrollProgress />
-
-      {/* Hero */}
-      <section id="hero" ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 grid-overlay opacity-30" />
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--accent)]/5 rounded-full blur-3xl" />
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={heroInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8 }}
-            >
-              <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
-                We Give AKAAR to Ideas
-              </span>
-              <h1 className="text-5xl md:text-6xl font-bold mt-4 mb-6">
-                Engineering the <span className="gradient-text">Bottlenecks Out</span>
-              </h1>
-              <p className="text-lg text-[var(--text-secondary)] mb-8">
-                Local manufacturing and rapid prototyping are bottlenecked by manual, opaque
-                quoting processes, inconsistent print quality, and severe friction. We engineered
-                those bottlenecks out of existence. By merging intelligent software automation with
-                high-fidelity 3D print farms, we give creators, hardware startups, and engineers
-                a deterministic, zero-friction pipeline from digital mesh to physical product.
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Link href="/quote">
-                  <Button variant="primary" size="lg" glow>
-                    Start a Project
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button variant="outline" size="lg">
-                    Contact Us
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* Animated Stats */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={heroInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <AnimatedStats />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mission & Vision */}
-      <section id="mission" className="py-20 bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-8 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)]"
-            >
-              <div className="w-14 h-14 mb-6 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center">
-                <Target className="w-7 h-7 text-[var(--accent)]" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">The Problem</h2>
-              <p className="text-[var(--text-secondary)]">
-                Local manufacturing and rapid prototyping are bottlenecked by manual,
-                opaque quoting processes, inconsistent print quality, and severe friction
-                that slows down innovation cycles for engineers and hardware teams.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="p-8 border border-[var(--border)] rounded-xl bg-[var(--bg-primary)]"
-            >
-              <div className="w-14 h-14 mb-6 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center">
-                <Eye className="w-7 h-7 text-[var(--accent)]" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">The Akaar Solution</h2>
-              <p className="text-[var(--text-secondary)]">
-                We engineered those bottlenecks out of existence. By merging intelligent
-                software automation with high-fidelity 3D print farms, we deliver a
-                deterministic, zero-friction pipeline from digital mesh to physical product.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values */}
-      <section id="values" ref={valuesRef} className="py-20">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            preText="Our"
-            highlightText="Values"
-            subtitle="The principles that guide everything we do"
-          />
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => (
-              <motion.div
-                key={value.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={valuesInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="group p-6 border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/50 transition-all bg-[var(--bg-secondary)]"
-              >
-                <div className="w-12 h-12 mb-4 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)]/10 transition-all">
-                  <value.icon className="w-6 h-6 text-[var(--accent)]" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{value.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {value.description}
+    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-14">
+        <section className="luxury-panel relative overflow-hidden rounded-[2.45rem]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(214,178,114,0.14),transparent_28%),radial-gradient(circle_at_84%_22%,rgba(125,211,199,0.12),transparent_24%)]" />
+          <div className="grid gap-10 px-6 py-9 lg:grid-cols-[0.88fr_1.12fr] lg:px-10 lg:py-11">
+            <div className="relative z-10 flex flex-col justify-between gap-8">
+              <div className="editorial-stage-copy space-y-5">
+                <span className="luxury-kicker">About AKAAR</span>
+                <p className="editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
+                <h1 className="display-font text-[clamp(2.9rem,5vw,5rem)] leading-[0.94] text-[var(--text-primary)]">
+                  A working studio turning experimental prints into believable products.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
+                  AKAAR is not a made-up manufacturing brand with placeholder renders. The work comes out of an actual desktop setup, real machines, real lighting experiments, and repeated product studies until the object feels resolved.
                 </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+                <p className="editorial-eyebrow">Jaipur studio · Product studies · Review-led manufacturing</p>
+              </div>
 
-      {/* Capabilities */}
-      <section id="capabilities" ref={capabilitiesRef} className="py-20 bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            preText="Our"
-            highlightText="Capabilities"
-            subtitle="State-of-the-art equipment and expertise"
-          />
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Link href="/quote">
+                  <Button size="lg">
+                    Start a Build
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/products">
+                  <Button variant="outline" size="lg">
+                    View Collection
+                  </Button>
+                </Link>
+              </div>
+            </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {capabilities.map((cap, index) => (
-              <motion.div
-                key={cap.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={capabilitiesInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className={`p-8 border rounded-xl bg-[var(--bg-primary)] relative ${
-                  cap.comingSoon ? "border-amber-500/30 opacity-75" : "border-[var(--border)]"
-                }`}
-              >
-                {cap.comingSoon && (
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-amber-500/20 text-amber-500 text-xs font-semibold rounded-full border border-amber-500/30">
-                    Coming Soon
-                  </div>
-                )}
-                <div className="w-14 h-14 mb-6 border border-[var(--accent)]/30 rounded-lg flex items-center justify-center">
-                  <cap.icon className="w-7 h-7 text-[var(--accent)]" />
+            <div className="relative z-10 flex flex-col gap-5">
+              <div className="luxury-stage relative min-h-[390px] overflow-hidden rounded-[2rem] border border-white/8 p-5">
+                <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">Studio environment</div>
+                <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
+                  <img
+                    src="/showcase/studio/workspace-setup.png"
+                    alt="AKAAR workspace setup"
+                    className="hero-image-shadow"
+                  />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">{cap.title}</h3>
-                <ul className="space-y-3">
-                  {cap.items.map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-[var(--text-secondary)]">
-                      <CheckCircle className="w-4 h-4 text-[var(--accent)]" />
-                      {item}
-                    </li>
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.05)_0%,rgba(7,7,10,0.32)_100%)]" />
+                <div className="absolute bottom-0 left-0 right-0 grid gap-px border-t border-white/10 bg-white/10 sm:grid-cols-3">
+                  {studioMetrics.map((metric) => (
+                    <div key={metric.label} className="bg-[rgba(11,12,15,0.78)] px-5 py-4 backdrop-blur-md">
+                      <p className="luxury-metric-label text-white/42">{metric.label}</p>
+                      <p className="mt-2 text-sm font-medium text-white">{metric.value}</p>
+                    </div>
                   ))}
-                </ul>
-              </motion.div>
-            ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Timeline */}
-      <section id="journey" className="py-20">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            preText="Our"
-            highlightText="Journey"
-            subtitle="Key milestones in our growth - tap to learn more"
-          />
+        <section className="grid gap-6 lg:grid-cols-[1.02fr_0.98fr]">
+          <div className="luxury-card rounded-[2rem] p-6 sm:p-7">
+            <span className="luxury-kicker">How the brand is built</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              The process starts with objects that deserve to exist outside the slicer.
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
+              The strongest signal in your photos is that the work is already being tested as real products and living objects. That matters more than generic manufacturing copy, so the page now leads with the studio and the output itself.
+            </p>
 
-          <InteractiveTimeline />
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="py-20 bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            preText="What Clients"
-            highlightText="Say"
-            subtitle="Don't just take our word for it"
-          />
-
-          <div className="max-w-4xl mx-auto">
-            <TestimonialsCarousel />
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {process.map((item) => (
+                <div key={item.title} className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-primary)] px-5 py-5">
+                  <item.icon className="h-5 w-5 text-[var(--accent)]" />
+                  <h3 className="display-font mt-4 text-2xl text-[var(--text-primary)]">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{item.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* Work Gallery */}
-      <section id="work" className="py-20">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            preText="Our"
-            highlightText="Work"
-            subtitle="A selection of projects we've brought to life"
-          />
+          <div className="luxury-card overflow-hidden rounded-[2rem]">
+            <div className="grid gap-px bg-[var(--border)]">
+              <div className="luxury-stage relative min-h-[280px] overflow-hidden p-5">
+                <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">Planter family</div>
+                <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
+                  <img
+                    src="/showcase/studio/planter-lineup.png"
+                    alt="AKAAR planter lineup"
+                    className="hero-image-shadow"
+                  />
+                </div>
+              </div>
+              <div className="bg-[var(--bg-secondary)] px-6 py-6">
+                <p className="luxury-kicker">Studio proof</p>
+                <h3 className="display-font mt-3 text-3xl text-[var(--text-primary)]">Objects tested on the desk they are meant to live on.</h3>
+                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">
+                  This is the difference between “we can print things” and “we are shaping a product language.” The lineup shot proves the work is being developed as a repeatable family, not as a one-off lucky print.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-          <WorkGallery />
-        </div>
-      </section>
+        <section>
+          <div className="mb-8 max-w-3xl">
+            <span className="luxury-kicker">Real output</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              Product photos should carry the story on the About page.
+            </h2>
+          </div>
 
-      {/* Founder Section */}
-      <section id="team" ref={teamRef} className="py-20 bg-[var(--bg-secondary)]">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            preText="Meet the"
-            highlightText="Founder"
-            subtitle="The visionary who started it all"
-          />
+          <div className="space-y-6">
+            {showcaseProjects.map((project, index) => (
+              <motion.article
+                key={project.title}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.08 }}
+                className="luxury-card overflow-hidden rounded-[2.2rem]"
+              >
+                <div className="grid gap-px bg-[var(--border)] lg:grid-cols-2">
+                  <div className={`${index % 2 === 0 ? "order-1" : "order-2"} bg-[var(--bg-secondary)] px-6 py-7 sm:px-8`}>
+                    <span className="luxury-kicker">{project.category}</span>
+                    <h3 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+                      {project.title}
+                    </h3>
+                    <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
+                      {project.description}
+                    </p>
 
-          {/* Founder Featured Card */}
-          {teamMembers.filter(m => m.isFounder).map((founder) => (
-            <motion.div
-              key={founder.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={teamInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.1 }}
-              className="mb-20"
-            >
-              <Link href={`/team/${founder.slug}`} className="group block">
-                <div className="relative">
-                  {/* Glow Effect */}
-                  <div className="absolute -inset-2 bg-gradient-to-r from-[var(--accent)] via-blue-500 to-purple-600 rounded-3xl opacity-30 group-hover:opacity-70 blur-xl transition-all duration-500" />
-
-                  {/* Main Card */}
-                  <div className="relative grid md:grid-cols-2 gap-0 rounded-3xl overflow-hidden bg-[var(--bg-primary)] border border-[var(--accent)]/30 group-hover:border-[var(--accent)]/60 transition-all duration-300">
-                    {/* Image Side */}
-                    <div className="relative aspect-square md:aspect-auto md:min-h-[500px]">
-                      <img
-                        src={founder.image}
-                        alt={founder.name}
-                        className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--bg-primary)] md:block hidden" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent md:hidden" />
-
-                      {/* Founder Badge */}
-                      <div className="absolute top-6 left-6">
-                        <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--accent)] to-blue-500 text-white text-sm font-bold rounded-full shadow-lg">
-                          <Star className="w-4 h-4" />
-                          FOUNDER & CEO
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Content Side */}
-                    <div className="p-8 md:p-12 flex flex-col justify-center">
-                      <h3 className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-[var(--accent)] transition-colors">
-                        {founder.name}
-                      </h3>
-                      <p className="text-lg text-[var(--accent)] font-medium mb-6">
-                        {founder.domain}
-                      </p>
-
-                      {founder.founderVision && (
-                        <div className="relative mb-8">
-                          <div className="absolute -left-4 -top-2 text-6xl text-[var(--accent)]/20 font-serif">"</div>
-                          <p className="text-lg text-[var(--text-secondary)] italic leading-relaxed pl-4 border-l-2 border-[var(--accent)]/50">
-                            {founder.founderVision}
-                          </p>
+                    <div className="mt-8 grid gap-px overflow-hidden rounded-[1.6rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+                      {project.details.map((detail) => (
+                        <div key={detail} className="bg-[var(--bg-primary)] px-4 py-4">
+                          <p className="luxury-metric-label">Detail</p>
+                          <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">{detail}</p>
                         </div>
-                      )}
-
-                      <div className="flex flex-wrap gap-2 mb-8">
-                        {founder.skills.slice(0, 5).map((skill) => (
-                          <span
-                            key={skill}
-                            className="px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-sm font-medium rounded-full border border-[var(--accent)]/20"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                        {founder.skills.length > 5 && (
-                          <span className="px-3 py-1 bg-[var(--bg-secondary)] text-[var(--text-muted)] text-sm rounded-full">
-                            +{founder.skills.length - 5} more
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 text-[var(--accent)] font-semibold group-hover:gap-4 transition-all">
-                        <span>Read Full Story</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-                      </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
 
-          {/* Core Team Header */}
+                  <div className={`${index % 2 === 0 ? "order-2" : "order-1"} luxury-stage relative min-h-[320px] overflow-hidden p-5 ${project.mediaMode === "portrait-stage" ? "flex items-center justify-center" : ""}`}>
+                    <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">{project.category}</div>
+                    <div
+                      className={
+                        project.mediaMode === "portrait-stage"
+                          ? "editorial-media-frame relative z-10 aspect-[4/5] w-full max-w-[360px] bg-[linear-gradient(180deg,#dfe6f5_0%,#c8d2e8_60%,#b7c3dd_100%)] p-6"
+                          : "editorial-media-frame absolute inset-x-5 bottom-5 top-16"
+                      }
+                    >
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className={`hero-image-shadow ${project.mediaMode === "portrait-stage" ? "object-contain object-center" : ""}`}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.04)_0%,rgba(7,7,10,0.28)_100%)]" />
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        <section className="luxury-card rounded-[2.1rem] px-6 py-8 sm:px-8 lg:px-10">
+          <div className="mb-8 max-w-3xl">
+            <span className="luxury-kicker">Detail frames</span>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              Smaller shots do the credibility work.
+            </h2>
+            <p className="mt-4 text-[var(--text-secondary)]">
+              Close-ups, alternate angles, and real-environment images make the studio feel trustworthy. These frames show finish, scale, and object character without needing extra explanation.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {detailFrames.map((frame) => (
+              <article key={frame.title} className="luxury-card overflow-hidden rounded-[1.7rem]">
+                <div className="luxury-stage relative aspect-[4/5] overflow-hidden p-4">
+                  <div className="editorial-media-frame h-full w-full rounded-[1.35rem]">
+                    <img
+                      src={frame.image}
+                      alt={frame.title}
+                      className="hero-image-shadow"
+                    />
+                  </div>
+                </div>
+                <div className="border-t border-[var(--border)] px-5 py-4">
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{frame.title}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={teamInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.2 }}
-            className="text-center mb-12"
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8 max-w-2xl"
           >
-            <h3 className="text-2xl md:text-3xl font-bold">
-              The Core <span className="gradient-text">Team</span>
-            </h3>
-            <p className="text-[var(--text-secondary)] mt-3 max-w-xl mx-auto">
-              Experts assembled by Akash to execute the vision - tap cards to flip
+            <span className="luxury-kicker">Leadership</span>
+            <h2 className="display-font mt-4 max-w-[12ch] text-3xl leading-[1.02] text-[var(--text-primary)] sm:text-4xl">
+              The team now has its own dedicated space.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
+              About should stay focused on the studio, process, and product language. The full leadership story now lives on a dedicated team page where each person has room to stand on their own.
             </p>
           </motion.div>
 
-          {/* Enhanced Team Cards with flip effect */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teamMembers.filter(m => !m.isFounder).map((member, index) => (
-              <EnhancedTeamCard key={member.slug} member={member} index={index} />
+          {founder ? (
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.55 }}
+              className="mb-6 luxury-card overflow-hidden rounded-[2rem]"
+            >
+              <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[0.74fr_1.26fr]">
+                <div className="relative min-h-[320px] overflow-hidden bg-[var(--bg-secondary)] lg:min-h-[100%]">
+                  <img
+                    src={founder.image}
+                    alt={founder.name}
+                    className="h-full w-full object-cover object-center"
+                  />
+                </div>
+                <div className="bg-[var(--bg-secondary)] px-6 py-7 sm:px-7 lg:px-8">
+                  <span className="luxury-kicker">Founder preview</span>
+                  <h2 className="display-font mt-3 text-3xl leading-none text-[var(--text-primary)] sm:text-4xl">
+                    {founder.name}
+                  </h2>
+                  <p className="mt-3 text-sm uppercase tracking-[0.18em] text-[var(--accent)]">
+                    {founder.domain}
+                  </p>
+                  <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
+                    AKAAR exists because Akash set out to remove the friction between ambition and manufacturing. The business model, storefront, quote flow, and product direction all stem from that same founder thesis: hardware creation should feel composed, transparent, and fast enough to keep momentum alive.
+                  </p>
+                  <div className="mt-6 space-y-4">
+                    <p className="rounded-[1.35rem] border border-[var(--border)] bg-[var(--bg-primary)] px-5 py-4 text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
+                      {founder.founderVision}
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {founderBioSections.map((section) => (
+                        <p key={section.slice(0, 32)} className="text-sm leading-7 text-[var(--text-secondary)]">
+                          {section}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-7 grid gap-px overflow-hidden rounded-[1.35rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+                    <LeaderMetric label="Leads" value="Product strategy and company direction" />
+                    <LeaderMetric label="Built" value="Storefront, quote flow, and platform systems" />
+                    <LeaderMetric label="Connects" value="Software discipline with physical production" />
+                  </div>
+
+                  <div className="mt-7 flex flex-wrap gap-2">
+                    {founder.skills.slice(0, 4).map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-[var(--border-accent)] px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <Link
+                    href="/team"
+                    className="luxury-link mt-7"
+                  >
+                    Open team page
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {teamMembers.map((member) => (
+              <Link key={member.slug} href={member.isFounder ? "/team" : `/team/${member.slug}`} className="luxury-card rounded-[1.7rem] p-5">
+                <p className="luxury-metric-label">{member.isFounder ? "Founder" : "Leadership"}</p>
+                <p className="mt-4 display-font text-2xl text-[var(--text-primary)]">{member.name}</p>
+                <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[var(--accent)]">{member.role}</p>
+                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{member.domain}</p>
+              </Link>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Enhanced CTA */}
-      <EnhancedCTA />
+        <section className="luxury-panel overflow-hidden rounded-[2.2rem] px-6 py-8 text-center sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-6 flex flex-wrap justify-center gap-3">
+              {["Real studio", "Real products", "Review-led production", "Pan-India delivery"].map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border-accent)] px-4 py-2 text-sm text-[var(--text-secondary)]"
+                >
+                  <CheckCircle className="h-4 w-4 text-[var(--accent)]" />
+                  {item}
+                </span>
+              ))}
+            </div>
+            <span className="luxury-kicker">Next step</span>
+            <p className="mt-3 editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
+            <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
+              Bring the next object into the studio.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
+              If you already know what the part needs to do, move straight into a reviewed build request. If not, use the collection as a reference and start from there.
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+              <Link href="/quote">
+                <Button size="lg">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Start a Build
+                </Button>
+              </Link>
+              <Link href="/products">
+                <Button variant="outline" size="lg">
+                  <Users className="mr-2 h-4 w-4" />
+                  Explore Products
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function LeaderMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-[var(--bg-primary)] px-4 py-4">
+      <p className="luxury-metric-label">{label}</p>
+      <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { themes, defaultTheme, defaultStyle, defaultMode } from "@/config/themes";
+import { themes, defaultTheme, defaultStyle, defaultMode, themeStyleList } from "@/config/themes";
 
 // Generate the inline script that runs before React hydration
 const themeScript = `
@@ -8,7 +8,7 @@ const themeScript = `
   const themes = ${JSON.stringify(themes)};
   const defaultStyle = '${defaultStyle}';
   const defaultMode = '${defaultMode}';
-  const validStyles = ['cyberpunk', 'minimal', 'industrial', 'nothing'];
+  const validStyles = ${JSON.stringify(themeStyleList.map((style) => style.id))};
 
   try {
     const savedStyle = localStorage.getItem(STYLE_STORAGE_KEY);
@@ -43,11 +43,6 @@ const themeScript = `
     root.setAttribute('data-theme', theme.styleId);
     root.setAttribute('data-mode', theme.mode);
 
-    // Toggle effect classes
-    if (theme.effects.enableGlow) root.classList.add('theme-glow');
-    if (theme.effects.enableScanlines) root.classList.add('theme-scanlines');
-    if (theme.effects.enableGrid) root.classList.add('theme-grid');
-    if (theme.effects.enableNoise) root.classList.add('theme-noise');
   } catch (e) {}
 })();
 `;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { BRAND_TAGLINE_SHORT } from "@/lib/brand";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -13,25 +14,28 @@ interface LogoProps {
 
 const sizeConfig = {
   sm: {
-    icon: "w-8 h-8",
-    iconText: "text-lg",
-    brandText: "text-lg",
-    taglineText: "text-[10px]",
-    gap: "gap-2",
+    crest: "h-10 w-10",
+    brand: "text-base",
+    tagline: "text-[10px]",
+    gap: "gap-2.5",
+    markImage: "h-10 w-10",
+    fullImage: "h-10 w-auto",
   },
   md: {
-    icon: "w-10 h-10",
-    iconText: "text-xl",
-    brandText: "text-xl",
-    taglineText: "text-xs",
+    crest: "h-11 w-11",
+    brand: "text-lg",
+    tagline: "text-xs",
     gap: "gap-3",
+    markImage: "h-11 w-11",
+    fullImage: "h-12 w-auto",
   },
   lg: {
-    icon: "w-12 h-12",
-    iconText: "text-2xl",
-    brandText: "text-2xl",
-    taglineText: "text-sm",
-    gap: "gap-3",
+    crest: "h-14 w-14",
+    brand: "text-2xl",
+    tagline: "text-sm",
+    gap: "gap-4",
+    markImage: "h-14 w-14",
+    fullImage: "h-16 w-auto",
   },
 };
 
@@ -43,61 +47,55 @@ export function Logo({
   href = "/",
 }: LogoProps) {
   const config = sizeConfig[size];
+  const showFullLogo = showTagline;
 
-  const logoContent = (
-    <div className={cn("flex items-center group", config.gap, className)}>
-      {/* Icon Mark - Stylized 'A' with gradient */}
-      <div className="relative">
-        <div
-          className={cn(
-            config.icon,
-            "bg-gradient-to-br from-[#0ea5e9] via-[#3b82f6] to-[#2563eb] rounded-lg flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 shadow-lg"
-          )}
-        >
-          {/* Inner 'A' shape */}
-          <div className="relative">
-            <span className={cn("text-white font-bold", config.iconText)}>
-              A
-            </span>
-            {/* Small 3D indicator */}
-            <span className="absolute -bottom-0.5 -right-1 text-[8px] font-bold text-white/80">
-              3D
-            </span>
+  const content = (
+    <div className={cn("flex items-center", config.gap, className)}>
+      {showFullLogo ? (
+        <img
+          src="/brand/akaar-logo-full.png"
+          alt="AKAAR 3D"
+          className={cn("block", config.fullImage)}
+        />
+      ) : (
+        <>
+          <div
+            className={cn(
+              "relative flex items-center justify-center overflow-hidden rounded-[1.2rem] border border-[var(--border-accent)] bg-[var(--bg-primary)] shadow-[0_22px_55px_-40px_rgba(0,0,0,0.8)]",
+              config.crest
+            )}
+          >
+            <img
+              src="/brand/akaar-logo-mark.png"
+              alt="AKAAR mark"
+              className={cn("block object-contain p-1.5", config.markImage)}
+            />
           </div>
-        </div>
-        {/* Glow effect on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0ea5e9] to-[#2563eb] rounded-lg blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-300 -z-10" />
-      </div>
 
-      {/* Text */}
-      {showText && (
-        <div className="flex flex-col leading-tight">
-          <span className={cn("font-bold tracking-wide", config.brandText)}>
-            AKAAR{" "}
-            <span className="text-[var(--accent)] font-extrabold">3D</span>
-          </span>
-          {showTagline && (
-            <span
-              className={cn(
-                "text-[var(--text-muted)] -mt-0.5 tracking-wide",
-                config.taglineText
-              )}
-            >
-              Giving AKAAR to Ideas
-            </span>
-          )}
-        </div>
+          {showText ? (
+            <div className="flex flex-col leading-none">
+              <span className={cn("display-font font-semibold uppercase tracking-[0.08em] text-[var(--text-primary)]", config.brand)}>
+                AKAAR
+              </span>
+              {showTagline ? (
+                <span className={cn("mt-1 font-mono uppercase tracking-[0.18em] text-[var(--text-muted)]", config.tagline)}>
+                  {BRAND_TAGLINE_SHORT}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );
 
-  if (href) {
-    return (
-      <Link href={href} className="inline-flex">
-        {logoContent}
-      </Link>
-    );
+  if (!href) {
+    return content;
   }
 
-  return logoContent;
+  return (
+    <Link href={href} className="inline-flex">
+      {content}
+    </Link>
+  );
 }
