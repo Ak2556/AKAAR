@@ -5,7 +5,7 @@
   "packageManager": "pnpm@8.15.0",
   "scripts": {
     "dev": "pnpm --filter storefront dev",
-    "build": "pnpm --filter storefront build",
+    "build": "pnpm --filter @akaar/db db:generate && pnpm --filter storefront build",
     "lint": "pnpm --filter storefront lint",
     "db:start": "docker-compose up -d",
     "db:stop": "docker-compose down",
