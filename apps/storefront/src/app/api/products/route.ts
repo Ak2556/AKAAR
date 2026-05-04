@@ -72,7 +72,7 @@ export async function GET(request: Request) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-      categories: categories.map((c) => c.category).filter(Boolean),
+      categories: categories.map((c: { category: string | null }) => c.category).filter(Boolean),
     });
   } catch (error) {
     console.error("Error fetching products:", error);
