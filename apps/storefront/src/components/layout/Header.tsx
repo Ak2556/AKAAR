@@ -22,9 +22,8 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { SearchModal } from "@/components/search/SearchModal";
 import { useTheme } from "@/hooks/useTheme";
-import { signOut } from "next-auth/react";
+
 import { useAuthState } from "@/components/providers/AuthProvider";
-import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
 
 const navItems = [
   { href: "/products", label: "Collection" },
@@ -39,8 +38,7 @@ export function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { openCart, totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
-  const { session, status, enabled: authEnabled } = useAuthState();
-  const { authAvailable } = useRuntimeCapabilities();
+  const { session, status, enabled: authEnabled, signOut } = useAuthState();
   const { isDark, toggleMode } = useTheme();
   const isAdmin = session?.user?.role === "ADMIN";
 
@@ -184,7 +182,7 @@ export function Header() {
                           <button
                             onClick={() => {
                               setIsUserMenuOpen(false);
-                              signOut({ callbackUrl: "/" });
+                              signOut();
                             }}
                             className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-red-300 transition-colors hover:bg-red-500/10"
                           >
@@ -196,17 +194,13 @@ export function Header() {
                     ) : null}
                   </AnimatePresence>
                 </div>
-              ) : authAvailable ? (
+              ) : (
                 <Link
                   href="/auth/signin"
                   className="luxury-pill rounded-full px-4 py-2 text-sm hover:text-[var(--text-primary)]"
                 >
                   Sign In
                 </Link>
-              ) : (
-                <span className="luxury-pill rounded-full px-4 py-2 text-sm text-[var(--text-muted)]">
-                  Auth unavailable
-                </span>
               )}
 
               <Link
@@ -302,7 +296,7 @@ export function Header() {
                         <button
                           onClick={() => {
                             setIsOpen(false);
-                            signOut({ callbackUrl: "/" });
+                            signOut();
                           }}
                           className="rounded-2xl px-3 py-3 text-left text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10"
                         >

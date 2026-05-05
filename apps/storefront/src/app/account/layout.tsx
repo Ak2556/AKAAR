@@ -12,7 +12,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useEffect } from "react";
-import { signOut } from "next-auth/react";
+
 import { useAuthState } from "@/components/providers/AuthProvider";
 import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
 
@@ -103,7 +103,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                 <div className="my-1 border-t border-[var(--border)]" />
 
                 <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={async () => { const { createClient } = await import("@/lib/supabase/client"); const s = createClient(); await s.auth.signOut(); window.location.href = "/"; }}
                   className="flex items-center gap-3 rounded-[1.2rem] px-4 py-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10"
                 >
                   <LogOut className="h-4 w-4" />

@@ -1,12 +1,3 @@
-import {
-  hasAuthSecret,
-  hasDatabaseUrl,
-  hasSupabaseClientConfig,
-  getServerEnv,
-  hasValue,
-  isLocalDataMode,
-} from "@/lib/local-runtime";
-
 export type OAuthProviderId = "google" | "github";
 
 export interface RuntimeCapabilities {
@@ -20,51 +11,33 @@ export interface RuntimeCapabilities {
   missingConfig: string[];
 }
 
+function hasValue(value: string | undefined): boolean {
+  return Boolean(value && value.trim().length > 0);
+}
+
 export function getRuntimeCapabilities(): RuntimeCapabilities {
-  const localDataMode = isLocalDataMode();
-  const databaseConfigured = hasDatabaseUrl();
-  const authSecretConfigured = hasAuthSecret();
-  const supabaseConfigured = hasSupabaseClientConfig();
+  // Read directly from process.env — reliable in both dev and Vercel server components
+  const supabaseUrl = hasValue(process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const supabaseKey = hasValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const supabaseAvailable = supabaseUrl && supabaseKey
 
-  const enabledOAuthProviders: OAuthProviderId[] = [];
-  if (
-    hasValue(getServerEnv("GOOGLE_CLIENT_ID")) &&
-    hasValue(getServerEnv("GOOGLE_CLIENT_SECRET"))
-  ) {
-    enabledOAuthProviders.push("google");
-  }
-  if (
-    hasValue(getServerEnv("GITHUB_CLIENT_ID")) &&
-    hasValue(getServerEnv("GITHUB_CLIENT_SECRET"))
-  ) {
-    enabledOAuthProviders.push("github");
-  }
+  const missingConfig: string[] = []
+  if (!supabaseUrl) missingConfig.push("NEXT_PUBLIC_SUPABASE_URL")
+  if (!supabaseKey) missingConfig.push("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+  if (!hasValue(process.env.SUPABASE_SERVICE_ROLE_KEY)) missingConfig.push("SUPABASE_SERVICE_ROLE_KEY")
 
-  const missingConfig: string[] = [];
-  if (!localDataMode && !databaseConfigured) {
-    missingConfig.push("DATABASE_URL");
-  }
-  if (!authSecretConfigured) {
-    missingConfig.push("AUTH_SECRET or NEXTAUTH_SECRET");
-  }
-  const supabaseUrlConfigured = hasValue(getServerEnv("NEXT_PUBLIC_SUPABASE_URL"));
-  const supabaseKeyConfigured = hasValue(getServerEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"));
-  if (supabaseUrlConfigured !== supabaseKeyConfigured) {
-    missingConfig.push(
-      "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
-    );
-  }
-
-  const dataBackendAvailable = localDataMode || databaseConfigured;
+  const enabledOAuthProviders: OAuthProviderId[] = []
+  if (hasValue(process.env.GOOGLE_CLIENT_ID)) enabledOAuthProviders.push("google")
+  if (hasValue(process.env.GITHUB_CLIENT_ID)) enabledOAuthProviders.push("github")
 
   return {
-    authAvailable: authSecretConfigured && dataBackendAvailable,
-    catalogAvailable: dataBackendAvailable,
-    quoteSubmissionAvailable: dataBackendAvailable,
-    supabaseAvailable: supabaseConfigured,
-    localDataMode,
-    enabledOAuthProviders: authSecretConfigured && dataBackendAvailable ? enabledOAuthProviders : [],
-    isDevelopment: process.env.NODE_ENV !== "production",
+    authAvailable:            supabaseAvailable,
+    catalogAvailable:         supabaseAvailable,
+    quoteSubmissionAvailable: supabaseAvailable,
+    supabaseAvailable,
+    localDataMode:            false,
+    enabledOAuthProviders:    supabaseAvailable ? enabledOAuthProviders : [],
+    isDevelopment:            process.env.NODE_ENV !== "production",
     missingConfig,
   };
 }

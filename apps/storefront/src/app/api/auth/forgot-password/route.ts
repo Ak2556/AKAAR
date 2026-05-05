@@ -1,85 +1,30 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@akaar/db";
-import { nanoid } from "nanoid";
-import { sendPasswordResetEmail } from "@/lib/email";
-import { forgotPasswordSchema, validateRequest } from "@/lib/validations";
-import { withRateLimit, rateLimitPresets } from "@/lib/rate-limit";
-import {
-  createLocalPasswordResetToken,
-  getLocalUserByEmail,
-} from "@/lib/local-data-store";
-import { isLocalDataMode } from "@/lib/local-runtime";
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { withRateLimit, rateLimitPresets } from '@/lib/rate-limit'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const localDataMode = isLocalDataMode();
+    const rateLimitError = await withRateLimit(request, rateLimitPresets.strict)
+    if (rateLimitError) return rateLimitError
 
-    // Rate limit: 5 requests per minute (strict)
-    const rateLimitError = await withRateLimit(request, rateLimitPresets.strict);
-    if (rateLimitError) return rateLimitError;
-
-    const body = await request.json();
-    const validation = validateRequest(forgotPasswordSchema, body);
-
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+    const { email } = await request.json()
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    const { email } = validation.data;
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
+    })
 
-    // Check if user exists
-    const user = localDataMode
-      ? await getLocalUserByEmail(email)
-      : await prisma.user.findUnique({
-          where: { email: email.toLowerCase() },
-        });
+    if (error) {
+      console.error('Password reset error:', error)
+    }
 
     // Always return success to prevent email enumeration
-    if (!user) {
-      return NextResponse.json({ success: true });
-    }
-
-    // Delete any existing tokens for this email
-    // Generate new token
-    const token = nanoid(32);
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    if (localDataMode) {
-      await createLocalPasswordResetToken(user.email, token, expires);
-    } else {
-      await prisma.passwordResetToken.deleteMany({
-        where: { email: user.email },
-      });
-
-      await prisma.passwordResetToken.create({
-        data: {
-          email: user.email,
-          token,
-          expires,
-        },
-      });
-    }
-
-    // Send reset email
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
-
-    try {
-      await sendPasswordResetEmail({
-        to: user.email,
-        name: user.name || undefined,
-        resetUrl,
-      });
-    } catch (emailError) {
-      console.error("Failed to send reset email:", emailError);
-      // Don't fail the request if email fails
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: 'If that email exists, a reset link has been sent.' })
   } catch (error) {
-    console.error("Forgot password error:", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    console.error('Forgot password error:', error)
+    return NextResponse.json({ error: 'Failed to send reset email' }, { status: 500 })
   }
 }

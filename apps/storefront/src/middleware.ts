@@ -1,11 +1,14 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/lib/auth.config";
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
-// Use lightweight auth config for edge middleware (no Prisma/bcrypt)
-const { auth } = NextAuth(authConfig);
-
-export default auth;
+export async function middleware(request: NextRequest) {
+  return updateSession(request)
+}
 
 export const config = {
-  matcher: ["/account/:path*"],
-};
+  matcher: [
+    '/account/:path*',
+    '/admin/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}

@@ -1,170 +1,71 @@
-import { prisma } from "@akaar/db";
-import { NextResponse } from "next/server";
-import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
-import { listLocalProducts } from "@/lib/local-data-store";
-import { isLocalDataMode } from "@/lib/local-runtime";
-
-function buildSearchWhere(search: string | null) {
-  if (!search) {
-    return undefined;
-  }
-
-  return [
-    { name: { contains: search, mode: "insensitive" as const } },
-    { description: { contains: search, mode: "insensitive" as const } },
-    { shortDescription: { contains: search, mode: "insensitive" as const } },
-  ];
-}
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
-  const capabilities = getRuntimeCapabilities();
-
-  if (!capabilities.catalogAvailable) {
-    return NextResponse.json(
-      {
-        products: [],
-        pagination: {
-          page: 1,
-          limit: 12,
-          total: 0,
-          totalPages: 0,
-        },
-        categories: [],
-        catalogAvailable: false,
-        empty: true,
-        message: "Catalog unavailable",
-      },
-      { status: 503 }
-    );
-  }
-
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
-    const search = searchParams.get("search");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "12");
-    const sortBy = searchParams.get("sortBy") || "sortOrder";
-    const sortOrder = searchParams.get("sortOrder") || "asc";
+    const { searchParams } = new URL(request.url)
+    const category  = searchParams.get('category')
+    const search    = searchParams.get('search')
+    const page      = parseInt(searchParams.get('page')  || '1')
+    const limit     = parseInt(searchParams.get('limit') || '12')
+    const sortBy    = searchParams.get('sortBy')    || 'sort_order'
+    const sortOrder = searchParams.get('sortOrder') || 'asc'
+    const offset    = (page - 1) * limit
 
-    if (isLocalDataMode()) {
-      const { products, total, categories } = await listLocalProducts({
-        page,
-        limit,
-        category,
-        search,
-        sortBy,
-        sortOrder,
-      });
+    const supabase = await createClient()
 
-      return NextResponse.json({
-        products,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-        categories,
-        catalogAvailable: true,
-        empty: total === 0,
-      });
+    let query = supabase
+      .from('products')
+      .select('*, mesh_files(*)', { count: 'exact' })
+      .eq('is_active', true)
+
+    if (category && category !== 'all') {
+      query = query.ilike('category', category)
+    }
+    if (search) {
+      query = query.or(
+        `name.ilike.%${search}%,description.ilike.%${search}%,short_description.ilike.%${search}%`
+      )
     }
 
-    // Build where clause
-    const searchWhere = buildSearchWhere(search);
-
-    const where: Record<string, unknown> = {
-      isActive: true,
-    };
-
-    if (category && category !== "all") {
-      where.category = {
-        equals: category,
-        mode: "insensitive",
-      };
+    const validSortCols: Record<string, string> = {
+      price: 'price', name: 'name', createdAt: 'created_at', sortOrder: 'sort_order'
     }
+    const col = validSortCols[sortBy] ?? 'sort_order'
+    query = query.order(col, { ascending: sortOrder !== 'desc' })
 
-    if (searchWhere) {
-      where.OR = searchWhere;
+    const { data: products, count, error } = await query.range(offset, offset + limit - 1)
+
+    if (error) throw error
+
+    // Fetch distinct categories
+    const { data: cats } = await supabase
+      .from('products')
+      .select('category')
+      .eq('is_active', true)
+      .not('category', 'is', null)
+
+    const categoryMap: Record<string, number> = {}
+    for (const row of cats ?? []) {
+      if (row.category) categoryMap[row.category] = (categoryMap[row.category] ?? 0) + 1
     }
+    const categories = Object.entries(categoryMap).map(([label, count]) => ({
+      id: label.toLowerCase(), label, count,
+    }))
 
-    const categoryWhere: Record<string, unknown> = { isActive: true };
-    if (searchWhere) {
-      categoryWhere.OR = searchWhere;
-    }
-
-    // Build orderBy
-    const orderBy: Record<string, string> = {};
-    if (sortBy === "price") {
-      orderBy.price = sortOrder;
-    } else if (sortBy === "name") {
-      orderBy.name = sortOrder;
-    } else if (sortBy === "createdAt") {
-      orderBy.createdAt = sortOrder;
-    } else {
-      orderBy.sortOrder = "asc";
-    }
-
-    // Execute queries in parallel
-    const [products, total, categories] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        include: {
-          meshFile: true,
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy,
-      }),
-      prisma.product.count({ where }),
-      prisma.product.groupBy({
-        by: ["category"],
-        where: categoryWhere,
-        _count: {
-          category: true,
-        },
-        orderBy: {
-          category: "asc",
-        },
-      }),
-    ]);
-
+    const total = count ?? 0
     return NextResponse.json({
-      products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-      categories: categories
-        .filter((entry) => Boolean(entry.category))
-        .map((entry) => ({
-          id: entry.category!.toLowerCase(),
-          label: entry.category!,
-          count: entry._count.category,
-        })),
+      products: products ?? [],
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      categories,
       catalogAvailable: true,
       empty: total === 0,
-    });
+    })
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error('Error fetching products:', error)
     return NextResponse.json(
-      {
-        products: [],
-        pagination: {
-          page: 1,
-          limit: 12,
-          total: 0,
-          totalPages: 0,
-        },
-        categories: [],
-        catalogAvailable: false,
-        empty: true,
-        message: "Catalog unavailable",
-      },
+      { products: [], pagination: { page:1,limit:12,total:0,totalPages:0 }, categories: [], catalogAvailable: false, empty: true },
       { status: 503 }
-    );
+    )
   }
 }

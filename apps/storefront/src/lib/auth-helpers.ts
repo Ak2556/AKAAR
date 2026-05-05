@@ -1,19 +1,23 @@
-import type { Session } from "next-auth";
-import { auth } from "@/lib/auth";
-import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
+import { createClient } from '@/lib/supabase/server'
+import type { User } from '@supabase/supabase-js'
 
-export async function getOptionalSession(): Promise<Session | null> {
-  if (!getRuntimeCapabilities().authAvailable) {
-    return null;
-  }
-
+export async function getOptionalSession(): Promise<{ user: { id: string; email?: string | null } } | null> {
   try {
-    return await auth();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+    return { user: { id: user.id, email: user.email } }
   } catch {
-    return null;
+    return null
   }
 }
 
-export async function requireSession(): Promise<Session | null> {
-  return getOptionalSession();
+export async function requireSession(): Promise<User | null> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  } catch {
+    return null
+  }
 }

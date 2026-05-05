@@ -1,61 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createRazorpayOrder } from "@/lib/razorpay";
-import { auth } from "@/lib/auth";
-import { hasRazorpayCredentials, isLocalDataMode } from "@/lib/local-runtime";
+import { NextRequest, NextResponse } from 'next/server'
+import { createRazorpayOrder } from '@/lib/razorpay'
+import { createClient } from '@/lib/supabase/server'
+import { hasRazorpayCredentials } from '@/lib/local-runtime'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    const body = await request.json();
+    if (!hasRazorpayCredentials()) {
+      return NextResponse.json({ error: 'Payment gateway not configured' }, { status: 503 })
+    }
 
-    const { amount, items, shippingAddress, shippingMethod, email } = body;
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const body = await request.json()
+    const { amount, currency = 'INR', receipt } = body
 
     if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { error: "Invalid amount" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Valid amount is required' }, { status: 400 })
     }
 
-    // Generate unique receipt ID
-    const receipt = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const order = await createRazorpayOrder({ amount, currency, receipt })
 
-    if (isLocalDataMode() && !hasRazorpayCredentials()) {
-      return NextResponse.json({
-        orderId: `local_${receipt}`,
-        amount: Math.round(amount * 100),
-        currency: "INR",
-        receipt,
-        key: "local-dev-mode",
-        paymentMode: "mock",
-      });
-    }
-
-    // Create Razorpay order
-    const razorpayOrder = await createRazorpayOrder({
-      amount: Math.round(amount * 100), // Convert to paise
-      currency: "INR",
-      receipt,
-      notes: {
-        userId: session?.user?.id || "guest",
-        email: email || session?.user?.email || "",
-        itemCount: items?.length?.toString() || "0",
-      },
-    });
-
-    return NextResponse.json({
-      orderId: razorpayOrder.id,
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency,
-      receipt: razorpayOrder.receipt,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
-      paymentMode: "razorpay",
-    });
+    return NextResponse.json({ order, userId: user?.id ?? null })
   } catch (error) {
-    console.error("Error creating Razorpay order:", error);
-    return NextResponse.json(
-      { error: "Failed to create payment order" },
-      { status: 500 }
-    );
+    console.error('Error creating Razorpay order:', error)
+    return NextResponse.json({ error: 'Failed to create payment order' }, { status: 500 })
   }
 }

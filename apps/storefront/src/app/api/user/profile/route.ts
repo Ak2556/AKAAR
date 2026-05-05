@@ -1,97 +1,48 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@akaar/db";
-import { getOptionalSession } from "@/lib/auth-helpers";
-import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
-import { getLocalUserById, updateLocalUser } from "@/lib/local-data-store";
-import { isLocalDataMode } from "@/lib/local-runtime";
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
-  if (!getRuntimeCapabilities().authAvailable) {
-    return NextResponse.json(
-      { error: "Authentication unavailable" },
-      { status: 503 }
-    );
-  }
-
   try {
-    const session = await getOptionalSession();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id, name, email, image, role, created_at')
+      .eq('id', user.id)
+      .single()
 
-    const user = isLocalDataMode()
-      ? await getLocalUserById(session.user.id)
-      : await prisma.user.findUnique({
-          where: { id: session.user.id },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-            createdAt: true,
-          },
-        });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ user });
+    if (error || !profile) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    return NextResponse.json({ user: profile })
   } catch (error) {
-    console.error("Error fetching profile:", error);
-    return NextResponse.json(
-      { error: "Profile unavailable" },
-      { status: 503 }
-    );
+    console.error('Error fetching profile:', error)
+    return NextResponse.json({ error: 'Profile unavailable' }, { status: 503 })
   }
 }
 
 export async function PUT(request: NextRequest) {
-  if (!getRuntimeCapabilities().authAvailable) {
-    return NextResponse.json(
-      { error: "Authentication unavailable" },
-      { status: 503 }
-    );
-  }
-
   try {
-    const session = await getOptionalSession();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const body = await request.json()
+    const updates: { name?: string; image?: string } = {}
+    if (typeof body.name === 'string') updates.name = body.name.trim()
+    if (typeof body.image === 'string') updates.image = body.image
 
-    const body = await request.json();
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select('id, name, email, image, role')
+      .single()
 
-    const user = isLocalDataMode()
-      ? await updateLocalUser({
-          id: session.user.id,
-          name: body.name || null,
-        })
-      : await prisma.user.update({
-          where: { id: session.user.id },
-          data: {
-            name: body.name || undefined,
-          },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          },
-        });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ user });
+    if (error) throw error
+    return NextResponse.json({ user: profile })
   } catch (error) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: "Profile unavailable" },
-      { status: 503 }
-    );
+    console.error('Error updating profile:', error)
+    return NextResponse.json({ error: 'Profile unavailable' }, { status: 503 })
   }
 }

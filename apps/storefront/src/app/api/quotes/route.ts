@@ -1,151 +1,83 @@
-import { prisma } from "@akaar/db";
-import { NextResponse } from "next/server";
-import { nanoid } from "nanoid";
-import { quoteRequestSchema, validateRequest } from "@/lib/validations";
-import { getOptionalSession } from "@/lib/auth-helpers";
-import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
-import { createLocalQuote, listLocalQuotesForUser } from "@/lib/local-data-store";
-import { isLocalDataMode } from "@/lib/local-runtime";
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { nanoid } from 'nanoid'
+import { quoteRequestSchema, validateRequest } from '@/lib/validations'
 
-// GET - List user's quote requests
 export async function GET() {
-  const capabilities = getRuntimeCapabilities();
-
-  if (!capabilities.authAvailable || !capabilities.quoteSubmissionAvailable) {
-    return NextResponse.json(
-      { error: "Quotes unavailable in this environment" },
-      { status: 503 }
-    );
-  }
-
   try {
-    const session = await getOptionalSession();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const { data: quotes, error } = await supabase
+      .from('quote_requests')
+      .select('*, quote_files(*)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
 
-    const quotes = isLocalDataMode()
-      ? await listLocalQuotesForUser(session.user.id)
-      : await prisma.quoteRequest.findMany({
-          where: { userId: session.user.id },
-          include: {
-            files: true,
-          },
-          orderBy: { createdAt: "desc" },
-        });
-
-    return NextResponse.json({ quotes });
+    if (error) throw error
+    return NextResponse.json({ quotes: quotes ?? [] })
   } catch (error) {
-    console.error("Error fetching quotes:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch quotes" },
-      { status: 500 }
-    );
+    console.error('Error fetching quotes:', error)
+    return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 })
   }
 }
 
-// POST - Create new quote request
 export async function POST(request: Request) {
-  const capabilities = getRuntimeCapabilities();
-
-  if (!capabilities.quoteSubmissionAvailable) {
-    return NextResponse.json(
-      { error: "Quote requests are unavailable in this environment" },
-      { status: 503 }
-    );
-  }
-
   try {
-    const session = await getOptionalSession();
-    const body = await request.json();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    const validation = validateRequest(quoteRequestSchema, body);
+    const body = await request.json()
+    const validation = validateRequest(quoteRequestSchema, body)
     if (!validation.success) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    const { name, email, company, phone, service, material, quantity, notes, files } =
-      validation.data;
+    const { name, email, company, phone, service, material, quantity, notes, files } = validation.data
+    const quoteNumber = `QT-${nanoid(10).toUpperCase()}`
 
-    // Generate quote number
-    const quoteNumber = `QT-${nanoid(10).toUpperCase()}`;
+    const { data: quote, error: quoteError } = await supabase
+      .from('quote_requests')
+      .insert({
+        quote_number: quoteNumber,
+        user_id: user?.id ?? null,
+        name,
+        email,
+        company: company ?? null,
+        phone: phone ?? null,
+        service,
+        material,
+        quantity,
+        notes: notes ?? null,
+      })
+      .select()
+      .single()
 
-    // Create quote request
-    const quote = isLocalDataMode()
-      ? await createLocalQuote({
-          quoteNumber,
-          userId: session?.user?.id || null,
-          name,
-          email,
-          company: company || null,
-          phone: phone || null,
-          service,
-          material,
-          quantity,
-          notes: notes || null,
-          files: (files || []).map((file) => ({
-            originalFilename: file.originalFilename,
-            storedFilename: file.s3Key?.split("/").pop() || file.originalFilename,
-            s3Key: file.s3Key || `review/${quoteNumber}/${file.originalFilename}`,
-            s3Bucket: file.s3Bucket || process.env.AWS_S3_BUCKET || "review-attachments",
-            fileSize: file.fileSize,
-            fileType: file.fileType,
-          })),
-        })
-      : await prisma.quoteRequest.create({
-          data: {
-            quoteNumber,
-            userId: session?.user?.id,
-            name,
-            email,
-            company,
-            phone,
-            service,
-            material,
-            quantity,
-            notes,
-            files: files?.length
-              ? {
-                  create: files.map((file) => ({
-                    originalFilename: file.originalFilename,
-                    storedFilename:
-                      file.s3Key?.split("/").pop() ||
-                      file.originalFilename,
-                    s3Key:
-                      file.s3Key ||
-                      `review/${quoteNumber}/${file.originalFilename}`,
-                    s3Bucket:
-                      file.s3Bucket ||
-                      process.env.AWS_S3_BUCKET ||
-                      "review-attachments",
-                    fileSize: file.fileSize,
-                    fileType: file.fileType,
-                  })),
-                }
-              : undefined,
-          },
-          include: {
-            files: true,
-          },
-        });
+    if (quoteError) throw quoteError
+
+    // Attach files if any
+    if (files?.length) {
+      const quoteFiles = files.map((file: {
+        originalFilename: string; s3Key?: string; s3Bucket?: string; fileSize: number; fileType: string;
+      }) => ({
+        quote_request_id: quote.id,
+        original_filename: file.originalFilename,
+        stored_filename: file.s3Key?.split('/').pop() ?? file.originalFilename,
+        s3_key: file.s3Key ?? `review/${quoteNumber}/${file.originalFilename}`,
+        s3_bucket: file.s3Bucket ?? process.env.AWS_S3_BUCKET ?? 'review-attachments',
+        file_size: file.fileSize,
+        file_type: file.fileType,
+      }))
+      await supabase.from('quote_files').insert(quoteFiles)
+    }
 
     return NextResponse.json(
-      {
-        message: "Quote request submitted successfully",
-        quoteNumber: quote.quoteNumber,
-        quote,
-      },
+      { message: 'Quote request submitted successfully', quoteNumber, quote },
       { status: 201 }
-    );
+    )
   } catch (error) {
-    console.error("Error creating quote:", error);
-    return NextResponse.json(
-      { error: "Failed to create quote request" },
-      { status: 500 }
-    );
+    console.error('Error creating quote:', error)
+    return NextResponse.json({ error: 'Failed to create quote request' }, { status: 500 })
   }
 }

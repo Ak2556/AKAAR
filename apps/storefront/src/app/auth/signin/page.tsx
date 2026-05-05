@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
@@ -34,9 +34,10 @@ function SignInForm() {
     setFormError("");
 
     try {
-      const result = await signIn("credentials", { email, password, redirect: false });
-      if (result?.error) {
-        setFormError("Invalid email or password");
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setFormError(error.message === "Invalid login credentials" ? "Invalid email or password" : error.message);
       } else {
         router.push(callbackUrl);
         router.refresh();
@@ -48,12 +49,16 @@ function SignInForm() {
     }
   };
 
-  const handleOAuthSignIn = (provider: string) => {
+  const handleOAuthSignIn = async (provider: string) => {
     if (!authAvailable) {
       setFormError("Authentication is unavailable in this environment.");
       return;
     }
-    signIn(provider, { callbackUrl });
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: provider as "google" | "github",
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${callbackUrl}` },
+    });
   };
 
   return (

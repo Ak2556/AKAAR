@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Mail, Lock, User, Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
@@ -51,22 +51,26 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+      const supabase = createClient();
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to create account");
+      if (signUpError) {
+        setError(signUpError.message);
         return;
       }
 
-      const result = await signIn("credentials", { email, password, redirect: false });
-      if (result?.error) {
-        setError("Account created but sign-in failed. Please sign in manually.");
+      // Auto sign-in after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        // Account created — redirect to sign-in to confirm email
+        router.push("/auth/signin?message=check-email");
       } else {
         router.push("/");
         router.refresh();
@@ -78,12 +82,16 @@ export default function SignUpPage() {
     }
   };
 
-  const handleOAuthSignIn = (provider: string) => {
+  const handleOAuthSignIn = async (provider: string) => {
     if (!authAvailable) {
       setError("Authentication is unavailable in this environment.");
       return;
     }
-    signIn(provider, { callbackUrl: "/" });
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: provider as "google" | "github",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
   };
 
   return (

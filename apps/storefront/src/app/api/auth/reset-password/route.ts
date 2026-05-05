@@ -1,107 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@akaar/db";
-import bcrypt from "bcryptjs";
-import { resetPasswordSchema, validateRequest } from "@/lib/validations";
-import { withRateLimit, rateLimitPresets } from "@/lib/rate-limit";
-import {
-  deleteLocalPasswordResetToken,
-  getLocalPasswordResetToken,
-  getLocalUserByEmail,
-  updateLocalUser,
-} from "@/lib/local-data-store";
-import { isLocalDataMode } from "@/lib/local-runtime";
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const localDataMode = isLocalDataMode();
-
-    // Rate limit: 5 requests per minute (strict)
-    const rateLimitError = await withRateLimit(request, rateLimitPresets.strict);
-    if (rateLimitError) return rateLimitError;
-
-    const body = await request.json();
-    const validation = validateRequest(resetPasswordSchema, body);
-
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+    const { password } = await request.json()
+    if (!password || password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
-    const { token, password } = validation.data;
+    const supabase = await createClient()
+    const { error } = await supabase.auth.updateUser({ password })
 
-    // Find the reset token
-    const resetToken = localDataMode
-      ? await getLocalPasswordResetToken(token)
-      : await prisma.passwordResetToken.findUnique({
-          where: { token },
-        });
-
-    if (!resetToken) {
-      return NextResponse.json(
-        { error: "Invalid reset token" },
-        { status: 400 }
-      );
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    if (new Date(resetToken.expires) < new Date()) {
-      // Clean up expired token
-      if (localDataMode) {
-        await deleteLocalPasswordResetToken(token);
-      } else {
-        await prisma.passwordResetToken.delete({
-          where: { token },
-        });
-      }
-      return NextResponse.json(
-        { error: "Reset token has expired" },
-        { status: 400 }
-      );
-    }
-
-    // Find user
-    const user = localDataMode
-      ? await getLocalUserByEmail(resetToken.email)
-      : await prisma.user.findUnique({
-          where: { email: resetToken.email },
-        });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 400 }
-      );
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Update user password
-    if (localDataMode) {
-      await updateLocalUser({
-        id: user.id,
-        password: hashedPassword,
-      });
-    } else {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { password: hashedPassword },
-      });
-    }
-
-    // Delete the used token
-    if (localDataMode) {
-      await deleteLocalPasswordResetToken(token);
-    } else {
-      await prisma.passwordResetToken.delete({
-        where: { token },
-      });
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: 'Password updated successfully' })
   } catch (error) {
-    console.error("Reset password error:", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    console.error('Reset password error:', error)
+    return NextResponse.json({ error: 'Failed to reset password' }, { status: 500 })
   }
 }

@@ -1,114 +1,66 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@akaar/db";
-import { getOptionalSession } from "@/lib/auth-helpers";
-import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
-import {
-  createLocalAddress,
-  listLocalAddressesForUser,
-} from "@/lib/local-data-store";
-import { isLocalDataMode } from "@/lib/local-runtime";
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
-  if (!getRuntimeCapabilities().authAvailable) {
-    return NextResponse.json(
-      { error: "Authentication unavailable" },
-      { status: 503 }
-    );
-  }
-
   try {
-    const session = await getOptionalSession();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { data: addresses, error } = await supabase
+      .from('addresses')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('is_default', { ascending: false })
 
-    const addresses = isLocalDataMode()
-      ? await listLocalAddressesForUser(session.user.id)
-      : await prisma.address.findMany({
-          where: {
-            userId: session.user.id,
-          },
-          orderBy: {
-            isDefault: "desc",
-          },
-        });
-
-    return NextResponse.json({ addresses });
+    if (error) throw error
+    return NextResponse.json({ addresses: addresses ?? [] })
   } catch (error) {
-    console.error("Error fetching addresses:", error);
-    return NextResponse.json(
-      { error: "Addresses unavailable" },
-      { status: 503 }
-    );
+    console.error('Error fetching addresses:', error)
+    return NextResponse.json({ error: 'Addresses unavailable' }, { status: 503 })
   }
 }
 
 export async function POST(request: NextRequest) {
-  if (!getRuntimeCapabilities().authAvailable) {
-    return NextResponse.json(
-      { error: "Authentication unavailable" },
-      { status: 503 }
-    );
-  }
-
   try {
-    const session = await getOptionalSession();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await request.json()
+
+    // Clear default flag on existing addresses if this will be default
+    if (body.isDefault) {
+      await supabase
+        .from('addresses')
+        .update({ is_default: false })
+        .eq('user_id', user.id)
     }
 
-    const body = await request.json();
+    const { data: address, error } = await supabase
+      .from('addresses')
+      .insert({
+        user_id: user.id,
+        label: body.label ?? null,
+        type: body.type ?? 'home',
+        first_name: body.firstName,
+        last_name: body.lastName,
+        address: body.address,
+        apartment: body.apartment ?? null,
+        city: body.city,
+        state: body.state,
+        zip: body.zip,
+        country: body.country ?? 'India',
+        phone: body.phone ?? null,
+        is_default: body.isDefault ?? false,
+      })
+      .select()
+      .single()
 
-    const address = isLocalDataMode()
-      ? await createLocalAddress(session.user.id, {
-          label: body.label || null,
-          type: body.type || "home",
-          firstName: body.firstName,
-          lastName: body.lastName,
-          address: body.address,
-          apartment: body.apartment || null,
-          city: body.city,
-          state: body.state,
-          zip: body.zip,
-          country: body.country || "India",
-          phone: body.phone || null,
-          isDefault: body.isDefault || false,
-        })
-      : await (async () => {
-          if (body.isDefault) {
-            await prisma.address.updateMany({
-              where: { userId: session.user.id },
-              data: { isDefault: false },
-            });
-          }
-
-          return prisma.address.create({
-            data: {
-              userId: session.user.id,
-              label: body.label || null,
-              type: body.type || "home",
-              firstName: body.firstName,
-              lastName: body.lastName,
-              address: body.address,
-              apartment: body.apartment || null,
-              city: body.city,
-              state: body.state,
-              zip: body.zip,
-              country: body.country || "India",
-              phone: body.phone || null,
-              isDefault: body.isDefault || false,
-            },
-          });
-        })();
-
-    return NextResponse.json({ address });
+    if (error) throw error
+    return NextResponse.json({ address }, { status: 201 })
   } catch (error) {
-    console.error("Error creating address:", error);
-    return NextResponse.json(
-      { error: "Addresses unavailable" },
-      { status: 503 }
-    );
+    console.error('Error creating address:', error)
+    return NextResponse.json({ error: 'Addresses unavailable' }, { status: 503 })
   }
 }
