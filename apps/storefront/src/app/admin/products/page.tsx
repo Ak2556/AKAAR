@@ -43,7 +43,18 @@ export default async function AdminProductsPage() {
     .from('products')
     .select('id, name, slug, category, image_url, is_active, created_at')
     .order('created_at', { ascending: false })
-    .limit(24)
+    .limit(24) as {
+      data: Array<{
+        id: string
+        name: string
+        slug: string
+        category: string | null
+        image_url: string | null
+        is_active: boolean
+        created_at: string
+      }> | null
+      error: unknown
+    }
 
   return (
     <div className="min-h-screen pt-28 pb-20">
