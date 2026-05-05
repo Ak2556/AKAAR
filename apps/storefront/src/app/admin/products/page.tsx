@@ -15,7 +15,7 @@ export default async function AdminProductsPage() {
     .from('profiles')
     .select('role, name')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: string; name: string | null } | null; error: unknown }
 
   if (!profile || profile.role !== 'ADMIN') {
     return (

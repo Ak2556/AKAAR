@@ -21,7 +21,7 @@ async function requireAdmin() {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: string } | null; error: unknown }
 
   if (profile?.role !== 'ADMIN') return null
   return user

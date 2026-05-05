@@ -53,7 +53,7 @@ export async function updateSession(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { role: string } | null; error: unknown }
 
     if (profile?.role !== 'ADMIN') {
       const url = request.nextUrl.clone()
