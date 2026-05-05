@@ -38,13 +38,6 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@akaar/db"],
   // Required for Next.js 16 with Sentry webpack config
   turbopack: {},
-  env: {
-    DATABASE_URL: process.env.DATABASE_URL,
-    AUTH_SECRET: process.env.AUTH_SECRET,
-    AUTH_URL: process.env.AUTH_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  },
   async headers() {
     return [
       {
