@@ -13,6 +13,12 @@ export async function GET(request: Request) {
     const offset    = (page - 1) * limit
 
     const supabase = await createClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { products: [], pagination: { page: 1, limit: 12, total: 0, totalPages: 0 }, categories: [], catalogAvailable: false, empty: true },
+        { status: 503 }
+      )
+    }
 
     let query = supabase
       .from('products')

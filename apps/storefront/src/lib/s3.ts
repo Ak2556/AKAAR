@@ -6,14 +6,23 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-// Initialize S3 client
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "ap-south-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+let _s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!_s3Client) {
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+      throw new Error("AWS credentials not configured");
+    }
+    _s3Client = new S3Client({
+      region: process.env.AWS_REGION || "ap-south-1",
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    });
+  }
+  return _s3Client;
+}
 
 const BUCKET_NAME = process.env.AWS_S3_BUCKET || "akaar-uploads";
 
@@ -23,9 +32,6 @@ export interface UploadResult {
   url: string;
 }
 
-/**
- * Generate a presigned URL for client-side uploads
- */
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
@@ -37,12 +43,9 @@ export async function getPresignedUploadUrl(
     ContentType: contentType,
   });
 
-  return getSignedUrl(s3Client, command, { expiresIn });
+  return getSignedUrl(getS3Client(), command, { expiresIn });
 }
 
-/**
- * Generate a presigned URL for downloading/viewing files
- */
 export async function getPresignedDownloadUrl(
   key: string,
   expiresIn = 3600
@@ -52,12 +55,9 @@ export async function getPresignedDownloadUrl(
     Key: key,
   });
 
-  return getSignedUrl(s3Client, command, { expiresIn });
+  return getSignedUrl(getS3Client(), command, { expiresIn });
 }
 
-/**
- * Upload a file directly to S3 (server-side)
- */
 export async function uploadToS3(
   key: string,
   body: Buffer | Uint8Array,
@@ -70,7 +70,7 @@ export async function uploadToS3(
     ContentType: contentType,
   });
 
-  await s3Client.send(command);
+  await getS3Client().send(command);
 
   return {
     key,
@@ -79,21 +79,15 @@ export async function uploadToS3(
   };
 }
 
-/**
- * Delete a file from S3
- */
 export async function deleteFromS3(key: string): Promise<void> {
   const command = new DeleteObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
   });
 
-  await s3Client.send(command);
+  await getS3Client().send(command);
 }
 
-/**
- * Generate a unique S3 key for quote files
- */
 export function generateQuoteFileKey(
   quoteId: string,
   filename: string
@@ -103,31 +97,24 @@ export function generateQuoteFileKey(
   return `quotes/${quoteId}/${timestamp}-${sanitizedFilename}`;
 }
 
-/**
- * Generate a unique S3 key for mesh files
- */
 export function generateMeshFileKey(filename: string): string {
   const timestamp = Date.now();
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
   return `meshes/${timestamp}-${sanitizedFilename}`;
 }
 
-// Allowed file types for quote uploads
 export const ALLOWED_QUOTE_FILE_TYPES = [
-  // 3D Files
   "model/stl",
   "application/sla",
   "model/obj",
   "application/x-tgif",
   "model/gltf-binary",
   "model/gltf+json",
-  "application/octet-stream", // For .stl, .obj files
-  // Documents
+  "application/octet-stream",
   "application/pdf",
   "image/png",
   "image/jpeg",
   "image/webp",
-  // Archives
   "application/zip",
   "application/x-rar-compressed",
 ];
@@ -158,4 +145,4 @@ export function isValidFileType(filename: string): boolean {
   return ALLOWED_EXTENSIONS.includes(ext);
 }
 
-export { s3Client, BUCKET_NAME };
+export { BUCKET_NAME };

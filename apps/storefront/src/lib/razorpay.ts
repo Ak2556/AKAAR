@@ -39,10 +39,12 @@ export async function verifyPaymentSignature(
   paymentId: string,
   signature: string
 ): Promise<boolean> {
+  const secret = process.env.RAZORPAY_KEY_SECRET
+  if (!secret) throw new Error('Razorpay credentials not configured')
   const crypto = await import("crypto");
   const body = orderId + "|" + paymentId;
   const expectedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+    .createHmac("sha256", secret)
     .update(body)
     .digest("hex");
   return expectedSignature === signature;

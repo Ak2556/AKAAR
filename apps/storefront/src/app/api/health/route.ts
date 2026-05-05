@@ -4,7 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET() {
   try {
     const supabase = await createClient()
-    // Lightweight check — fetch 0 rows from profiles
+    if (!supabase) {
+      return NextResponse.json(
+        { status: 'unhealthy', timestamp: new Date().toISOString(), services: { database: 'not configured' } },
+        { status: 503 }
+      )
+    }
     const { error } = await supabase.from('profiles').select('id').limit(1)
     if (error) throw error
 
