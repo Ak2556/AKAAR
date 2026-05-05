@@ -1,11 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import type { Database } from './types'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -53,7 +52,7 @@ export async function updateSession(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single() as { data: { role: string } | null; error: unknown }
+      .single()
 
     if (profile?.role !== 'ADMIN') {
       const url = request.nextUrl.clone()

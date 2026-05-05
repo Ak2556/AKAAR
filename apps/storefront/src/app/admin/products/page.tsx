@@ -15,7 +15,7 @@ export default async function AdminProductsPage() {
     .from('profiles')
     .select('role, name')
     .eq('id', user.id)
-    .single() as { data: { role: string; name: string | null } | null; error: unknown }
+    .single()
 
   if (!profile || profile.role !== 'ADMIN') {
     return (
@@ -43,18 +43,7 @@ export default async function AdminProductsPage() {
     .from('products')
     .select('id, name, slug, category, image_url, is_active, created_at')
     .order('created_at', { ascending: false })
-    .limit(24) as {
-      data: Array<{
-        id: string
-        name: string
-        slug: string
-        category: string | null
-        image_url: string | null
-        is_active: boolean
-        created_at: string
-      }> | null
-      error: unknown
-    }
+    .limit(24)
 
   return (
     <div className="min-h-screen pt-28 pb-20">
