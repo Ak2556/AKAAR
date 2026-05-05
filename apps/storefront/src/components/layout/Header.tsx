@@ -303,7 +303,7 @@ export function Header() {
                           Sign Out
                         </button>
                       </>
-                    ) : authAvailable ? (
+                    ) : (
                       <Link
                         href="/auth/signin"
                         onClick={() => setIsOpen(false)}
@@ -311,7 +311,7 @@ export function Header() {
                       >
                         Sign In
                       </Link>
-                    ) : null}
+                    )}
 
                     <Link
                       href="/quote"
