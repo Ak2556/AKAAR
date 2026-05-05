@@ -1,14 +1,3 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
-
-export async function middleware(request: NextRequest) {
-  return updateSession(request)
-}
-
-export const config = {
-  matcher: [
-    '/account/:path*',
-    '/admin/:path*',
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-}
+// Deprecated: Next.js 16 uses proxy.ts instead of middleware.ts
+// Session handling and route protection is now in src/proxy.ts
+export {};
