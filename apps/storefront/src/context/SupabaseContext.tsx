@@ -6,7 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 
 interface SupabaseContextValue {
-  supabase: SupabaseClient<Database>;
+  supabase: SupabaseClient<Database> | null;
   configured: boolean;
 }
 
@@ -19,7 +19,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
     return {
-      supabase: createClient(),
+      supabase: configured ? createClient() : null,
       configured,
     };
   }, []);
