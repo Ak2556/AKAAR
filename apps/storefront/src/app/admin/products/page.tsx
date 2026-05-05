@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCreateForm } from '@/components/admin/ProductCreateForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminProductsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
