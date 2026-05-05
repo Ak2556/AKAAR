@@ -5,9 +5,6 @@ import { ProductCreateForm } from '@/components/admin/ProductCreateForm'
 
 export default async function AdminProductsPage() {
   const supabase = await createClient()
-  if (!supabase) {
-    redirect('/auth/signin?callbackUrl=%2Fadmin%2Fproducts')
-  }
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
