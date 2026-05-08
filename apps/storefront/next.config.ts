@@ -35,8 +35,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@akaar/db"],
-  // Required for Next.js 16 with Sentry webpack config
-  turbopack: {},
   async headers() {
     return [
       {
