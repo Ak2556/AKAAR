@@ -4,8 +4,7 @@
 -- https://supabase.com/dashboard/project/mpdjjxkkjuhnqcynclin/sql
 -- ============================================================
 
--- Enable UUID extension
-create extension if not exists "uuid-ossp";
+-- gen_random_uuid() is replaced by gen_random_uuid() (built-in, no extension needed)
 
 -- ============================================================
 -- ENUMS
@@ -68,7 +67,7 @@ create trigger profiles_updated_at
 -- ============================================================
 
 create table public.mesh_files (
-  id                  uuid        primary key default uuid_generate_v4(),
+  id                  uuid        primary key default gen_random_uuid(),
   original_filename   text        not null,
   stored_filename     text,
   storage_path        text,
@@ -90,7 +89,7 @@ create table public.mesh_files (
 -- ============================================================
 
 create table public.products (
-  id                  uuid        primary key default uuid_generate_v4(),
+  id                  uuid        primary key default gen_random_uuid(),
   name                text        not null,
   slug                text        not null unique,
   description         text,
@@ -118,7 +117,7 @@ create index products_is_active_idx on public.products(is_active);
 -- ============================================================
 
 create table public.addresses (
-  id          uuid        primary key default uuid_generate_v4(),
+  id          uuid        primary key default gen_random_uuid(),
   user_id     uuid        not null references public.profiles(id) on delete cascade,
   label       text,
   type        text        not null default 'home',
@@ -147,7 +146,7 @@ create index addresses_user_id_idx on public.addresses(user_id);
 -- ============================================================
 
 create table public.orders (
-  id                  uuid           primary key default uuid_generate_v4(),
+  id                  uuid           primary key default gen_random_uuid(),
   order_number        text           not null unique,
   user_id             uuid           references public.profiles(id),
   status              order_status   not null default 'PENDING',
@@ -182,7 +181,7 @@ create index orders_status_idx       on public.orders(status);
 -- ============================================================
 
 create table public.order_items (
-  id          uuid           primary key default uuid_generate_v4(),
+  id          uuid           primary key default gen_random_uuid(),
   order_id    uuid           not null references public.orders(id) on delete cascade,
   product_id  uuid           references public.products(id),
   name        text           not null,
@@ -201,7 +200,7 @@ create index order_items_order_id_idx on public.order_items(order_id);
 -- ============================================================
 
 create table public.quote_requests (
-  id              uuid         primary key default uuid_generate_v4(),
+  id              uuid         primary key default gen_random_uuid(),
   quote_number    text         not null unique,
   user_id         uuid         references public.profiles(id),
   status          quote_status not null default 'PENDING',
@@ -232,7 +231,7 @@ create index quote_requests_status_idx  on public.quote_requests(status);
 -- ============================================================
 
 create table public.quote_files (
-  id                uuid        primary key default uuid_generate_v4(),
+  id                uuid        primary key default gen_random_uuid(),
   quote_request_id  uuid        not null references public.quote_requests(id) on delete cascade,
   original_filename text        not null,
   stored_filename   text        not null,
@@ -250,7 +249,7 @@ create index quote_files_quote_id_idx on public.quote_files(quote_request_id);
 -- ============================================================
 
 create table public.audit_logs (
-  id            uuid         primary key default uuid_generate_v4(),
+  id            uuid         primary key default gen_random_uuid(),
   user_id       uuid         references public.profiles(id),
   action        text         not null,
   entity_type   text         not null,
