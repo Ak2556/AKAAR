@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Loader2, Upload, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
 
 interface ProductCreateFormProps {
   existingProducts: Array<{
@@ -18,62 +19,143 @@ interface ProductCreateFormProps {
   }>;
 }
 
+type UploadStage =
+  | "idle"
+  | "uploading-image"
+  | "uploading-model"
+  | "saving"
+  | "done";
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+async function uploadToStorage(
+  supabase: ReturnType<typeof createClient>,
+  bucket: string,
+  path: string,
+  file: File
+): Promise<string> {
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: "31536000",
+    upsert: true,
+  });
+  if (error) throw new Error(`Storage upload failed: ${error.message}`);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export function ProductCreateForm({
   existingProducts,
 }: ProductCreateFormProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [stage, setStage] = useState<UploadStage>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{
-    name: string;
-    slug: string;
-  } | null>(null);
-  const [modelName, setModelName] = useState("");
-  const [imageName, setImageName] = useState("");
+  const [success, setSuccess] = useState<{ name: string; slug: string } | null>(
+    null
+  );
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [modelFile, setModelFile] = useState<File | null>(null);
+
+  const isSubmitting = stage !== "idle" && stage !== "done";
+
+  const stageLabel: Record<UploadStage, string> = {
+    idle: "Create Product",
+    "uploading-image": "Uploading image…",
+    "uploading-model": "Uploading 3D model…",
+    saving: "Saving product…",
+    done: "Create Product",
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setSuccess(null);
-    setIsSubmitting(true);
+
+    const form = event.currentTarget;
+    const fd = new FormData(form);
+
+    const name = (fd.get("name") as string)?.trim();
+    const rawPrice = fd.get("price") as string;
+    if (!name) { setError("Product name is required"); return; }
+    const price = Number(rawPrice);
+    if (!Number.isFinite(price) || price <= 0) { setError("Price must be a positive number"); return; }
 
     try {
-      const form = event.currentTarget;
-      const formData = new FormData(form);
+      const supabase = createClient();
+      const timestamp = Date.now();
+
+      // ── 1. Upload preview image (optional) ──────────────────────────────
+      let imageUrl: string | null = null;
+      if (imageFile) {
+        setStage("uploading-image");
+        const ext = imageFile.name.split(".").pop() ?? "jpg";
+        const path = `images/${timestamp}-${slugify(name)}.${ext}`;
+        imageUrl = await uploadToStorage(supabase, "product-assets", path, imageFile);
+      }
+
+      // ── 2. Upload 3D model (optional) ────────────────────────────────────
+      let modelUrl: string | null = null;
+      let modelFilename: string | null = null;
+      let modelSize: number | null = null;
+      if (modelFile) {
+        setStage("uploading-model");
+        const ext = modelFile.name.split(".").pop() ?? "glb";
+        const path = `models/${timestamp}-${slugify(name)}.${ext}`;
+        modelUrl = await uploadToStorage(supabase, "product-assets", path, modelFile);
+        modelFilename = modelFile.name;
+        modelSize = modelFile.size;
+      }
+
+      // ── 3. Save product via API ──────────────────────────────────────────
+      setStage("saving");
+      const isActiveRaw = fd.get("isActive");
 
       const response = await fetch("/api/admin/products", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          slug: (fd.get("slug") as string)?.trim() || undefined,
+          category: (fd.get("category") as string)?.trim() || undefined,
+          shortDescription: (fd.get("shortDescription") as string)?.trim() || undefined,
+          description: (fd.get("description") as string)?.trim() || undefined,
+          price,
+          isActive: isActiveRaw === "true",
+          imageUrl,
+          modelUrl,
+          modelFilename,
+          modelSize,
+        }),
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to create product");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create product");
-      }
-
-      setSuccess({
-        name: data.product.name,
-        slug: data.product.slug,
-      });
+      setSuccess({ name: data.product.name, slug: data.product.slug });
+      setStage("done");
       form.reset();
-      setModelName("");
-      setImageName("");
+      setImageFile(null);
+      setModelFile(null);
       router.refresh();
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Failed to create product"
-      );
-    } finally {
-      setIsSubmitting(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create product");
+      setStage("idle");
     }
   };
 
   return (
     <div className="grid xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] gap-8">
       <form
+        ref={formRef}
         onSubmit={handleSubmit}
         className="border border-[var(--border)] rounded-2xl bg-[var(--bg-secondary)] p-6 md:p-8 space-y-6"
       >
@@ -108,7 +190,9 @@ export function ProductCreateForm({
 
         <div className="grid md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Product Name *</label>
+            <label className="block text-sm font-medium mb-2">
+              Product Name *
+            </label>
             <input
               type="text"
               name="name"
@@ -139,7 +223,9 @@ export function ProductCreateForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Price (INR) *</label>
+            <label className="block text-sm font-medium mb-2">
+              Price (INR) *
+            </label>
             <input
               type="number"
               name="price"
@@ -166,7 +252,9 @@ export function ProductCreateForm({
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Short Description</label>
+            <label className="block text-sm font-medium mb-2">
+              Short Description
+            </label>
             <input
               type="text"
               name="shortDescription"
@@ -176,7 +264,9 @@ export function ProductCreateForm({
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Full Description</label>
+            <label className="block text-sm font-medium mb-2">
+              Full Description
+            </label>
             <textarea
               name="description"
               rows={5}
@@ -187,6 +277,7 @@ export function ProductCreateForm({
         </div>
 
         <div className="grid lg:grid-cols-2 gap-4">
+          {/* Image upload */}
           <label className="block rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 cursor-pointer hover:border-[var(--accent)]/60 transition-colors">
             <span className="flex items-center gap-2 text-sm font-medium mb-2">
               <Upload className="w-4 h-4 text-[var(--accent)]" />
@@ -197,48 +288,56 @@ export function ProductCreateForm({
             </p>
             <input
               type="file"
-              name="previewImage"
               accept=".png,.jpg,.jpeg,.webp,.avif"
               className="hidden"
-              onChange={(event) =>
-                setImageName(event.target.files?.[0]?.name || "")
-              }
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
             <span className="text-sm text-[var(--text-muted)]">
-              {imageName || "Choose an image file"}
+              {imageFile ? imageFile.name : "Choose an image file"}
             </span>
           </label>
 
+          {/* Model upload */}
           <label className="block rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 cursor-pointer hover:border-[var(--accent)]/60 transition-colors">
             <span className="flex items-center gap-2 text-sm font-medium mb-2">
               <Upload className="w-4 h-4 text-[var(--accent)]" />
               3D Preview Model
             </span>
             <p className="text-xs text-[var(--text-secondary)] mb-3">
-              Optional. GLB or GLTF up to 50 MB. These render interactively on
-              the product page.
+              Optional. GLB or GLTF up to 50 MB. Renders interactively on the
+              product page.
             </p>
             <input
               type="file"
-              name="modelFile"
               accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
               className="hidden"
-              onChange={(event) =>
-                setModelName(event.target.files?.[0]?.name || "")
-              }
+              onChange={(e) => setModelFile(e.target.files?.[0] ?? null)}
             />
             <span className="text-sm text-[var(--text-muted)]">
-              {modelName || "Choose a GLB or GLTF model"}
+              {modelFile ? modelFile.name : "Choose a GLB or GLTF model"}
             </span>
           </label>
         </div>
 
+        {/* Upload progress pill */}
+        {isSubmitting && (
+          <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 px-4 py-3 text-sm text-[var(--accent)] flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+            {stageLabel[stage]}
+          </div>
+        )}
+
         <div className="flex items-center justify-end">
-          <Button type="submit" variant="primary" size="lg" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Creating Product...
+                {stageLabel[stage]}
               </>
             ) : (
               "Create Product"
@@ -252,7 +351,7 @@ export function ProductCreateForm({
           <div>
             <h2 className="text-xl font-bold">Latest Products</h2>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
-              Current marketplace items from Prisma.
+              Current marketplace items.
             </p>
           </div>
           <span className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
@@ -263,7 +362,8 @@ export function ProductCreateForm({
         <div className="space-y-3">
           {existingProducts.length === 0 ? (
             <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-5 text-sm text-[var(--text-secondary)]">
-              No products yet. Create your first marketplace listing from this page.
+              No products yet. Create your first marketplace listing from this
+              page.
             </div>
           ) : (
             existingProducts.map((product) => (
@@ -280,7 +380,9 @@ export function ProductCreateForm({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-xs text-[var(--text-muted)]">No image</span>
+                    <span className="text-xs text-[var(--text-muted)]">
+                      No image
+                    </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
