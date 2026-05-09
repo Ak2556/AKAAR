@@ -53,9 +53,30 @@ export async function GET(request: Request) {
       id: label.toLowerCase(), label, count,
     }))
 
+    // Transform snake_case → camelCase for the client
+    const mapped = (products ?? []).map((p) => {
+      const mf = p.mesh_files as Record<string, unknown> | null
+      return {
+        id:               p.id,
+        name:             p.name,
+        slug:             p.slug,
+        category:         p.category ?? null,
+        price:            p.price,
+        description:      p.description ?? null,
+        shortDescription: p.short_description ?? null,
+        imageUrl:         p.image_url ?? null,
+        isActive:         p.is_active,
+        meshFile: mf ? {
+          id:               mf.id,
+          storagePath:      mf.storage_path ?? null,
+          originalFilename: mf.original_filename ?? 'model.glb',
+        } : null,
+      }
+    })
+
     const total = count ?? 0
     return NextResponse.json({
-      products: products ?? [],
+      products: mapped,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       categories,
       catalogAvailable: true,
