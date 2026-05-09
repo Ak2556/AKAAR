@@ -351,7 +351,7 @@ export function ProductCreateForm({
           <div>
             <h2 className="text-xl font-bold">Latest Products</h2>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
-              Current marketplace items.
+              Click any product to edit it.
             </p>
           </div>
           <span className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
@@ -369,7 +369,7 @@ export function ProductCreateForm({
             existingProducts.map((product) => (
               <Link
                 key={product.id}
-                href={`/products/${product.slug}`}
+                href={`/admin/products/${product.id}`}
                 className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] p-3 hover:border-[var(--accent)]/60 transition-colors"
               >
                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">

@@ -130,20 +130,67 @@ export async function PATCH(request: Request) {
   if (!id) return NextResponse.json({ error: 'Product id is required' }, { status: 400 })
 
   const admin = createAdminClient()
+
+  // Handle model URL update — create/update/clear mesh_file record
+  let meshFileId: string | null | undefined = undefined // undefined = no change
+  if ('modelUrl' in updates) {
+    if (!updates.modelUrl) {
+      // Clearing the model
+      meshFileId = null
+    } else {
+      // New model uploaded — upsert a mesh_file record
+      const { data: existingProduct } = await admin
+        .from('products')
+        .select('mesh_file_id')
+        .eq('id', id)
+        .single()
+
+      if (existingProduct?.mesh_file_id) {
+        // Update existing mesh_file record
+        await admin.from('mesh_files').update({
+          original_filename: updates.modelFilename ?? 'model.glb',
+          stored_filename:   updates.modelFilename ?? 'model.glb',
+          storage_path:      updates.modelUrl,
+          file_size:         updates.modelSize ?? 0,
+        }).eq('id', existingProduct.mesh_file_id)
+        meshFileId = existingProduct.mesh_file_id
+      } else {
+        // Insert new mesh_file record
+        const { data: meshFile, error: meshErr } = await admin
+          .from('mesh_files')
+          .insert({
+            original_filename: updates.modelFilename ?? 'model.glb',
+            stored_filename:   updates.modelFilename ?? 'model.glb',
+            storage_path:      updates.modelUrl,
+            file_type:         'model/gltf-binary',
+            file_size:         updates.modelSize ?? 0,
+            is_processed:      true,
+          })
+          .select()
+          .single()
+        if (meshErr) return NextResponse.json({ error: meshErr.message }, { status: 500 })
+        meshFileId = meshFile.id
+      }
+    }
+  }
+
+  const productUpdate: Record<string, unknown> = {
+    name:              updates.name,
+    slug:              updates.slug,
+    description:       updates.description,
+    short_description: updates.shortDescription,
+    category:          updates.category,
+    price:             updates.price,
+    is_active:         updates.isActive,
+  }
+  if ('imageUrl' in updates)  productUpdate.image_url   = updates.imageUrl
+  if (meshFileId !== undefined) productUpdate.mesh_file_id = meshFileId
+
   const { data: product, error } = await admin
     .from('products')
-    .update({
-      name:              updates.name,
-      slug:              updates.slug,
-      description:       updates.description,
-      short_description: updates.shortDescription,
-      category:          updates.category,
-      price:             updates.price,
-      is_active:         updates.isActive,
-      image_url:         updates.imageUrl,
-    })
+    .update(productUpdate)
     .eq('id', id)
-    .select()
+    .select('*, mesh_files(*)')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
