@@ -7,14 +7,26 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data: orders, error } = await supabase
+    const { data: rawOrders, error } = await supabase
       .from('orders')
-      .select('*, order_items(*, products(*))')
+      .select('id, order_number, status, total, created_at, tracking_number, tracking_url, order_items(id, name, quantity, material)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return NextResponse.json({ orders: orders ?? [] })
+
+    const orders = (rawOrders ?? []).map((o: typeof rawOrders extends (infer T)[] ? T : never) => ({
+      id: o.id,
+      orderNumber: o.order_number,
+      status: o.status,
+      total: o.total,
+      createdAt: o.created_at,
+      trackingNumber: o.tracking_number,
+      trackingUrl: o.tracking_url,
+      items: o.order_items,
+    }))
+
+    return NextResponse.json({ orders })
   } catch (error) {
     console.error('Error fetching orders:', error)
     return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 })

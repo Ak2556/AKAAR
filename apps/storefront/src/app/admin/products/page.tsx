@@ -58,6 +58,14 @@ export default async function AdminProductsPage() {
           <p className="text-lg text-[var(--text-secondary)] max-w-3xl">
             Add new marketplace products with preview images and interactive GLB/GLTF assets.
           </p>
+          <div className="flex gap-3 mt-6">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 px-4 py-2 text-sm font-medium text-[var(--accent)]">
+              Products
+            </span>
+            <Link href="/admin/orders" className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-colors">
+              Orders
+            </Link>
+          </div>
         </div>
 
         <ProductCreateForm

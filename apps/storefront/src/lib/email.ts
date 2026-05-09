@@ -295,25 +295,48 @@ interface OrderStatusUpdateData {
   orderNumber: string;
   status: string;
   message?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
 }
 
 export async function sendOrderStatusEmail(data: OrderStatusUpdateData) {
-  const statusMessages: Record<string, string> = {
-    PROCESSING: "Your order is now being processed. Our team is preparing your items.",
-    SHIPPED: "Great news! Your order has been shipped and is on its way.",
-    DELIVERED: "Your order has been delivered. We hope you love it!",
-    CANCELLED: "Your order has been cancelled. If you have questions, please contact us.",
+  const statusLabels: Record<string, string> = {
+    CONFIRMED:  'Order Confirmed',
+    PROCESSING: 'Order In Progress',
+    SHIPPED:    'Order Shipped',
+    DELIVERED:  'Order Delivered',
+    CANCELLED:  'Order Cancelled',
   };
 
+  const statusMessages: Record<string, string> = {
+    CONFIRMED:  'Your order has been confirmed. Our team will begin processing it shortly.',
+    PROCESSING: 'Your order is now being processed. Our team is preparing your items.',
+    SHIPPED:    'Great news! Your order has been shipped and is on its way to you.',
+    DELIVERED:  'Your order has been delivered. We hope you love it!',
+    CANCELLED:  'Your order has been cancelled. If you have questions, please contact us.',
+  };
+
+  const trackingSection = data.status === 'SHIPPED' && data.trackingNumber ? `
+    <div style="background: #0a0a0a; border: 1px solid #00fff5; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <p style="color: #888; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.1em;">Tracking Number</p>
+      <p style="color: #00fff5; font-size: 20px; font-weight: bold; margin: 0; font-family: monospace;">${data.trackingNumber}</p>
+      ${data.trackingUrl ? `<a href="${data.trackingUrl}" style="display: inline-block; margin-top: 12px; color: #00fff5; font-size: 13px;">Track your package →</a>` : ''}
+    </div>
+  ` : '';
+
+  const label = statusLabels[data.status] || data.status;
+
   const html = baseTemplate(`
-    <h2>Order Status Update</h2>
-    <p>Your order <strong>${data.orderNumber}</strong> status has been updated:</p>
+    <h2>${label}</h2>
+    <p>Your order <strong>${data.orderNumber}</strong> has been updated.</p>
 
     <div style="background: #f9f9f9; padding: 20px; border-radius: 4px; margin: 20px 0; text-align: center;">
-      <h3 style="color: #00fff5; margin: 0;">${data.status}</h3>
+      <h3 style="color: #00fff5; margin: 0;">${label}</h3>
     </div>
 
     <p>${data.message || statusMessages[data.status] || 'Your order status has been updated.'}</p>
+
+    ${trackingSection}
 
     <div style="text-align: center; margin-top: 30px;">
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/account/orders" class="button">View Order Details</a>
@@ -322,7 +345,7 @@ export async function sendOrderStatusEmail(data: OrderStatusUpdateData) {
 
   return sendEmail({
     to: data.to,
-    subject: `Order ${data.orderNumber} - ${data.status}`,
+    subject: `${label} — ${data.orderNumber}`,
     html,
   });
 }

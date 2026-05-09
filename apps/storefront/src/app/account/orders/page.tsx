@@ -32,6 +32,8 @@ interface Order {
   status: string;
   total: number;
   items: OrderItem[];
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
 }
 
 const statusConfig: Record<string, { icon: LucideIcon; tone: string; label: string }> = {
@@ -191,6 +193,22 @@ export default function OrdersPage() {
                 <div className="bg-[var(--bg-secondary)] px-5 py-5">
                   <p className="luxury-metric-label">State</p>
                   <p className="mt-4 text-sm text-[var(--text-primary)]">{statusConfig[order.status]?.label || order.status}</p>
+                  {order.trackingNumber && (
+                    <div className="mt-4 rounded-[1rem] border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
+                      <p className="text-xs uppercase tracking-wider text-cyan-400 mb-1">Tracking</p>
+                      <p className="font-mono text-sm text-[var(--text-primary)]">{order.trackingNumber}</p>
+                      {order.trackingUrl && (
+                        <a
+                          href={order.trackingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
+                        >
+                          Track package →
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.article>
