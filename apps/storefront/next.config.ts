@@ -35,6 +35,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@akaar/db"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
   async headers() {
     return [
       {
