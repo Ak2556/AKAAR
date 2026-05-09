@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowUpRight, ShoppingCart } from "lucide-react";
+import { ArrowUpRight, ShoppingCart, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
@@ -83,9 +83,10 @@ export function ProductCard({
               <p className="mt-3 text-lg font-semibold text-[var(--text-primary)]">{formatPrice(price)}</p>
             </div>
             <div className="bg-[var(--bg-secondary)] px-5 py-5">
-              <p className="luxury-metric-label">Preview</p>
-              <p className="mt-3 text-sm font-medium text-[var(--text-primary)]">
-                {imageUrl ? "Configured" : "Placeholder"}
+              <p className="luxury-metric-label">Shipping</p>
+              <p className="mt-3 text-sm font-semibold text-emerald-400 flex items-center gap-1.5">
+                <Truck className="h-3.5 w-3.5" />
+                Free
               </p>
             </div>
             <button

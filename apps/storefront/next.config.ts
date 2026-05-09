@@ -40,6 +40,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  async redirects() {
+    return [
+      { source: '/team/mohit-sheravat', destination: '/team/mohit-sherawat', permanent: true },
+      { source: '/team/tarveen-sheravat', destination: '/team/tarveen-sherawat', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

@@ -39,8 +39,8 @@ interface Product {
 const performanceFacts = [
   { label: "Preview system", value: "3D-capable viewer" },
   { label: "Review window", value: "48 hours" },
-  { label: "Production mode", value: "Custom configured" },
-  { label: "Dispatch", value: "Pan-India support" },
+  { label: "Shipping", value: "FREE · Pan-India" },
+  { label: "Dispatch", value: "5-7 business days" },
 ];
 
 export default function ProductDetailPage() {

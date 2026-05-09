@@ -29,9 +29,9 @@ declare global {
 }
 
 const shippingMethods = [
-  { id: "standard", name: "Standard Shipping", price: 99,  time: "5-7 business days" },
-  { id: "express",  name: "Express Shipping",  price: 199, time: "2-3 business days" },
-  { id: "overnight",name: "Priority Shipping", price: 399, time: "1-2 business days" },
+  { id: "standard", name: "Standard Shipping", price: 0,   time: "5-7 business days", badge: "FREE" },
+  { id: "express",  name: "Express Shipping",  price: 149, time: "2-3 business days", badge: null },
+  { id: "overnight",name: "Priority Shipping", price: 299, time: "1-2 business days", badge: null },
 ];
 
 const steps = ["Information", "Shipping", "Payment"];
@@ -597,11 +597,20 @@ export default function CheckoutPage() {
                             ) : null}
                           </div>
                           <div>
-                            <p className="display-font text-2xl text-[var(--text-primary)]">{method.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="display-font text-2xl text-[var(--text-primary)]">{method.name}</p>
+                              {method.badge && (
+                                <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                                  {method.badge}
+                                </span>
+                              )}
+                            </div>
                             <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[var(--text-muted)]">{method.time}</p>
                           </div>
                         </div>
-                        <span className="text-sm font-medium text-[var(--text-primary)]">{formatPrice(method.price)}</span>
+                        <span className={`text-sm font-medium ${method.price === 0 ? 'text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+                          {method.price === 0 ? 'FREE' : formatPrice(method.price)}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -713,7 +722,7 @@ export default function CheckoutPage() {
 
                   <div className="mt-6 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)]">
                     <TotalRow label="Subtotal" value={formatPrice(totalPrice)} />
-                    <TotalRow label="Shipping" value={formatPrice(shippingCost)} />
+                    <TotalRow label="Shipping" value={shippingCost === 0 ? 'FREE' : formatPrice(shippingCost)} />
                     <TotalRow label="GST (18%)" value={formatPrice(tax)} />
                     <div className="flex items-center justify-between bg-[var(--bg-secondary)] px-4 py-5">
                       <span className="text-sm font-medium text-[var(--text-primary)]">Total</span>

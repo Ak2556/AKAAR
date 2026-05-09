@@ -40,11 +40,11 @@ When he's not leading AKAAR, Akash explores cutting-edge developments in machine
     founderVision: "I started AKAAR 3D because I saw a broken system—manual quoting, inconsistent quality, and endless friction that slowed down innovators. We're not just a 3D printing service; we're building the infrastructure for the next generation of hardware creators. Every engineer, every startup, every maker deserves access to manufacturing that just works.",
   },
   {
-    slug: "mohit-sheravat",
-    name: "Mohit Sheravat",
+    slug: "mohit-sherawat",
+    name: "Mohit Sherawat",
     role: "Lead Industrial Designer",
     domain: "CAD optimization, mesh validation, and model slicing for structural integrity",
-    image: "/team/mohit-sheravat.jpeg",
+    image: "/team/mohit-sherawat.jpeg",
     bio: `Mohit brings years of industrial design experience to AKAAR 3D, ensuring every print meets the highest standards of quality and precision. As Lead Industrial Designer, he oversees the entire design-to-print pipeline, from initial CAD file validation to final slicing optimization.
 
 His expertise in mesh repair and optimization means that even complex geometries are handled with care, resulting in prints that are structurally sound and dimensionally accurate. Mohit works closely with customers to understand their design requirements and provides guidance on design-for-manufacturing best practices.
@@ -52,7 +52,7 @@ His expertise in mesh repair and optimization means that even complex geometries
 With a keen eye for detail and a deep understanding of 3D printing constraints, Mohit ensures that every part that leaves the facility meets AKAAR's quality standards.`,
     skills: ["CAD Design", "Mesh Optimization", "3D Modeling", "Slicing Software", "Design for Manufacturing", "Quality Assurance", "SolidWorks", "Fusion 360"],
     social: {
-      linkedin: "https://linkedin.com/in/mohit-sheravat",
+      linkedin: "https://linkedin.com/in/mohit-sherawat",
       email: "mohit@akaar3d.com",
     },
   },
@@ -74,11 +74,11 @@ Beyond maintenance, Harish continuously evaluates and tests new hardware, materi
     },
   },
   {
-    slug: "tarveen-sheravat",
-    name: "Tarveen Sheravat",
+    slug: "tarveen-sherawat",
+    name: "Tarveen Sherawat",
     role: "Head of Operations & Unit Economics",
     domain: "Supply chain logistics, material procurement, and cost-margin optimization",
-    image: "/team/tarveen-sheravat.jpeg",
+    image: "/team/tarveen-sherawat.jpeg",
     bio: `Tarveen drives the operational excellence that makes AKAAR 3D a reliable partner for businesses and individuals alike. As Head of Operations, she manages everything from material procurement to order fulfillment, ensuring smooth end-to-end delivery.
 
 Her analytical approach to unit economics has been instrumental in developing AKAAR's competitive pricing model while maintaining healthy margins. Tarveen has built strong relationships with material suppliers and logistics partners across India.
@@ -86,7 +86,7 @@ Her analytical approach to unit economics has been instrumental in developing AK
 She oversees the supply chain, inventory management, and shipping operations, working to reduce lead times and improve customer satisfaction. Tarveen's operational expertise ensures that AKAAR can scale efficiently while maintaining service quality.`,
     skills: ["Operations Management", "Supply Chain", "Inventory Management", "Cost Analysis", "Vendor Relations", "Logistics", "Process Optimization", "Project Management"],
     social: {
-      linkedin: "https://linkedin.com/in/tarveen-sheravat",
+      linkedin: "https://linkedin.com/in/tarveen-sherawat",
       email: "tarveen@akaar3d.com",
     },
   },

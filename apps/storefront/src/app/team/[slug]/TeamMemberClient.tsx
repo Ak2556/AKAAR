@@ -4,17 +4,28 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Linkedin, Github, Mail, Twitter, Quote, Sparkles, Star, Lightbulb, Users, Target, Rocket } from "lucide-react";
-import { TeamMember } from "@/lib/team-data";
+import { TeamMember, teamMembers } from "@/lib/team-data";
 
 export function TeamMemberClient({ member }: { member: TeamMember }) {
-  // Split bio into paragraphs and extract first sentence for highlight
   const bioParagraphs = member.bio.split("\n\n");
   const highlightText = bioParagraphs[0].split('.')[0] + '.';
+  const otherMembers = teamMembers.filter((m) => m.slug !== member.slug);
 
   return (
     <main className="min-h-screen">
-      {/* Hero Section - Full Width */}
-      <section className="relative min-h-[80vh] flex items-end overflow-hidden">
+      {/* Back button — fixed above hero, always visible */}
+      <div className="fixed top-20 left-6 z-50">
+        <Link
+          href="/team"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--border)] rounded-full text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)]/50 transition-all shadow-lg"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Team
+        </Link>
+      </div>
+
+      {/* Hero Section */}
+      <section className="relative min-h-[85vh] flex items-end overflow-hidden">
         {/* Background Image with Parallax Effect */}
         <div className="absolute inset-0">
           <Image
@@ -46,22 +57,6 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
 
         {/* Content */}
         <div className="relative z-10 container mx-auto px-6 pb-16">
-          {/* Back Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute top-24 left-6"
-          >
-            <Link
-              href="/team"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-primary)]/50 backdrop-blur-sm border border-[var(--border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)]/50 transition-all"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Team
-            </Link>
-          </motion.div>
-
           <div className="max-w-4xl">
             {/* Founder Badge - Special for founder */}
             {member.isFounder && (
@@ -426,14 +421,67 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                   Get a Quote
                 </Link>
                 <Link
-                  href="/team"
+                  href="/products"
                   className="inline-flex items-center gap-2 px-8 py-4 border border-[var(--border)] text-[var(--text-primary)] font-semibold rounded-xl hover:border-[var(--accent)]/50 hover:text-[var(--accent)] transition-all"
                 >
-                  Meet the Team
+                  Browse Products
                 </Link>
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Meet the rest of the team */}
+      <section className="py-20 bg-[var(--bg-primary)] border-t border-[var(--border)]">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-10 flex items-center justify-between"
+          >
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] mb-2">The Team</p>
+              <h2 className="text-2xl font-bold">Also at AKAAR 3D</h2>
+            </div>
+            <Link href="/team" className="text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors">
+              View all →
+            </Link>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {otherMembers.map((m, i) => (
+              <motion.div
+                key={m.slug}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+              >
+                <Link
+                  href={`/team/${m.slug}`}
+                  className="group flex items-center gap-4 p-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent)]/50 hover:bg-[var(--accent)]/5 transition-all"
+                >
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--bg-tertiary)] border border-[var(--border)]">
+                    <Image
+                      src={m.image}
+                      alt={m.name}
+                      fill
+                      className="object-cover object-top"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors truncate">
+                      {m.name}
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{m.role}</p>
+                  </div>
+                  <ArrowLeft className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-all rotate-180 ml-auto flex-shrink-0" />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
