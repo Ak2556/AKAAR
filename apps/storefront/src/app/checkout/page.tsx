@@ -202,19 +202,20 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create order");
-      }
-
       const orderData = await response.json();
 
-      if (orderData.paymentMode === "mock") {
-        await finalizeOrder({
-          razorpay_order_id: orderData.orderId,
-          razorpay_payment_id: `localpay_${Date.now()}`,
-          razorpay_signature: "local-dev-signature",
-        });
-        return;
+      if (!response.ok) {
+        // Show the actual API error so we can diagnose it
+        const msg = orderData?.error || "Failed to create payment order";
+        throw new Error(
+          response.status === 503
+            ? "Payment gateway not configured. Please contact support."
+            : msg
+        );
+      }
+
+      if (!orderData.key || !orderData.orderId) {
+        throw new Error("Payment service returned incomplete data. Please try again.");
       }
 
       const options = {
@@ -224,7 +225,7 @@ export default function CheckoutPage() {
         name: "AKAAR",
         description: `Order - ${items.length} item(s)`,
         order_id: orderData.orderId,
-        handler: async function(response: any) {
+        handler: async function(response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
           await finalizeOrder(response);
         },
         prefill: {
@@ -245,8 +246,9 @@ export default function CheckoutPage() {
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
-    } catch {
-      toast.error("Failed to initiate payment. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to initiate payment. Please try again.";
+      toast.error(message);
       setIsProcessing(false);
     }
   };
