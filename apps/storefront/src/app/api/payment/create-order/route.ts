@@ -13,15 +13,28 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     const body = await request.json()
-    const { amount, currency = 'INR', receipt } = body
+    // amount comes in from checkout as rupees — Razorpay needs paise
+    const { amount: amountRupees, currency = 'INR', receipt } = body
 
-    if (!amount || amount <= 0) {
+    if (!amountRupees || amountRupees <= 0) {
       return NextResponse.json({ error: 'Valid amount is required' }, { status: 400 })
     }
 
-    const order = await createRazorpayOrder({ amount, currency, receipt })
+    const amountPaise = Math.round(amountRupees * 100)
+    const order = await createRazorpayOrder({
+      amount: amountPaise,
+      currency,
+      receipt: receipt || `rcpt_${Date.now()}`,
+    })
 
-    return NextResponse.json({ order, userId: user?.id ?? null })
+    return NextResponse.json({
+      // Fields the checkout page reads directly
+      key:      process.env.RAZORPAY_KEY_ID,
+      orderId:  order.id,
+      amount:   order.amount,   // in paise — Razorpay modal expects paise
+      currency: order.currency,
+      userId:   user?.id ?? null,
+    })
   } catch (error) {
     console.error('Error creating Razorpay order:', error)
     return NextResponse.json({ error: 'Failed to create payment order' }, { status: 500 })

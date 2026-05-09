@@ -29,9 +29,9 @@ declare global {
 }
 
 const shippingMethods = [
-  { id: "standard", name: "Standard Shipping", price: 499, time: "5-7 business days" },
-  { id: "express", name: "Express Shipping", price: 999, time: "2-3 business days" },
-  { id: "overnight", name: "Overnight Shipping", price: 1999, time: "Next business day" },
+  { id: "standard", name: "Standard Shipping", price: 99,  time: "5-7 business days" },
+  { id: "express",  name: "Express Shipping",  price: 199, time: "2-3 business days" },
+  { id: "overnight",name: "Priority Shipping", price: 399, time: "1-2 business days" },
 ];
 
 const steps = ["Information", "Shipping", "Payment"];
