@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FieldBlock, MetricTile, SummaryRow } from "@/components/ui/storefront-primitives";
+import { AddressAutocomplete } from "@/components/ui/AddressAutocomplete";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
@@ -70,6 +71,17 @@ export default function CheckoutPage() {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePlaceSelect = (fields: { address: string; city: string; state: string; zip: string; country: string }) => {
+    setFormData((prev) => ({
+      ...prev,
+      address: fields.address || prev.address,
+      city:    fields.city    || prev.city,
+      state:   fields.state   || prev.state,
+      zip:     fields.zip     || prev.zip,
+      country: fields.country || prev.country,
+    }));
   };
 
   const selectedShipping = shippingMethods.find((method) => method.id === formData.shippingMethod);
@@ -498,12 +510,12 @@ export default function CheckoutPage() {
                       </FormField>
                       <div className="sm:col-span-2">
                         <FormField label="Address *">
-                          <input
-                            type="text"
+                          <AddressAutocomplete
                             name="address"
                             required
                             value={formData.address}
                             onChange={handleChange}
+                            onPlaceSelect={handlePlaceSelect}
                             className="luxury-input w-full rounded-full px-5 py-3"
                           />
                         </FormField>

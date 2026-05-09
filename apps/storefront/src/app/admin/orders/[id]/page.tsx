@@ -210,6 +210,41 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 {addr.city}, {addr.state} {addr.zip}<br />
                 {addr.country}
               </p>
+
+              {/* Google Maps embed */}
+              {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (addr.address || addr.city) && (() => {
+                const fullAddress = [
+                  addr.address,
+                  addr.apartment,
+                  addr.city,
+                  addr.state,
+                  addr.zip,
+                  addr.country || 'India',
+                ].filter(Boolean).join(', ')
+                const mapsUrl = `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(fullAddress)}&zoom=15`
+                return (
+                  <div className="mt-4 rounded-xl overflow-hidden border border-[var(--border)]">
+                    <iframe
+                      src={mapsUrl}
+                      width="100%"
+                      height="220"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Delivery location"
+                    />
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 py-2 text-xs text-[var(--accent)] hover:underline bg-[var(--bg-secondary)]"
+                    >
+                      Open in Google Maps ↗
+                    </a>
+                  </div>
+                )
+              })()}
               {order.notes && (
                 <>
                   <p className="luxury-kicker mt-6 mb-2">Customer Notes</p>
