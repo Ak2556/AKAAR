@@ -212,17 +212,16 @@ export function ProductCreateForm({
           <label className="block rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 cursor-pointer hover:border-[var(--accent)]/60 transition-colors">
             <span className="flex items-center gap-2 text-sm font-medium mb-2">
               <Upload className="w-4 h-4 text-[var(--accent)]" />
-              3D Preview Model *
+              3D Preview Model
             </span>
             <p className="text-xs text-[var(--text-secondary)] mb-3">
-              Required. GLB or GLTF up to 50 MB. These render interactively on
+              Optional. GLB or GLTF up to 50 MB. These render interactively on
               the product page.
             </p>
             <input
               type="file"
               name="modelFile"
               accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
-              required
               className="hidden"
               onChange={(event) =>
                 setModelName(event.target.files?.[0]?.name || "")
