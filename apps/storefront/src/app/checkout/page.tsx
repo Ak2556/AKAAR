@@ -218,18 +218,25 @@ export default function CheckoutPage() {
         throw new Error("Payment service returned incomplete data. Please try again.");
       }
 
-      const options = {
+      // Determine if UPI should be shown.
+      // UPI QR payments require a verified merchant VPA (bank-linked Razorpay account).
+      // Hide UPI until the Razorpay account is fully KYC-verified.
+      const isTestKey = (orderData.key as string)?.startsWith("rzp_test_");
+      const hideUpi = isTestKey || process.env.NEXT_PUBLIC_RAZORPAY_HIDE_UPI === "true";
+
+      const options: Record<string, unknown> = {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "AKAAR",
-        description: `Order - ${items.length} item(s)`,
+        name: "AKAAR 3D",
+        description: `Order — ${items.length} item${items.length > 1 ? "s" : ""}`,
+        image: "/logo.png",
         order_id: orderData.orderId,
         handler: async function(response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
           await finalizeOrder(response);
         },
         prefill: {
-          name: `${formData.firstName} ${formData.lastName}`,
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
           email: formData.email,
           contact: formData.phone,
         },
@@ -241,8 +248,20 @@ export default function CheckoutPage() {
             setIsProcessing(false);
             toast.info("Payment cancelled");
           },
+          escape: false,
+          backdropclose: false,
         },
       };
+
+      // Hide UPI when merchant VPA is not yet verified
+      if (hideUpi) {
+        options.config = {
+          display: {
+            hide: [{ method: "upi" }],
+            preferences: { show_default_blocks: true },
+          },
+        };
+      }
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
