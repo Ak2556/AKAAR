@@ -265,21 +265,23 @@ export default function ProductDetailPage() {
 
               <div className="flex flex-col gap-3">
                 <div className="luxury-stage relative overflow-hidden rounded-[2rem] border border-white/8 p-4 sm:p-5" style={{ minHeight: "340px" }}>
-                  {showViewer || (allImages.length === 0 && (product.meshFile?.storagePath || product.meshFile?.s3Key)) ? (
+                  {/* All images pre-loaded in DOM; only selected one is visible — eliminates per-click load lag */}
+                  {allImages.map((img, i) => (
+                    <img
+                      key={img}
+                      src={img}
+                      alt={i === 0 ? product.name : ""}
+                      className={`absolute inset-4 sm:inset-5 rounded-[1rem] object-contain transition-opacity duration-150 ${
+                        !showViewer && selectedImageIdx === i ? "opacity-100" : "opacity-0 pointer-events-none"
+                      }`}
+                    />
+                  ))}
+                  {(showViewer || allImages.length === 0) && (
                     <ProductViewer3D
                       name={product.name}
                       imageUrl={allImages[0] ?? null}
                       modelUrl={product.meshFile?.storagePath || product.meshFile?.s3Key}
                     />
-                  ) : allImages[selectedImageIdx] ? (
-                    <img
-                      src={allImages[selectedImageIdx]}
-                      alt={product.name}
-                      className="h-full w-full rounded-[1.4rem] object-contain"
-                      style={{ minHeight: "308px" }}
-                    />
-                  ) : (
-                    <ProductViewer3D name={product.name} imageUrl={null} modelUrl={null} />
                   )}
                 </div>
 
