@@ -158,7 +158,7 @@ export default function AboutPage() {
               The process starts with objects that deserve to exist outside the slicer.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
-              The strongest signal in your photos is that the work is already being tested as real products and living objects. That matters more than generic manufacturing copy, so the page now leads with the studio and the output itself.
+              AKAAR works from a real desk in Jaipur — not a render farm or a generic print shop. Each product is developed as a physical object that needs to perform in a room, hold up under repeated use, and feel resolved when it arrives.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -199,7 +199,7 @@ export default function AboutPage() {
           <div className="mb-8 max-w-3xl">
             <span className="luxury-kicker">Real output</span>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              Product photos should carry the story on the About page.
+              Work built to live in the world, not just to finish printing.
             </h2>
           </div>
 
@@ -297,10 +297,10 @@ export default function AboutPage() {
           >
             <span className="luxury-kicker">Leadership</span>
             <h2 className="display-font mt-4 max-w-[12ch] text-3xl leading-[1.02] text-[var(--text-primary)] sm:text-4xl">
-              The team now has its own dedicated space.
+              The people behind the studio.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
-              About should stay focused on the studio, process, and product language. The full leadership story now lives on a dedicated team page where each person has room to stand on their own.
+              Every project involves direct collaboration with the founder and team. No handoffs, no blind production queues — each build request goes through the same people who designed the output process.
             </p>
           </motion.div>
 

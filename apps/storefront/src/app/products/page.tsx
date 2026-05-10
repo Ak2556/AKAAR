@@ -86,15 +86,15 @@ const editorialMoments = [
 const shopSignals = [
   {
     label: "Browse",
-    value: "Published products, not placeholder tiles",
+    value: "Real studio photography, published prices, live inventory",
   },
   {
     label: "Filter",
-    value: "Category, search, price, and view controls",
+    value: "By category, material, or name — or search directly",
   },
   {
-    label: "Shift to custom",
-    value: "Any listing can move into a reviewed build request",
+    label: "Go custom",
+    value: "Any listing becomes the starting point for a build request",
   },
 ];
 
@@ -263,7 +263,7 @@ export default function ProductsPage() {
                   The live shop for products you can browse, compare, and build from.
                 </h1>
                 <p className="max-w-xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                  This page should behave like a real shop first: published listings, clear prices, visible categories, and fast ways to move from discovery to cart or quote.
+                  Every item ships from a real studio setup in Jaipur. Compare products, browse by category, and move directly to cart — or start a custom build request from any listing.
                 </p>
                 <p className="editorial-eyebrow">Published products · Search and filter · Cart or quote</p>
               </div>
@@ -314,7 +314,7 @@ export default function ProductsPage() {
                       {featuredProduct?.name || "Published collection"}
                     </p>
                     <p className="mt-2 text-sm leading-6 text-white/68">
-                      {featuredProduct?.description || "Start from the live product index, then move deeper into category-specific listings or custom work."}
+                      {featuredProduct?.description || "Designed and produced at the AKAAR studio in Jaipur. Browse the full catalog below to find the right fit, or move into a custom build."}
                     </p>
                   </div>
                   <div className="bg-[rgba(11,12,15,0.78)] px-5 py-4 backdrop-blur-md">
@@ -559,7 +559,7 @@ export default function ProductsPage() {
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                       <span className="inline-flex items-center rounded-full border border-[var(--border-accent)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-                        Starting point for cart or custom quote
+                        Add to cart or request a custom build
                       </span>
                     </div>
                   </div>
@@ -670,7 +670,7 @@ export default function ProductsPage() {
           <div className="mb-8 max-w-3xl">
             <span className="luxury-kicker">From the studio</span>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              After the shop, the product stories can support the trust.
+              Every listing comes out of a real working process.
             </h2>
           </div>
 
