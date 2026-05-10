@@ -74,6 +74,7 @@ export function PrinterShowcaseSection() {
                     src={item.image}
                     alt={item.kicker}
                     fill
+                    unoptimized={item.image.endsWith(".webp")}
                     sizes="(max-width: 1024px) 100vw, 620px"
                     className="object-cover"
                   />
