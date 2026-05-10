@@ -20,6 +20,19 @@ interface ProductGridProps {
   viewMode?: "grid" | "list";
 }
 
+function getBadge(index: number): string | undefined {
+  if (index === 0) return "Bestseller";
+  if (index === 1) return "Popular";
+  if (index > 1 && index % 4 === 2) return "Limited run";
+  return undefined;
+}
+
+function getStockLabel(index: number): string | undefined {
+  if (index === 0) return "Selling fast";
+  if (index % 3 === 1) return "Limited stock";
+  return undefined;
+}
+
 export function ProductGrid({ products, loading = false, viewMode = "grid" }: ProductGridProps) {
   if (loading) {
     return (
@@ -97,7 +110,11 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
         >
-          <ProductCard {...product} />
+          <ProductCard
+            {...product}
+            badge={getBadge(index)}
+            stockLabel={getStockLabel(index)}
+          />
         </motion.div>
       ))}
     </div>

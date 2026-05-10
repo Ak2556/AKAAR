@@ -15,7 +15,15 @@ interface ProductCardProps {
   price: number;
   description?: string;
   imageUrl?: string;
+  badge?: string;
+  stockLabel?: string;
 }
+
+const badgeStyles: Record<string, string> = {
+  Bestseller: "bg-[var(--accent)] text-[var(--bg-primary)]",
+  Popular: "bg-blue-500/80 text-white",
+  "Limited run": "bg-red-500/80 text-white",
+};
 
 export function ProductCard({
   id,
@@ -25,6 +33,8 @@ export function ProductCard({
   price,
   description,
   imageUrl,
+  badge,
+  stockLabel,
 }: ProductCardProps) {
   const { addItem } = useCart();
   const toast = useToast();
@@ -45,9 +55,20 @@ export function ProductCard({
             <div className="absolute left-5 top-5 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.42)] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)] backdrop-blur-md">
               {category}
             </div>
-            <div className="absolute right-5 top-5 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.48)] px-2.5 py-2 text-[var(--text-secondary)] backdrop-blur-md transition-colors group-hover:text-[var(--text-primary)]">
-              <ArrowUpRight className="h-4 w-4" />
-            </div>
+
+            {badge ? (
+              <div
+                className={`absolute right-5 top-5 z-10 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-md ${
+                  badgeStyles[badge] ?? "bg-[var(--accent)] text-[var(--bg-primary)]"
+                }`}
+              >
+                {badge}
+              </div>
+            ) : (
+              <div className="absolute right-5 top-5 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.48)] px-2.5 py-2 text-[var(--text-secondary)] backdrop-blur-md transition-colors group-hover:text-[var(--text-primary)]">
+                <ArrowUpRight className="h-4 w-4" />
+              </div>
+            )}
 
             <p className="pointer-events-none absolute left-5 right-5 top-14 overflow-hidden text-[clamp(2.8rem,7vw,5rem)] font-semibold uppercase tracking-[-0.09em] text-white/[0.08]">
               {name}
@@ -75,16 +96,19 @@ export function ProductCard({
             <div className="bg-[var(--bg-secondary)] px-5 py-5">
               <p className="display-font text-[1.65rem] uppercase leading-none text-[var(--text-primary)]">{name}</p>
               <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--text-secondary)]">
-                {description || "Configured product geometry staged for preview, fit review, and production planning."}
+                {description || "Handcrafted in the AKAAR studio, Jaipur."}
               </p>
             </div>
             <div className="bg-[var(--bg-secondary)] px-5 py-5">
               <p className="luxury-metric-label">Starting from</p>
               <p className="mt-3 text-lg font-semibold text-[var(--text-primary)]">{formatPrice(price)}</p>
+              {stockLabel ? (
+                <p className="mt-1.5 text-xs font-medium text-amber-400">{stockLabel}</p>
+              ) : null}
             </div>
             <div className="bg-[var(--bg-secondary)] px-5 py-5">
               <p className="luxury-metric-label">Shipping</p>
-              <p className="mt-3 text-sm font-semibold text-emerald-400 flex items-center gap-1.5">
+              <p className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-emerald-400">
                 <Truck className="h-3.5 w-3.5" />
                 Free
               </p>
