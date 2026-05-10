@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 
 export interface CatalogProduct {
   id: string;
@@ -61,6 +62,22 @@ function normalizeSearch(search: string | null | undefined) {
   return trimmed.replace(/[,%]/g, " ").replace(/\s+/g, " ").slice(0, 80);
 }
 
+function createCatalogClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase is not configured");
+  }
+
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
 function emptyCatalog(page: number, limit: number, message?: string): CatalogResult {
   return {
     products: [],
@@ -72,7 +89,7 @@ function emptyCatalog(page: number, limit: number, message?: string): CatalogRes
   };
 }
 
-export async function getCatalog(options: CatalogQueryOptions = {}): Promise<CatalogResult> {
+async function getCatalogUncached(options: CatalogQueryOptions = {}): Promise<CatalogResult> {
   const page = normalizePositiveInteger(options.page, 1);
   const limit = Math.min(normalizePositiveInteger(options.limit, 12), 48);
   const offset = (page - 1) * limit;
@@ -82,7 +99,7 @@ export async function getCatalog(options: CatalogQueryOptions = {}): Promise<Cat
   const sortOrder = options.sortOrder === "desc" ? "desc" : "asc";
 
   try {
-    const supabase = await createClient();
+    const supabase = createCatalogClient();
 
     let query = supabase
       .from("products")
@@ -151,3 +168,7 @@ export async function getCatalog(options: CatalogQueryOptions = {}): Promise<Cat
     return emptyCatalog(page, limit, "Catalog unavailable");
   }
 }
+
+export const getCatalog = unstable_cache(getCatalogUncached, ["public-catalog"], {
+  revalidate: 30,
+});
