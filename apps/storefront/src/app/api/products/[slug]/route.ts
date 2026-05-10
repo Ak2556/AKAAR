@@ -13,6 +13,7 @@ function mapProduct(p: Record<string, unknown>) {
     description:      p.description ?? null,
     shortDescription: p.short_description ?? null,
     imageUrl:         p.image_url ?? null,
+    images:           (p.images as string[] | null) ?? [],
     isActive:         p.is_active,
     sortOrder:        p.sort_order,
     meshFile: mf ? {

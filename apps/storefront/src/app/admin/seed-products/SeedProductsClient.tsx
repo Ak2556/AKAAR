@@ -56,18 +56,23 @@ async function uploadImage(supabase: ReturnType<typeof createClient>, file: File
 type Status = "idle" | "uploading" | "saving" | "done" | "error";
 
 function ProductSeedCard({ product }: { product: typeof PRODUCTS[number] }) {
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [resultSlug, setResultSlug] = useState<string | null>(null);
 
   const handleSeed = async () => {
-    if (!imageFile) { setError("Please select an image first"); return; }
+    if (imageFiles.length === 0) { setError("Please select at least one image"); return; }
     setError(null);
     try {
       setStatus("uploading");
       const supabase = createClient();
-      const imageUrl = await uploadImage(supabase, imageFile, product.slug);
+      const urls = await Promise.all(
+        imageFiles.map((file, i) =>
+          uploadImage(supabase, file, i === 0 ? product.slug : `${product.slug}-${i + 1}`)
+        )
+      );
+      const imageUrl = urls[0];
 
       setStatus("saving");
       const res = await fetch("/api/admin/products", {
@@ -82,6 +87,7 @@ function ProductSeedCard({ product }: { product: typeof PRODUCTS[number] }) {
           description: product.description,
           isActive: true,
           imageUrl,
+          images: urls,
         }),
       });
 
@@ -97,7 +103,7 @@ function ProductSeedCard({ product }: { product: typeof PRODUCTS[number] }) {
   };
 
   const busy = status === "uploading" || status === "saving";
-  const label = status === "uploading" ? "Uploading image…" : status === "saving" ? "Saving…" : "Seed this product";
+  const label = status === "uploading" ? "Uploading images…" : status === "saving" ? "Saving…" : "Seed this product";
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 space-y-4">
@@ -124,19 +130,22 @@ function ProductSeedCard({ product }: { product: typeof PRODUCTS[number] }) {
           <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] px-4 py-3 text-sm transition-colors hover:border-[var(--accent)]/60">
             <Upload className="h-4 w-4 text-[var(--accent)]" />
             <span className="text-[var(--text-secondary)]">
-              {imageFile ? imageFile.name : "Pick image"}
+              {imageFiles.length > 0
+                ? `${imageFiles.length} photo${imageFiles.length > 1 ? "s" : ""} selected`
+                : "Pick photos (select multiple)"}
             </span>
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.webp"
+              multiple
               className="hidden"
-              onChange={(e) => { setImageFile(e.target.files?.[0] ?? null); setError(null); }}
+              onChange={(e) => { setImageFiles(Array.from(e.target.files ?? [])); setError(null); }}
             />
           </label>
 
           <button
             onClick={handleSeed}
-            disabled={busy || !imageFile}
+            disabled={busy || imageFiles.length === 0}
             className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[var(--text-primary)] px-5 py-3 text-sm font-medium text-[var(--bg-primary)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

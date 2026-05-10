@@ -30,6 +30,7 @@ interface Product {
   description: string | null;
   shortDescription: string | null;
   imageUrl: string | null;
+  images: string[];
   meshFile?: {
     id: string;
     storagePath?: string | null;
@@ -59,6 +60,8 @@ export default function ProductDetailPage() {
   const [catalogAvailable, setCatalogAvailable] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
+  const [showViewer, setShowViewer] = useState(false);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -80,6 +83,8 @@ export default function ProductDetailPage() {
         setCatalogAvailable(Boolean(data.catalogAvailable));
         setProduct(data.product);
         setRelatedProducts(data.relatedProducts || []);
+        setSelectedImageIdx(0);
+        setShowViewer(false);
       } catch (fetchError) {
         setError(fetchError instanceof Error ? fetchError.message : "Failed to load product");
       } finally {
@@ -95,6 +100,12 @@ export default function ProductDetailPage() {
   const price = product?.price ? Number(product.price) : 0;
   const isWishlisted = product ? isInWishlist(product.id) : false;
 
+  const allImages = useMemo(() => {
+    if (!product) return [];
+    if (product.images?.length) return product.images;
+    return product.imageUrl ? [product.imageUrl] : [];
+  }, [product]);
+
   const handleAddToCart = () => {
     if (!product) return;
     addItem(
@@ -103,7 +114,7 @@ export default function ProductDetailPage() {
         name: product.name,
         slug: product.slug,
         price,
-        image: product.imageUrl || undefined,
+        image: allImages[0] || undefined,
       },
       quantity
     );
@@ -118,7 +129,7 @@ export default function ProductDetailPage() {
       slug: product.slug,
       price,
       category: product.category || undefined,
-      imageUrl: product.imageUrl || undefined,
+      imageUrl: allImages[0] || undefined,
     });
 
     toast[isWishlisted ? "info" : "success"](
@@ -227,9 +238,9 @@ export default function ProductDetailPage() {
         </motion.div>
 
         <section className="luxury-panel relative overflow-hidden rounded-[2.45rem]">
-          {product.imageUrl ? (
+          {allImages[0] ? (
             <img
-              src={product.imageUrl}
+              src={allImages[0]}
               alt={product.name}
               className="absolute right-[-8%] top-0 hidden h-full w-[48%] object-cover opacity-18 blur-[2px] lg:block"
             />
@@ -252,12 +263,55 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              <div className="luxury-stage relative overflow-hidden rounded-[2rem] border border-white/8 p-4 sm:p-5">
-                <ProductViewer3D
-                  name={product.name}
-                  imageUrl={product.imageUrl}
-                  modelUrl={product.meshFile?.storagePath || product.meshFile?.s3Key}
-                />
+              <div className="flex flex-col gap-3">
+                <div className="luxury-stage relative overflow-hidden rounded-[2rem] border border-white/8 p-4 sm:p-5" style={{ minHeight: "340px" }}>
+                  {showViewer || (allImages.length === 0 && (product.meshFile?.storagePath || product.meshFile?.s3Key)) ? (
+                    <ProductViewer3D
+                      name={product.name}
+                      imageUrl={allImages[0] ?? null}
+                      modelUrl={product.meshFile?.storagePath || product.meshFile?.s3Key}
+                    />
+                  ) : allImages[selectedImageIdx] ? (
+                    <img
+                      src={allImages[selectedImageIdx]}
+                      alt={product.name}
+                      className="h-full w-full rounded-[1.4rem] object-contain"
+                      style={{ minHeight: "308px" }}
+                    />
+                  ) : (
+                    <ProductViewer3D name={product.name} imageUrl={null} modelUrl={null} />
+                  )}
+                </div>
+
+                {(allImages.length > 1 || (product.meshFile?.storagePath || product.meshFile?.s3Key)) && (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {allImages.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setSelectedImageIdx(i); setShowViewer(false); }}
+                        className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
+                          !showViewer && selectedImageIdx === i
+                            ? "border-[var(--accent)]"
+                            : "border-transparent hover:border-[var(--border-accent)]"
+                        }`}
+                      >
+                        <img src={img} alt="" className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                    {(product.meshFile?.storagePath || product.meshFile?.s3Key) && (
+                      <button
+                        onClick={() => setShowViewer(true)}
+                        className={`relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-[var(--bg-secondary)] text-xs font-semibold uppercase tracking-wider transition-colors ${
+                          showViewer
+                            ? "border-[var(--accent)] text-[var(--accent)]"
+                            : "border-transparent text-[var(--text-muted)] hover:border-[var(--border-accent)]"
+                        }`}
+                      >
+                        3D
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 xl:grid-cols-4">

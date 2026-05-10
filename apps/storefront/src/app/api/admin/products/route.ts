@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       price: rawPrice,
       isActive,
       imageUrl,
+      images,
       modelUrl,
       modelFilename,
       modelSize,
@@ -97,6 +98,7 @@ export async function POST(request: Request) {
         short_description: shortDescription?.trim() || null,
         description: description?.trim() || null,
         image_url: imageUrl || null,
+        images: images?.length ? images : (imageUrl ? [imageUrl] : null),
         price,
         is_active: isActive ?? true,
         mesh_file_id: meshFileId,
@@ -184,6 +186,7 @@ export async function PATCH(request: Request) {
     is_active:         updates.isActive,
   }
   if ('imageUrl' in updates)  productUpdate.image_url   = updates.imageUrl
+  if ('images' in updates)    productUpdate.images      = updates.images
   if (meshFileId !== undefined) productUpdate.mesh_file_id = meshFileId
 
   const { data: product, error } = await admin
