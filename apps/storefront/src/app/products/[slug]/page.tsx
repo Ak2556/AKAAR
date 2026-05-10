@@ -154,7 +154,7 @@ export default function ProductDetailPage() {
         "Configured geometry staged for visual review, material selection, and production planning.",
       production:
         product.description ||
-        "This product page is intended to work like a reviewed spec sheet. Inspect the visual stage, confirm the intended category, then move into cart or use the listing as a quote reference.",
+        "Handcrafted in the AKAAR studio, Jaipur. Every part goes through a material and geometry review before production begins.",
       preview: product.meshFile
         ? `${product.meshFile.originalFilename} is available as the source preview asset for the interactive viewer.`
         : "No mesh asset is attached yet, so the viewer falls back to the prepared visual stage.",
@@ -224,7 +224,7 @@ export default function ProductDetailPage() {
               <div>
                 <span className="luxury-kicker">{product.category || "Uncategorized"}</span>
                 <div className="mt-4 space-y-2">
-                  <p className="hero-wordmark text-[var(--text-primary)]">{product.name}</p>
+                  <h1 className="display-font text-4xl font-semibold uppercase leading-tight text-[var(--text-primary)] sm:text-5xl">{product.name}</h1>
                   <p className="display-font max-w-2xl text-lg leading-8 text-[var(--text-secondary)]">
                     {productNarrative.descriptor}
                   </p>
@@ -325,7 +325,7 @@ export default function ProductDetailPage() {
                 <InfoPanel
                   kicker="Need modifications?"
                   title="Shift into a reviewed custom build"
-                  body="If the material, fit, finish, or geometry needs to change, continue from this page into a quote request instead of forcing a generic purchase path."
+                  body="Need a different scale, finish, material, or geometry? Move from this listing into a custom build request — reviewed personally before production."
                   cta={
                     <Link
                       href="/quote"
