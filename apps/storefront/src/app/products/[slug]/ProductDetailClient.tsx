@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -13,12 +14,23 @@ import {
   Zap,
 } from "lucide-react";
 import { ReactNode, useMemo, useState } from "react";
-import { ProductViewer3D } from "@/components/products/ProductViewer3D";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
+
+const ProductViewer3D = dynamic(
+  () => import("@/components/products/ProductViewer3D").then((mod) => mod.ProductViewer3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex aspect-square items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)] text-sm text-[var(--text-secondary)]">
+        Loading preview...
+      </div>
+    ),
+  }
+);
 
 export interface ProductData {
   id: string;
@@ -141,12 +153,16 @@ export function ProductDetailClient({
 
         <section className="luxury-panel relative overflow-hidden rounded-[2.45rem]">
           {allImages[0] ? (
-            <img
-              src={allImages[0]}
-              alt=""
-              aria-hidden
-              className="absolute right-[-8%] top-0 hidden h-full w-[48%] object-cover opacity-18 blur-[2px] lg:block"
-            />
+            <div className="absolute right-[-8%] top-0 hidden h-full w-[48%] opacity-18 blur-[2px] lg:block">
+              <Image
+                src={allImages[0]}
+                alt=""
+                aria-hidden
+                fill
+                sizes="48vw"
+                className="object-cover"
+              />
+            </div>
           ) : null}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(214,178,114,0.16),transparent_28%),radial-gradient(circle_at_86%_28%,rgba(125,211,199,0.12),transparent_26%)]" />
 
@@ -178,24 +194,36 @@ export function ProductDetailClient({
                 >
                   {/* All images in DOM — opacity-toggled for instant switching */}
                   {allImages.map((img, i) => (
-                    <img
+                    <div
                       key={img}
-                      src={img}
-                      alt={i === 0 ? product.name : ""}
                       className={`absolute inset-4 sm:inset-5 rounded-[1rem] object-contain transition-opacity duration-150 ${
                         !showViewer && selectedImageIdx === i
                           ? "opacity-100"
                           : "opacity-0 pointer-events-none"
                       }`}
-                    />
+                    >
+                      <Image
+                        src={img}
+                        alt={i === 0 ? product.name : ""}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 560px"
+                        className="object-contain"
+                        priority={i === 0}
+                      />
+                    </div>
                   ))}
-                  {(showViewer || allImages.length === 0) && (
+                  {showViewer ? (
                     <ProductViewer3D
                       name={product.name}
                       imageUrl={allImages[0] ?? null}
                       modelUrl={product.meshFile?.storagePath || product.meshFile?.s3Key}
                     />
-                  )}
+                  ) : null}
+                  {!showViewer && allImages.length === 0 ? (
+                    <div className="absolute inset-4 flex items-center justify-center rounded-[1rem] border border-[var(--border)] bg-[var(--bg-tertiary)] text-sm text-[var(--text-secondary)] sm:inset-5">
+                      Preview unavailable
+                    </div>
+                  ) : null}
                 </div>
 
                 {(allImages.length > 1 || has3D) && (
@@ -210,7 +238,13 @@ export function ProductDetailClient({
                             : "border-transparent hover:border-[var(--border-accent)]"
                         }`}
                       >
-                        <img src={img} alt="" className="h-full w-full object-cover" />
+                        <Image
+                          src={img}
+                          alt=""
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
                       </button>
                     ))}
                     {has3D && (

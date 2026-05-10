@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import { BRAND_TAGLINE } from "@/lib/brand";
 
@@ -10,7 +11,7 @@ const printerStories = [
     kicker: "Bambu Lab P1S",
     title: "Enclosed speed for serious prototype throughput.",
     body: "Use the P1S stage to signal fast-turn enclosure work, reliable engineering prints, and a workflow that feels finished before the first layer begins.",
-    image: "/showcase/bambu-p1s.jpg",
+    image: "/showcase/bambu-p1s.webp",
     stats: [
       { label: "Print mode", value: "High-throughput" },
       { label: "Best for", value: "Functional prototypes" },
@@ -59,18 +60,24 @@ export function PrinterShowcaseSection() {
             <div className="relative min-h-[360px] overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(214,178,114,0.18),_transparent_36%),linear-gradient(180deg,rgba(9,9,11,0.1),rgba(9,9,11,0.72))] z-10" />
               {printerStories.map((item, index) => (
-                <motion.img
+                <motion.div
                   key={item.id}
-                  src={item.image}
-                  alt={item.kicker}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0"
                   style={{ scale: imageScale }}
                   animate={{
                     opacity: index === activeIndex ? 1 : 0,
                     filter: index === activeIndex ? "saturate(1) brightness(0.96)" : "saturate(0.7) brightness(0.7)",
                   }}
                   transition={{ duration: 0.7, ease: "easeInOut" }}
-                />
+                >
+                  <Image
+                    src={item.image}
+                    alt={item.kicker}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 620px"
+                    className="object-cover"
+                  />
+                </motion.div>
               ))}
 
               <motion.div style={{ y: overlayY }} className="absolute inset-x-0 bottom-0 z-20 p-6 sm:p-8">

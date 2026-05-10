@@ -4,7 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
-import { CartDrawer } from "@/components/cart/CartDrawer";
+import { LazyCartDrawer } from "@/components/cart/LazyCartDrawer";
 import { ToastProvider } from "@/context/ToastContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/components/providers/AuthProvider";
@@ -69,7 +69,7 @@ export default function RootLayout({
                         <DevelopmentSetupBanner capabilities={runtimeCapabilities} />
                         <main className="min-h-screen">{children}</main>
                         <Footer />
-                        <CartDrawer />
+                        <LazyCartDrawer />
                       </CartProvider>
                     </WishlistProvider>
                   </ToastProvider>
