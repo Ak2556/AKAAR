@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "apps/storefront/.next",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "framework": "nextjs"
+}
