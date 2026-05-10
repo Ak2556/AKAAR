@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, ShoppingCart, Truck } from "lucide-react";
@@ -49,7 +48,7 @@ export function ProductCard({
   };
 
   return (
-    <motion.div whileHover={{ y: -5 }} className="group h-full">
+    <div className="group h-full transition-transform duration-300 hover:-translate-y-1">
       <Link href={`/products/${slug}`} className="block h-full">
         <article className="luxury-card flex h-full flex-col overflow-hidden rounded-[2.1rem]">
           <div className="luxury-stage relative aspect-[1.05/1] overflow-hidden px-5 py-5 sm:px-6">
@@ -128,6 +127,6 @@ export function ProductCard({
           </div>
         </article>
       </Link>
-    </motion.div>
+    </div>
   );
 }

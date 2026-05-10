@@ -4,6 +4,7 @@ import { Suspense, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Center, Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { Box, FileImage, FileQuestion } from "lucide-react";
+import Image from "next/image";
 
 interface ProductViewer3DProps {
   imageUrl?: string | null;
@@ -55,10 +56,12 @@ export function ProductViewer3D({
   if (imageUrl) {
     return (
       <div className="relative aspect-square bg-[var(--bg-tertiary)] rounded-xl overflow-hidden border border-[var(--border)]">
-        <img
+        <Image
           src={imageUrl}
           alt={name}
-          className="w-full h-full object-cover"
+          fill
+          sizes="(max-width: 1024px) 100vw, 560px"
+          className="object-cover"
         />
         <div className="absolute left-4 bottom-4 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-primary)]/85 backdrop-blur text-xs text-[var(--text-secondary)] flex items-center gap-2">
           <FileImage className="w-4 h-4 text-[var(--accent)]" />

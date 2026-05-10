@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
@@ -20,10 +22,14 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { SearchModal } from "@/components/search/SearchModal";
 import { useTheme } from "@/hooks/useTheme";
 
 import { useAuthState } from "@/components/providers/AuthProvider";
+
+const SearchModal = dynamic(
+  () => import("@/components/search/SearchModal").then((mod) => mod.SearchModal),
+  { ssr: false }
+);
 
 const navItems = [
   { href: "/products", label: "Collection" },
@@ -143,11 +149,16 @@ export function Header() {
                     className="luxury-pill flex items-center gap-3 rounded-full pl-2 pr-4 py-2 hover:text-[var(--text-primary)]"
                   >
                     {session.user?.image ? (
-                      <img
-                        src={session.user.image}
-                        alt={session.user.name || "User"}
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
+                      <span className="relative block h-8 w-8 overflow-hidden rounded-full">
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "User"}
+                          fill
+                          sizes="32px"
+                          unoptimized
+                          className="object-cover"
+                        />
+                      </span>
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--text-primary)] text-sm font-semibold text-[var(--bg-primary)]">
                         {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || "U"}
@@ -328,7 +339,9 @@ export function Header() {
         </nav>
       </motion.header>
 
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      {isSearchOpen ? (
+        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      ) : null}
     </>
   );
 }

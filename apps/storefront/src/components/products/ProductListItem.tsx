@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Heart, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -63,11 +64,15 @@ export function ProductListItem({
             </p>
 
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={name}
-                className="hero-image-shadow absolute inset-x-6 bottom-6 top-18 h-[calc(100%-6rem)] w-[calc(100%-3rem)] object-contain transition-transform duration-500 group-hover:scale-[1.03]"
-              />
+              <div className="absolute inset-x-6 bottom-6 top-18 h-[calc(100%-6rem)]">
+                <Image
+                  src={imageUrl}
+                  alt={name}
+                  fill
+                  sizes="(max-width: 1280px) 100vw, 560px"
+                  className="hero-image-shadow object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              </div>
             ) : (
               <div className="absolute inset-x-6 bottom-6 top-18 overflow-hidden rounded-[1.7rem] border border-[var(--border)] bg-[linear-gradient(145deg,#15181d_0%,#232a33_50%,#101114_100%)]">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(214,178,114,0.16),transparent_30%),radial-gradient(circle_at_80%_74%,rgba(125,211,199,0.1),transparent_28%)]" />

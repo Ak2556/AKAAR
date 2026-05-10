@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { BRAND_TAGLINE } from "@/lib/brand";
@@ -62,12 +63,16 @@ export function HeroSection() {
 
             <div className="flex flex-col gap-5">
               <div className="luxury-stage relative flex min-h-[340px] items-end overflow-hidden rounded-[1.8rem] px-5 pt-10 sm:px-8">
-                <motion.img
-                  src="/showcase/bambu-p1s.jpg"
-                  alt="Bambu Lab P1S"
-                  className="absolute inset-0 h-full w-full object-cover opacity-54"
-                  style={{ y: imageY, scale: imageScale }}
-                />
+                <motion.div className="absolute inset-0 opacity-54" style={{ y: imageY, scale: imageScale }}>
+                  <Image
+                    src="/showcase/bambu-p1s.webp"
+                    alt="Bambu Lab P1S"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 560px"
+                    className="object-cover"
+                  />
+                </motion.div>
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.16)_0%,rgba(7,7,10,0.56)_58%,rgba(7,7,10,0.74)_100%)]" />
                 <div className="absolute inset-x-6 top-6 h-px bg-gradient-to-r from-transparent via-[var(--text-primary)]/12 to-transparent" />
                 <div className="absolute left-6 top-6 editorial-eyebrow">

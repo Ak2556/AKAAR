@@ -2,7 +2,6 @@
 
 import { ProductCard } from "./ProductCard";
 import { ProductListItem } from "./ProductListItem";
-import { motion } from "framer-motion";
 
 interface Product {
   id: string;
@@ -68,11 +67,7 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
 
   if (products.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center py-20"
-      >
+      <div className="text-center py-20">
         <div className="w-20 h-20 mx-auto mb-6 border border-[var(--border)] rounded-xl flex items-center justify-center">
           <span className="text-[var(--text-muted)] font-mono">?</span>
         </div>
@@ -80,22 +75,17 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
         <p className="text-[var(--text-secondary)]">
           Try adjusting your filters or search terms
         </p>
-      </motion.div>
+      </div>
     );
   }
 
   if (viewMode === "list") {
     return (
       <div className="space-y-4">
-        {products.map((product, index) => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
+        {products.map((product) => (
+          <div key={product.id}>
             <ProductListItem {...product} />
-          </motion.div>
+          </div>
         ))}
       </div>
     );
@@ -104,18 +94,13 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {products.map((product, index) => (
-        <motion.div
-          key={product.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
-        >
+        <div key={product.id}>
           <ProductCard
             {...product}
             badge={getBadge(index)}
             stockLabel={getStockLabel(index)}
           />
-        </motion.div>
+        </div>
       ))}
     </div>
   );
