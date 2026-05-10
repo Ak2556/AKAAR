@@ -75,13 +75,16 @@ export async function GET(request: Request) {
     })
 
     const total = count ?? 0
-    return NextResponse.json({
-      products: mapped,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-      categories,
-      catalogAvailable: true,
-      empty: total === 0,
-    })
+    return NextResponse.json(
+      {
+        products: mapped,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        categories,
+        catalogAvailable: true,
+        empty: total === 0,
+      },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300" } }
+    )
   } catch (error) {
     console.error('Error fetching products:', error)
     return NextResponse.json(

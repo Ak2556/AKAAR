@@ -151,9 +151,7 @@ export default function ProductsPage() {
         params.set("sortOrder", "desc");
       }
 
-      const response = await fetch(`/api/products?${params.toString()}`, {
-        cache: "no-store",
-      });
+      const response = await fetch(`/api/products?${params.toString()}`);
       const data: ProductsResponse = await response.json();
 
       setCatalogAvailable(data.catalogAvailable);

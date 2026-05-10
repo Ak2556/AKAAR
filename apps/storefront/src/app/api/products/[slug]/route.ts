@@ -55,11 +55,14 @@ export async function GET(
       .neq('id', raw.id)
       .limit(4)
 
-    return NextResponse.json({
-      product: mapProduct(raw as Record<string, unknown>),
-      relatedProducts: (relatedRaw ?? []).map(r => mapProduct(r as Record<string, unknown>)),
-      catalogAvailable: true,
-    })
+    return NextResponse.json(
+      {
+        product: mapProduct(raw as Record<string, unknown>),
+        relatedProducts: (relatedRaw ?? []).map(r => mapProduct(r as Record<string, unknown>)),
+        catalogAvailable: true,
+      },
+      { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=3600" } }
+    )
   } catch (error) {
     console.error('Error fetching product:', error)
     return NextResponse.json({ error: 'Catalog unavailable', catalogAvailable: false }, { status: 503 })

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, ShoppingCart, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -75,11 +76,15 @@ export function ProductCard({
             </p>
 
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={name}
-                className="hero-image-shadow absolute inset-x-5 bottom-5 top-20 h-[calc(100%-6.25rem)] w-[calc(100%-2.5rem)] object-contain transition-transform duration-500 group-hover:scale-[1.04]"
-              />
+              <div className="absolute inset-x-5 bottom-5 top-20">
+                <Image
+                  src={imageUrl}
+                  alt={name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="hero-image-shadow object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+                />
+              </div>
             ) : (
               <div className="absolute inset-x-5 bottom-5 top-20 overflow-hidden rounded-[1.7rem] border border-[var(--border)] bg-[linear-gradient(145deg,#14171c_0%,#232a33_52%,#101114_100%)]">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(214,178,114,0.18),transparent_28%),radial-gradient(circle_at_78%_76%,rgba(125,211,199,0.12),transparent_28%)]" />

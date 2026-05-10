@@ -35,6 +35,16 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@akaar/db"],
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
