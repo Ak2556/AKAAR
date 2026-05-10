@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +10,7 @@ export default function TeamPage() {
   const founderBioSections = founder ? founder.bio.split("\n\n").slice(0, 2) : [];
 
   return (
-    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+    <div className="min-h-screen animate-fade-in px-4 pb-16 pt-28 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-14">
         <section className="luxury-panel relative overflow-hidden rounded-[2.35rem]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(214,178,114,0.14),transparent_28%),radial-gradient(circle_at_84%_22%,rgba(125,211,199,0.1),transparent_24%)]" />
@@ -54,13 +51,7 @@ export default function TeamPage() {
         </section>
 
         {founder ? (
-          <motion.section
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.55 }}
-            className="luxury-card overflow-hidden rounded-[2rem]"
-          >
+          <section className="luxury-card overflow-hidden rounded-[2rem]">
             <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[0.74fr_1.26fr]">
               <div className="relative min-h-[360px] overflow-hidden bg-[var(--bg-secondary)]">
                 <img
@@ -113,17 +104,11 @@ export default function TeamPage() {
                 </Link>
               </div>
             </div>
-          </motion.section>
+          </section>
         ) : null}
 
         <section>
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.45 }}
-            className="mb-5 max-w-2xl"
-          >
+          <div className="mb-5 max-w-2xl">
             <p className="luxury-kicker">Leadership bench</p>
             <h2 className="display-font mt-4 max-w-[12ch] text-3xl leading-[1.02] text-[var(--text-primary)] sm:text-4xl">
               Each team member gets space to stand on their own.
@@ -131,7 +116,7 @@ export default function TeamPage() {
             <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
               Instead of compressing everyone into the About page, the team now reveals here one by one with room for role context, operating focus, and a fuller biography.
             </p>
-          </motion.div>
+          </div>
 
           <div className="space-y-5">
             {coreTeam.map((member, index) => {
@@ -139,12 +124,10 @@ export default function TeamPage() {
               const isHarish = member.slug === "harish-kumar-meena";
 
               return (
-                <motion.div
+                <div
                   key={member.slug}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.45, delay: index * 0.07 }}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${index * 0.07}s` }}
                 >
                   <Link href={`/team/${member.slug}`} className="luxury-card group block overflow-hidden rounded-[1.8rem]">
                     <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[0.34fr_0.66fr]">
@@ -209,7 +192,7 @@ export default function TeamPage() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -223,7 +206,7 @@ export default function TeamPage() {
               Build with the team behind the studio.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
-              If the work, process, and people align with what you need, move into a reviewed build request and we’ll take it from there.
+              If the work, process, and people align with what you need, move into a reviewed build request and we'll take it from there.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <Link href="/quote">

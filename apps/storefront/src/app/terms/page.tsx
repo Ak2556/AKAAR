@@ -1,17 +1,10 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20">
+    <div className="min-h-screen animate-fade-in pt-32 pb-20">
       <div className="container mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto"
-        >
+        <div className="max-w-3xl mx-auto">
           <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
             Legal
           </span>
@@ -201,7 +194,7 @@ export default function TermsPage() {
               See also: <Link href="/privacy" className="text-[var(--accent)] hover:underline">Privacy Policy</Link>
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Search, MessageCircle, ArrowRight } from "lucide-react";
@@ -108,15 +107,11 @@ export default function FAQPage() {
   });
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
+    <div className="min-h-screen animate-fade-in pt-32 pb-20">
       {/* Header */}
       <div className="border-b border-[var(--border)] bg-[var(--bg-secondary)]">
         <div className="container mx-auto px-6 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
+          <div className="max-w-3xl">
             <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">
               Support
             </span>
@@ -126,19 +121,13 @@ export default function FAQPage() {
             <p className="text-lg text-[var(--text-secondary)]">
               Find answers to common questions about our services, materials, and processes.
             </p>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-12">
         {/* Search & Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-12"
-        >
-          {/* Search */}
+        <div className="mb-12">
           <div className="relative max-w-xl mb-8">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
             <input
@@ -150,7 +139,6 @@ export default function FAQPage() {
             />
           </div>
 
-          {/* Category Filters */}
           <div className="flex flex-wrap gap-3">
             {categories.map((category) => (
               <button
@@ -166,15 +154,10 @@ export default function FAQPage() {
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* FAQ List */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="max-w-3xl"
-        >
+        <div className="max-w-3xl">
           {filteredFaqs.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-[var(--text-muted)]">
@@ -184,11 +167,8 @@ export default function FAQPage() {
           ) : (
             <div className="space-y-4">
               {filteredFaqs.map((faq, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
                   className="border border-[var(--border)] rounded-xl overflow-hidden"
                 >
                   <button
@@ -197,39 +177,28 @@ export default function FAQPage() {
                   >
                     <span className="font-medium pr-4">{faq.question}</span>
                     <ChevronDown
-                      className={`w-5 h-5 text-[var(--accent)] flex-shrink-0 transition-transform ${
+                      className={`w-5 h-5 text-[var(--accent)] flex-shrink-0 transition-transform duration-200 ${
                         openIndex === index ? "rotate-180" : ""
                       }`}
                     />
                   </button>
-                  <AnimatePresence>
-                    {openIndex === index && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-6 pb-6 text-[var(--text-secondary)]">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                  <div
+                    className={`overflow-hidden transition-all duration-200 ease-out ${
+                      openIndex === index ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div className="px-6 pb-6 text-[var(--text-secondary)]">
+                      {faq.answer}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-16 p-8 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] max-w-3xl"
-        >
+        <div className="mt-16 p-8 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)] max-w-3xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="w-14 h-14 border border-[var(--accent)]/30 rounded-xl flex items-center justify-center flex-shrink-0">
               <MessageCircle className="w-7 h-7 text-[var(--accent)]" />
@@ -237,7 +206,7 @@ export default function FAQPage() {
             <div className="flex-1">
               <h3 className="text-xl font-semibold mb-2">Still have questions?</h3>
               <p className="text-[var(--text-secondary)]">
-                Can't find what you're looking for? Our team is here to help.
+                Can&apos;t find what you&apos;re looking for? Our team is here to help.
               </p>
             </div>
             <Link href="/contact">
@@ -247,7 +216,7 @@ export default function FAQPage() {
               </Button>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

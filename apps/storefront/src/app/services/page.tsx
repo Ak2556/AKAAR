@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -110,7 +107,7 @@ const process = [
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+    <div className="min-h-screen animate-fade-in px-4 pb-16 pt-28 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-14">
 
         {/* Hero */}
@@ -186,13 +183,10 @@ export default function ServicesPage() {
 
           <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
             {capabilities.map((cap, i) => (
-              <motion.article
+              <article
                 key={cap.title}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: i * 0.06 }}
-                className="luxury-card flex flex-col rounded-[2rem] p-6"
+                className="luxury-card animate-fade-in-up flex flex-col rounded-[2rem] p-6"
+                style={{ animationDelay: `${i * 0.06}s` }}
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
                   <cap.icon className="h-5 w-5 text-[var(--accent)]" />
@@ -208,7 +202,7 @@ export default function ServicesPage() {
                   ))}
                 </div>
                 <p className="mt-6 text-sm font-semibold text-[var(--accent)]">{cap.price}</p>
-              </motion.article>
+              </article>
             ))}
           </div>
         </section>
@@ -224,13 +218,10 @@ export default function ServicesPage() {
 
           <div className="space-y-6">
             {flagshipPrograms.map((program, index) => (
-              <motion.article
+              <article
                 key={program.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: index * 0.08 }}
-                className="luxury-card overflow-hidden rounded-[2.2rem]"
+                className="luxury-card animate-fade-in-up overflow-hidden rounded-[2.2rem]"
+                style={{ animationDelay: `${index * 0.08}s` }}
               >
                 <div className="grid gap-px bg-[var(--border)] lg:grid-cols-2">
                   <div className={`${index % 2 === 0 ? "order-1" : "order-2"} bg-[var(--bg-secondary)] px-6 py-7 sm:px-8 sm:py-8`}>
@@ -267,7 +258,7 @@ export default function ServicesPage() {
                     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.04)_0%,rgba(7,7,10,0.3)_100%)]" />
                   </div>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </section>
@@ -283,18 +274,15 @@ export default function ServicesPage() {
 
           <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] lg:grid-cols-5">
             {process.map((item, i) => (
-              <motion.div
+              <div
                 key={item.step}
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07 }}
-                className="bg-[var(--bg-secondary)] px-5 py-6"
+                className="animate-fade-in-up bg-[var(--bg-secondary)] px-5 py-6"
+                style={{ animationDelay: `${i * 0.07}s` }}
               >
                 <p className="display-font text-[2.2rem] leading-none text-[var(--accent)]/35">{item.step}</p>
                 <h3 className="display-font mt-5 text-2xl text-[var(--text-primary)]">{item.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{item.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>

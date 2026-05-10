@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -77,7 +74,7 @@ export default function AboutPage() {
   const founder = teamMembers.find((m) => m.isFounder);
 
   return (
-    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+    <div className="min-h-screen animate-fade-in px-4 pb-16 pt-28 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-14">
 
         {/* Hero */}
@@ -202,13 +199,10 @@ export default function AboutPage() {
 
           <div className="space-y-6">
             {showcaseProjects.map((project, index) => (
-              <motion.article
+              <article
                 key={project.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: index * 0.08 }}
-                className="luxury-card overflow-hidden rounded-[2.2rem]"
+                className="luxury-card animate-fade-in-up overflow-hidden rounded-[2.2rem]"
+                style={{ animationDelay: `${index * 0.08}s` }}
               >
                 <div className="grid gap-px bg-[var(--border)] lg:grid-cols-2">
                   <div className={`${index % 2 === 0 ? "order-1" : "order-2"} bg-[var(--bg-secondary)] px-6 py-7 sm:px-8`}>
@@ -245,7 +239,7 @@ export default function AboutPage() {
                     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,10,0.04)_0%,rgba(7,7,10,0.28)_100%)]" />
                   </div>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </section>
@@ -264,13 +258,10 @@ export default function AboutPage() {
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {detailFrames.map((frame, i) => (
-              <motion.article
+              <article
                 key={frame.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="luxury-card overflow-hidden rounded-[1.7rem]"
+                className="luxury-card animate-fade-in-up overflow-hidden rounded-[1.7rem]"
+                style={{ animationDelay: `${i * 0.07}s` }}
               >
                 <div className="luxury-stage relative aspect-[4/5] overflow-hidden p-4">
                   <div className="absolute inset-4 overflow-hidden rounded-[1.35rem]">
@@ -286,19 +277,14 @@ export default function AboutPage() {
                 <div className="border-t border-[var(--border)] px-5 py-4">
                   <p className="text-sm font-medium text-[var(--text-primary)]">{frame.title}</p>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </section>
 
         {/* Founder */}
         <section>
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            className="mb-8 max-w-2xl"
-          >
+          <div className="mb-8 max-w-2xl">
             <span className="luxury-kicker">Leadership</span>
             <h2 className="display-font mt-4 text-3xl leading-[1.02] text-[var(--text-primary)] sm:text-4xl">
               The people behind the studio.
@@ -306,15 +292,10 @@ export default function AboutPage() {
             <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
               Every build involves direct collaboration with the founder and team. No handoffs, no blind production queues — each request goes through the same people who designed the output process.
             </p>
-          </motion.div>
+          </div>
 
           {founder && (
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              className="mb-6 luxury-card overflow-hidden rounded-[2rem]"
-            >
+            <div className="mb-6 luxury-card overflow-hidden rounded-[2rem]">
               <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[0.74fr_1.26fr]">
                 <div className="relative min-h-[320px] overflow-hidden bg-[var(--bg-secondary)] lg:min-h-full">
                   <Image
@@ -373,7 +354,7 @@ export default function AboutPage() {
                   </Link>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           <div className="grid gap-5 md:grid-cols-3">
