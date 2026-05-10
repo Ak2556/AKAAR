@@ -8,6 +8,7 @@ export interface TeamMember {
   skills: string[];
   social: {
     linkedin?: string;
+    instagram?: string;
     github?: string;
     twitter?: string;
     email?: string;
@@ -32,7 +33,8 @@ Beyond code, Akash sets the company's direction, builds partnerships, and ensure
 When he's not leading AKAAR, Akash explores cutting-edge developments in machine learning and contributes to open-source projects. He believes that the future of manufacturing is digital-first, and AKAAR 3D is just the beginning.`,
     skills: ["Leadership", "Product Strategy", "Python", "Machine Learning", "Next.js", "System Design", "API Development", "Cloud Architecture", "Business Development", "TypeScript"],
     social: {
-      linkedin: "https://linkedin.com/in/akash-thakur",
+      linkedin: "https://www.linkedin.com/in/akash-thakur-dev/",
+      instagram: "https://www.instagram.com/akash___thakur07/?__pwa=1",
       github: "https://github.com/Ak2556",
       email: "akash@akaar3d.com",
     },
@@ -53,6 +55,7 @@ With a keen eye for detail and a deep understanding of 3D printing constraints, 
     skills: ["CAD Design", "Mesh Optimization", "3D Modeling", "Slicing Software", "Design for Manufacturing", "Quality Assurance", "SolidWorks", "Fusion 360"],
     social: {
       linkedin: "https://linkedin.com/in/mohit-sherawat",
+      instagram: "https://www.instagram.com/__.mayank.__001?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
       email: "mohit@akaar3d.com",
     },
   },
@@ -87,6 +90,7 @@ She oversees the supply chain, inventory management, and shipping operations, wo
     skills: ["Operations Management", "Supply Chain", "Inventory Management", "Cost Analysis", "Vendor Relations", "Logistics", "Process Optimization", "Project Management"],
     social: {
       linkedin: "https://linkedin.com/in/tarveen-sherawat",
+      instagram: "https://www.instagram.com/__sherawat.shaab?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
       email: "tarveen@akaar3d.com",
     },
   },

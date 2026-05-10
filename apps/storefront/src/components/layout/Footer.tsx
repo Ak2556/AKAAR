@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Linkedin, Mail, Send } from "lucide-react";
+import { Instagram, Linkedin, Mail, Send } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { Logo } from "@/components/ui/Logo";
 import { BRAND_TAGLINE } from "@/lib/brand";
@@ -31,7 +31,8 @@ const footerLinks = {
 
 const socialLinks = [
   { icon: Mail, href: "mailto:akaar3d.printing@gmail.com", label: "Email" },
-  { icon: Linkedin, href: "https://linkedin.com/company/akaar3d", label: "LinkedIn" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/akaar-3d-64a07240a/", label: "LinkedIn" },
+  { icon: Instagram, href: "https://www.instagram.com/akaar3d.printing?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==", label: "Instagram" },
 ];
 
 export function Footer() {
