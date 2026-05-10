@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Linkedin, Github, Mail, Twitter, Quote, Sparkles, Star, Lightbulb, Users, Target, Rocket } from "lucide-react";
+import { ArrowLeft, Linkedin, Github, Instagram, Mail, Twitter, Quote, Sparkles, Star, Lightbulb, Users, Target, Rocket } from "lucide-react";
 import { TeamMember, teamMembers } from "@/lib/team-data";
 
 export function TeamMemberClient({ member }: { member: TeamMember }) {
@@ -140,6 +140,17 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                   <Github className="w-5 h-5" />
                 </a>
               )}
+              {member.social.instagram && (
+                <a
+                  href={member.social.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 bg-[var(--bg-primary)]/50 backdrop-blur-sm border border-[var(--border)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/10 transition-all"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
               {member.social.twitter && (
                 <a
                   href={member.social.twitter}
@@ -181,7 +192,7 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                   <Lightbulb className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Founder's Vision</h2>
+                  <h2 className="text-2xl font-bold">Founder&apos;s Vision</h2>
                   <p className="text-[var(--text-muted)]">Why AKAAR 3D exists</p>
                 </div>
               </div>
@@ -192,7 +203,7 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                 <div className="absolute -inset-4 bg-gradient-to-r from-[var(--accent)]/20 via-blue-500/20 to-purple-600/20 rounded-3xl blur-2xl" />
 
                 <div className="relative p-8 md:p-12 bg-[var(--bg-primary)] border border-[var(--accent)]/30 rounded-3xl">
-                  <div className="absolute top-6 left-8 text-8xl text-[var(--accent)]/10 font-serif leading-none">"</div>
+                  <div className="absolute top-6 left-8 text-8xl text-[var(--accent)]/10 font-serif leading-none">&quot;</div>
                   <p className="text-xl md:text-2xl text-[var(--text-primary)] leading-relaxed relative z-10 pl-8">
                     {member.founderVision}
                   </p>

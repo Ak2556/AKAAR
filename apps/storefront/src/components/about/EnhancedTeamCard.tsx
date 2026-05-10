@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
-import { Users, ArrowRight, Linkedin, Github, Mail } from "lucide-react";
+import { Users, ArrowRight, Linkedin, Github, Instagram, Mail } from "lucide-react";
 import { type TeamMember } from "@/lib/team-data";
 
 interface EnhancedTeamCardProps {
@@ -46,10 +47,12 @@ export function EnhancedTeamCard({ member, index }: EnhancedTeamCardProps) {
             <div className="relative h-full rounded-2xl overflow-hidden bg-[var(--bg-primary)] border border-[var(--border)] group-hover:border-[var(--accent)]/50 transition-all duration-300">
               {/* Image */}
               {member.image ? (
-                <img
+                <Image
                   src={member.image}
                   alt={member.name}
-                  className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 320px"
+                  className="object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-secondary)]">
@@ -145,6 +148,17 @@ export function EnhancedTeamCard({ member, index }: EnhancedTeamCardProps) {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Github className="w-4 h-4" />
+                  </a>
+                )}
+                {member.social.instagram && (
+                  <a
+                    href={member.social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[var(--accent)]/20 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Instagram className="w-4 h-4" />
                   </a>
                 )}
                 {member.social.email && (
