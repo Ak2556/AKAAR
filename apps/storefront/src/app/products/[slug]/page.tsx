@@ -10,6 +10,8 @@ import {
   Loader2,
   Share2,
   ShoppingCart,
+  Truck,
+  Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProductViewer3D } from "@/components/products/ProductViewer3D";
@@ -37,10 +39,10 @@ interface Product {
 }
 
 const performanceFacts = [
-  { label: "Preview system", value: "3D-capable viewer" },
-  { label: "Review window", value: "48 hours" },
+  { label: "Material", value: "White PLA · FDM printed" },
+  { label: "Studio", value: "AKAAR, Jaipur" },
   { label: "Shipping", value: "FREE · Pan-India" },
-  { label: "Dispatch", value: "5-7 business days" },
+  { label: "Dispatch", value: "5–7 business days" },
 ];
 
 export default function ProductDetailPage() {
@@ -193,9 +195,28 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
-      <div className="mx-auto max-w-7xl">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+    <div className="min-h-screen pb-16">
+      {/* Urgency bar */}
+      <div className="border-b border-[var(--border)] bg-[var(--surface-highlight)] pt-20">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-4 py-2.5 sm:px-6">
+          <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
+            <Truck className="h-3 w-3" />
+            Free shipping · all orders
+          </span>
+          <span className="hidden h-3 w-px bg-[var(--border-accent)] sm:block" />
+          <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
+            <Zap className="h-3 w-3" />
+            Ships within 48 hrs · Jaipur
+          </span>
+          <span className="hidden h-3 w-px bg-[var(--border-accent)] sm:block" />
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+            Handcrafted · Limited studio production
+          </span>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 pt-6">
           <Link
             href="/products"
             className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
@@ -288,7 +309,13 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+                {/* Trust + FOMO */}
+                <div className="mt-6 flex items-center gap-3 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/8 px-4 py-3">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                  <p className="text-xs font-medium text-emerald-400">In stock · Ships within 48 hours if ordered today</p>
+                </div>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
                   <Button variant="primary" size="lg" className="w-full" onClick={handleAddToCart}>
                     <ShoppingCart className="mr-2 h-4 w-4" />
                     Add to Cart
@@ -312,15 +339,17 @@ export default function ProductDetailPage() {
               </div>
 
               <div className="grid gap-4">
+                {product.meshFile ? (
+                  <InfoPanel
+                    kicker="3D Preview"
+                    title="Interactive model attached"
+                    body={productNarrative.preview}
+                  />
+                ) : null}
                 <InfoPanel
-                  kicker="Preview notes"
-                  title={product.meshFile ? "Interactive asset attached" : "Prepared visual stage"}
-                  body={productNarrative.preview}
-                />
-                <InfoPanel
-                  kicker="Production intent"
-                  title="Use as a configured reference"
-                  body="This listing is a launch point. Move it into the cart when the preset is already close, or use it to anchor a more tailored quote request."
+                  kicker="What's included"
+                  title="Ready to display, straight out of the box"
+                  body="Your order arrives fully assembled and ready to place — on a desk, shelf, or altar. No finishing, painting, or post-processing required."
                 />
                 <InfoPanel
                   kicker="Need modifications?"
