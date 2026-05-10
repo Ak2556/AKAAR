@@ -110,11 +110,11 @@ export function EnhancedCTA() {
             {/* Contact info */}
             <div className="flex flex-wrap justify-center gap-6 text-sm text-[var(--text-muted)]">
               <a
-                href="mailto:hello@akaar3d.com"
+                href="mailto:akaar3d.printing@gmail.com"
                 className="flex items-center gap-2 hover:text-[var(--accent)] transition-colors"
               >
                 <Mail className="w-4 h-4" />
-                hello@akaar3d.com
+                akaar3d.printing@gmail.com
               </a>
               <a
                 href="tel:+919876543210"

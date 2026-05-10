@@ -36,7 +36,7 @@ When he's not leading AKAAR, Akash explores cutting-edge developments in machine
       linkedin: "https://www.linkedin.com/in/akash-thakur-dev/",
       instagram: "https://www.instagram.com/akash___thakur07/?__pwa=1",
       github: "https://github.com/Ak2556",
-      email: "akash@akaar3d.com",
+      email: "akaar3d.printing@gmail.com",
     },
     isFounder: true,
     founderVision: "I started AKAAR 3D because I saw a broken system—manual quoting, inconsistent quality, and endless friction that slowed down innovators. We're not just a 3D printing service; we're building the infrastructure for the next generation of hardware creators. Every engineer, every startup, every maker deserves access to manufacturing that just works.",
@@ -56,7 +56,7 @@ With a keen eye for detail and a deep understanding of 3D printing constraints, 
     social: {
       linkedin: "https://linkedin.com/in/mohit-sherawat",
       instagram: "https://www.instagram.com/__.mayank.__001?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
-      email: "mohit@akaar3d.com",
+      email: "akaar3d.printing@gmail.com",
     },
   },
   {
@@ -73,7 +73,7 @@ Beyond maintenance, Harish continuously evaluates and tests new hardware, materi
     skills: ["3D Printer Maintenance", "FDM Technology", "Electronics Repair", "Print Farm Management", "Quality Control", "Hardware Troubleshooting", "Preventive Maintenance", "Technical Documentation"],
     social: {
       linkedin: "https://linkedin.com/in/harish-kumar-meena",
-      email: "harish@akaar3d.com",
+      email: "akaar3d.printing@gmail.com",
     },
   },
   {
@@ -91,7 +91,7 @@ She oversees the supply chain, inventory management, and shipping operations, wo
     social: {
       linkedin: "https://linkedin.com/in/tarveen-sherawat",
       instagram: "https://www.instagram.com/__sherawat.shaab?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
-      email: "tarveen@akaar3d.com",
+      email: "akaar3d.printing@gmail.com",
     },
   },
 ];
