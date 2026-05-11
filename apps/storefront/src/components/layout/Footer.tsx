@@ -1,24 +1,19 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { Instagram, Linkedin, Mail, Send } from "lucide-react";
-import { useToast } from "@/context/ToastContext";
 import { Logo } from "@/components/ui/Logo";
-import { BRAND_TAGLINE } from "@/lib/brand";
 
 const footerLinks = {
   collection: [
     { label: "All Products", href: "/products" },
-    { label: "Functional Parts", href: "/products?category=functional" },
-    { label: "Prototype Runs", href: "/products?category=prototype" },
-    { label: "Custom Builds", href: "/quote" },
+    { label: "Figurines", href: "/products?category=Figurine" },
+    { label: "Lamps", href: "/products?category=Lamp" },
+    { label: "Request a Build", href: "/quote" },
   ],
   capabilities: [
-    { label: "3D Printing", href: "/services#printing" },
-    { label: "DFM Review", href: "/services#design" },
-    { label: "Rapid Prototyping", href: "/services#prototyping" },
-    { label: "Shipping", href: "/services#logistics" },
+    { label: "3D Printing", href: "/services" },
+    { label: "DFM Review", href: "/services" },
+    { label: "Rapid Prototyping", href: "/services" },
+    { label: "Shipping", href: "/services" },
   ],
   company: [
     { label: "About", href: "/about" },
@@ -36,75 +31,45 @@ const socialLinks = [
 ];
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const toast = useToast();
-
-  const handleNewsletterSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!email) {
-      toast.error("Please enter your email address");
-      return;
-    }
-
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const subscribers = JSON.parse(localStorage.getItem("akaar-newsletter") || "[]");
-    if (!subscribers.includes(email)) {
-      subscribers.push(email);
-      localStorage.setItem("akaar-newsletter", JSON.stringify(subscribers));
-    }
-
-    setEmail("");
-    setIsSubmitting(false);
-    toast.success("Subscribed. We’ll send capability updates and release notes.");
-  };
-
   return (
     <footer className="px-4 pb-6 pt-20 sm:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="luxury-panel overflow-hidden rounded-[2rem]">
           <div className="grid gap-10 border-b border-[var(--border)] px-6 py-10 lg:grid-cols-[1.4fr_1fr] lg:px-10">
             <div className="space-y-5">
-              <span className="luxury-kicker">Production Updates</span>
-              <p className="editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
+              <span className="luxury-kicker">Start a build</span>
               <h2 className="display-font max-w-[12ch] text-[clamp(2.1rem,2.8vw,3.2rem)] leading-[1.02] text-[var(--text-primary)]">
-                A quieter engineering brief for new materials, pricing logic, and launch-ready parts.
+                Upload your file. Get a quote in 48 hours.
               </h2>
               <p className="max-w-xl text-[var(--text-secondary)]">
-                AKAAR ships product notes for engineers, founders, and procurement teams that need clarity without the noise.
+                Attach your CAD file, choose a material, and tell us what the part needs to do. We review every request from the Jaipur studio and reply with pricing and next steps.
               </p>
             </div>
 
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end lg:justify-end">
-              <div className="flex-1">
-                <label className="luxury-metric-label mb-2 block">Email</label>
-                <input
-                  type="email"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="luxury-input w-full rounded-full px-5 py-3.5"
-                />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end lg:justify-end">
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/quote"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--text-primary)] px-6 py-3.5 font-medium text-[var(--bg-primary)] transition-transform hover:-translate-y-0.5"
+                >
+                  Request a Quote
+                  <Send className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border-accent)] px-6 py-3.5 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--surface-highlight)]"
+                >
+                  Talk to the team
+                </Link>
               </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--text-primary)] px-6 py-3.5 font-medium text-[var(--bg-primary)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
-              >
-                {isSubmitting ? "Subscribing..." : "Subscribe"}
-                <Send className="h-4 w-4" />
-              </button>
-            </form>
+            </div>
           </div>
 
           <div className="grid gap-10 px-6 py-10 lg:grid-cols-[1.2fr_repeat(3,minmax(0,1fr))] lg:px-10">
             <div className="space-y-6">
               <Logo size="lg" showTagline />
               <p className="max-w-sm text-[var(--text-secondary)]">
-                {BRAND_TAGLINE}. Launch-grade 3D printing for product teams that care about finish, lead time, and manufacturability.
+                FDM 3D printing studio in Jaipur. We review your file, print it, and ship it across India — typically within 48–72 hours of quote approval.
               </p>
               <div className="space-y-1 text-sm text-[var(--text-muted)]">
                 <p>9-B, 69, Block-B, Ring Road, Boorthal</p>
