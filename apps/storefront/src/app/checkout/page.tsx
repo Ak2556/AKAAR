@@ -351,7 +351,7 @@ export default function CheckoutPage() {
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" onLoad={() => setRazorpayLoaded(true)} />
-      <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6">
+      <div className="min-h-screen px-4 pb-40 pt-28 sm:px-6 xl:pb-16">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8">
             <Link
@@ -756,6 +756,39 @@ export default function CheckoutPage() {
               </div>
             </aside>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile sticky order summary bar — hidden on xl (sidebar visible there) */}
+      <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-[var(--border)] bg-[var(--bg-primary)]/95 px-4 py-3 backdrop-blur-md xl:hidden [padding-bottom:calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+        <div className="mx-auto flex max-w-lg items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-[0.14em]">
+              {items.length} item{items.length !== 1 ? "s" : ""} · {selectedShipping?.name || "Standard"}
+            </p>
+            <p className="mt-0.5 text-base font-semibold text-[var(--text-primary)]">
+              {formatPrice(orderTotal)}
+            </p>
+          </div>
+          {step < 3 ? (
+            <Button size="sm" onClick={handleContinue}>
+              Continue
+              <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={initiatePayment}
+              disabled={isProcessing || (!razorpayLoaded && !localDataMode)}
+            >
+              {isProcessing ? "Processing..." : (
+                <>
+                  <CreditCard className="mr-1.5 h-3.5 w-3.5" />
+                  Pay {formatPrice(orderTotal)}
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </>

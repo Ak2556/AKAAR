@@ -15,6 +15,7 @@ import { SettingsInitializer } from "@/components/SettingsInitializer";
 import { RuntimeCapabilitiesProvider } from "@/context/RuntimeCapabilitiesContext";
 import { SupabaseProvider } from "@/context/SupabaseContext";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
 import { DevelopmentSetupBanner } from "@/components/layout/DevelopmentSetupBanner";
 
@@ -33,6 +34,12 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
 });
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "AKAAR 3D | Giving AKAAR to Ideas | 3D Printing Services in Jaipur",
@@ -67,8 +74,9 @@ export default function RootLayout({
                         <ScrollProgress />
                         <Header />
                         <DevelopmentSetupBanner capabilities={runtimeCapabilities} />
-                        <main className="min-h-screen">{children}</main>
+                        <main className="min-h-screen pb-16 md:pb-0">{children}</main>
                         <Footer />
+                        <BottomNav />
                         <LazyCartDrawer />
                       </CartProvider>
                     </WishlistProvider>

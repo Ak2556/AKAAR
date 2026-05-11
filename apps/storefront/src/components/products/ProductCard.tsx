@@ -43,6 +43,7 @@ export function ProductCard({
   const handleAddToCart = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
     addItem({ id, name, slug, price });
     toast.success(`Added ${name} to cart`);
   };

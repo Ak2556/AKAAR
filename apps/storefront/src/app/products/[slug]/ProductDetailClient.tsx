@@ -13,7 +13,7 @@ import {
   Truck,
   Zap,
 } from "lucide-react";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -72,6 +72,11 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [showViewer, setShowViewer] = useState(false);
+  const [isCartButtonVisible, setIsCartButtonVisible] = useState(true);
+
+  // Refs for sticky bar IntersectionObserver and swipe gesture
+  const cartButtonRef = useRef<HTMLButtonElement>(null);
+  const touchStartX = useRef<number>(0);
 
   const price = product.price ? Number(product.price) : 0;
   const isWishlisted = isInWishlist(product.id);
@@ -83,7 +88,20 @@ export function ProductDetailClient({
 
   const has3D = Boolean(product.meshFile?.storagePath || product.meshFile?.s3Key);
 
+  // Observe whether the main Add to Cart button is on-screen
+  useEffect(() => {
+    const button = cartButtonRef.current;
+    if (!button) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsCartButtonVisible(entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(button);
+    return () => observer.disconnect();
+  }, []);
+
   const handleAddToCart = () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
     addItem(
       { id: product.id, name: product.name, slug: product.slug, price, image: allImages[0] || undefined },
       quantity
@@ -114,13 +132,29 @@ export function ProductDetailClient({
     toast.success("Link copied to clipboard");
   };
 
+  // Swipe gesture handlers for mobile gallery
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) < 40 || allImages.length <= 1) return;
+    if (delta < 0) {
+      setSelectedImageIdx((i) => Math.min(i + 1, allImages.length - 1));
+    } else {
+      setSelectedImageIdx((i) => Math.max(i - 1, 0));
+    }
+    setShowViewer(false);
+  };
+
   const descriptor = product.shortDescription ||
     "Configured geometry staged for visual review, material selection, and production planning.";
   const production = product.description ||
     "Handcrafted in the AKAAR studio, Jaipur. Every part goes through a material and geometry review before production begins.";
 
   return (
-    <div className="min-h-screen pb-16">
+    <div className="min-h-screen pb-32 lg:pb-16">
       {/* Urgency bar */}
       <div className="border-b border-[var(--border)] bg-[var(--surface-highlight)] pt-20">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-4 py-2.5 sm:px-6">
@@ -186,11 +220,13 @@ export function ProductDetailClient({
                 </div>
               </div>
 
-              {/* Image gallery */}
+              {/* Image gallery — swipe-enabled on mobile */}
               <div className="flex flex-col gap-3">
                 <div
                   className="luxury-stage relative overflow-hidden rounded-[2rem] border border-white/8 p-4 sm:p-5"
                   style={{ minHeight: "340px" }}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
                 >
                   {/* All images in DOM — opacity-toggled for instant switching */}
                   {allImages.map((img, i) => (
@@ -224,10 +260,28 @@ export function ProductDetailClient({
                       Preview unavailable
                     </div>
                   ) : null}
+
+                  {/* Swipe dot indicators — mobile only */}
+                  {allImages.length > 1 && (
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 sm:hidden">
+                      {allImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => { setSelectedImageIdx(i); setShowViewer(false); }}
+                          className={`h-1.5 rounded-full transition-all ${
+                            selectedImageIdx === i
+                              ? "w-4 bg-[var(--accent)]"
+                              : "w-1.5 bg-white/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
 
+                {/* Thumbnail strip — hidden on mobile (uses swipe + dots instead) */}
                 {(allImages.length > 1 || has3D) && (
-                  <div className="flex gap-2 overflow-x-auto pb-1">
+                  <div className="hidden gap-2 overflow-x-auto pb-1 sm:flex">
                     {allImages.map((img, i) => (
                       <button
                         key={i}
@@ -296,14 +350,14 @@ export function ProductDetailClient({
                     <div className="input-stepper mt-3 inline-flex items-center overflow-hidden rounded-full">
                       <button
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="px-4 py-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
+                        className="flex min-h-[44px] min-w-[44px] items-center justify-center px-3 py-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
                       >
                         -
                       </button>
-                      <span className="px-5 py-2 font-medium text-[var(--text-primary)]">{quantity}</span>
+                      <span className="px-4 py-2 font-medium text-[var(--text-primary)]">{quantity}</span>
                       <button
                         onClick={() => setQuantity((q) => q + 1)}
-                        className="px-4 py-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
+                        className="flex min-h-[44px] min-w-[44px] items-center justify-center px-3 py-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
                       >
                         +
                       </button>
@@ -319,7 +373,13 @@ export function ProductDetailClient({
                 </div>
 
                 <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-                  <Button variant="primary" size="lg" className="w-full" onClick={handleAddToCart}>
+                  <Button
+                    ref={cartButtonRef}
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleAddToCart}
+                  >
                     <ShoppingCart className="mr-2 h-4 w-4" />
                     Add to Cart
                   </Button>
@@ -430,6 +490,43 @@ export function ProductDetailClient({
             </div>
           </motion.section>
         ) : null}
+      </div>
+
+      {/* Sticky mobile add-to-cart bar — shown when main button is off screen */}
+      <div
+        className={`fixed bottom-16 left-0 right-0 z-40 border-t border-[var(--border)] bg-[var(--bg-primary)]/95 px-4 py-3 backdrop-blur-md transition-transform duration-200 lg:hidden [padding-bottom:calc(0.75rem+env(safe-area-inset-bottom,0px))] ${
+          isCartButtonVisible ? "translate-y-full" : "translate-y-0"
+        }`}
+      >
+        <div className="mx-auto flex max-w-lg items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-muted)]">
+              {product.name}
+            </p>
+            <p className="mt-0.5 text-base font-semibold text-[var(--text-primary)]">
+              {formatPrice(price)}
+            </p>
+          </div>
+          <div className="input-stepper flex shrink-0 items-center overflow-hidden rounded-full">
+            <button
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
+            >
+              −
+            </button>
+            <span className="px-2 text-sm font-medium text-[var(--text-primary)]">{quantity}</span>
+            <button
+              onClick={() => setQuantity((q) => q + 1)}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
+            >
+              +
+            </button>
+          </div>
+          <Button variant="primary" size="sm" onClick={handleAddToCart} className="shrink-0">
+            <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+            Add
+          </Button>
+        </div>
       </div>
     </div>
   );

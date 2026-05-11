@@ -52,7 +52,7 @@ export function CartDrawer() {
               </div>
               <button
                 onClick={closeCart}
-                className="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--bg-secondary)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -87,9 +87,19 @@ export function CartDrawer() {
                       exit={{ opacity: 0, x: -100 }}
                       className="flex gap-4 p-4 border border-[var(--border)] rounded-xl bg-[var(--bg-secondary)]"
                     >
-                      {/* Product Image Placeholder */}
-                      <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-lg flex items-center justify-center flex-shrink-0">
-                        <ShoppingBag className="w-8 h-8 text-[var(--text-muted)]" />
+                      {/* Product image or fallback */}
+                      <div className="relative w-20 h-20 bg-[var(--bg-tertiary)] rounded-xl flex-shrink-0 overflow-hidden">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="absolute inset-0 h-full w-full object-contain p-1"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <ShoppingBag className="w-8 h-8 text-[var(--text-muted)]" />
+                          </div>
+                        )}
                       </div>
 
                       {/* Product Info */}
@@ -110,21 +120,21 @@ export function CartDrawer() {
                           {formatPrice(item.price)}
                         </p>
 
-                        {/* Quantity Controls */}
+                        {/* Quantity Controls — 44px touch targets */}
                         <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center border border-[var(--border)] rounded-lg overflow-hidden">
+                          <div className="flex items-center border border-[var(--border)] rounded-xl overflow-hidden">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="p-2 hover:bg-[var(--bg-tertiary)] transition-colors"
+                              className="flex min-h-[44px] min-w-[44px] items-center justify-center hover:bg-[var(--bg-tertiary)] transition-colors"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="px-4 text-sm font-medium">
+                            <span className="px-3 text-sm font-medium min-w-[2rem] text-center">
                               {item.quantity}
                             </span>
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="p-2 hover:bg-[var(--bg-tertiary)] transition-colors"
+                              className="flex min-h-[44px] min-w-[44px] items-center justify-center hover:bg-[var(--bg-tertiary)] transition-colors"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
@@ -132,7 +142,7 @@ export function CartDrawer() {
 
                           <button
                             onClick={() => removeItem(item.id)}
-                            className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
