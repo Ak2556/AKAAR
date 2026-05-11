@@ -85,9 +85,9 @@ export default function ContactPage() {
               <CheckCircle className="h-10 w-10 text-[var(--accent)]" />
             </div>
             <span className="luxury-kicker mt-8 block">Message received</span>
-            <h1 className="display-font mt-4 text-4xl text-[var(--text-primary)]">We&apos;ll reply with the right lane owner.</h1>
+            <h1 className="display-font mt-4 text-4xl text-[var(--text-primary)]">Message received.</h1>
             <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
-              Your note is in. The team will route it to the right person for quotes, technical review, or studio operations and respond within one business day.
+              We'll get back to you at your email address within one business day. For urgent order coordination, call us directly on +91 7300431301.
             </p>
             <Button variant="primary" className="mt-8" onClick={() => setIsSubmitted(false)}>
               Send Another Message
@@ -107,10 +107,10 @@ export default function ContactPage() {
             <div className="editorial-stage-copy space-y-5">
               <span className="luxury-kicker">Contact AKAAR</span>
               <h1 className="display-font text-[clamp(2.8rem,4.8vw,4.8rem)] leading-[0.95] text-[var(--text-primary)]">
-                Reach the studio without falling into a generic support loop.
+                Talk to the AKAAR team.
               </h1>
               <p className="max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                Use this when the project needs a real response, not a support maze. Whether you are requesting a quote, checking feasibility, or discussing production, the contact experience should feel as composed as the rest of the site.
+                Email, call, or fill in the form below. We handle quote requests, order questions, and technical queries from the Jaipur studio. We typically reply within one business day.
               </p>
               <p className="editorial-eyebrow">Direct routing · Quote review · Technical response</p>
             </div>
@@ -158,9 +158,9 @@ export default function ContactPage() {
         <div className="grid gap-8 xl:grid-cols-[1.04fr_0.96fr]">
           <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="luxury-card rounded-[2rem] p-6 sm:p-7">
             <span className="luxury-kicker">Send a note</span>
-            <h2 className="display-font mt-3 text-4xl text-[var(--text-primary)]">Choose the right conversation lane.</h2>
+            <h2 className="display-font mt-3 text-4xl text-[var(--text-primary)]">Send a message.</h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
-              Keep it direct. Select the lane, give the context, and the right person on the team can pick it up without extra back-and-forth.
+              Select the topic, fill in your details, and send. We'll route it to the right person and reply within a business day.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">

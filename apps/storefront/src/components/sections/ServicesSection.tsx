@@ -59,11 +59,11 @@ export function ServicesSection() {
           <div className="max-w-3xl">
             <span className="luxury-kicker">Capabilities</span>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              Basic 3D printing materials, handled with more clarity than catalog noise.
+              What we print and how we work.
             </h2>
           </div>
           <p className="max-w-xl text-[var(--text-secondary)]">
-            The live studio stack right now is centered on PLA, ABS, TPU, and PETG, with file review and dispatch handled around those real materials instead of mock capability claims.
+            PLA, ABS, TPU, and PETG — the four materials we work with every day. File review and tracked dispatch come with every order.
           </p>
         </motion.div>
 

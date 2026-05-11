@@ -247,10 +247,10 @@ export default function QuotePage() {
             <div className="relative z-10 max-w-3xl">
               <span className="luxury-kicker">AKAAR build request</span>
               <h1 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl lg:text-6xl">
-                Upload the part. Tell us what it needs to do. We’ll shape the production path.
+                Send us your file. We’ll review it and quote you.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
-                This workspace is built for engineers and operators, not marketing forms. Add your files, choose the likely material, and explain what matters before we quote.
+                Add your CAD file, choose a material, and describe what the part needs to do. We review every request and reply with pricing and next steps within 48 hours.
               </p>
             </div>
 

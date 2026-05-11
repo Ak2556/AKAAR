@@ -9,25 +9,25 @@ const printerStories = [
   {
     id: "p1s",
     kicker: "Bambu Lab P1S",
-    title: "Enclosed speed for serious prototype throughput.",
-    body: "Use the P1S stage to signal fast-turn enclosure work, reliable engineering prints, and a workflow that feels finished before the first layer begins.",
+    title: "Enclosed chamber for engineering parts that need to come out right.",
+    body: "The P1S runs inside a temperature-controlled enclosure, which matters for ABS, ASA, and any print where warping or layer delamination is a concern. Good for functional parts, tight tolerances, and jobs that run 10+ hours.",
     image: "/showcase/bambu-p1s.webp",
     stats: [
-      { label: "Print mode", value: "High-throughput" },
+      { label: "Enclosure", value: "Fully enclosed" },
       { label: "Best for", value: "Functional prototypes" },
-      { label: "Story role", value: "Launch-stage output" },
+      { label: "Materials", value: "PLA · ABS · PETG · TPU" },
     ],
   },
   {
     id: "a1-combo",
     kicker: "Bambu Lab A1 Combo",
-    title: "Accessible multi-color presentation for faster approvals.",
-    body: "The A1 Combo section frames visual prototypes, communication models, and early-stage products that need to be convincing before they need to be final.",
+    title: "Multi-colour printing for models that need to look as good as they work.",
+    body: "The A1 Combo handles up to four filament colours in a single print. Useful for presentation models, UI mockups, and early-stage products where the visual needs to communicate before the final design is locked.",
     image: "/showcase/bambu-a1-combo.jpg",
     stats: [
-      { label: "Print mode", value: "Presentation-first" },
-      { label: "Best for", value: "Visual approvals" },
-      { label: "Story role", value: "Investor-ready prototypes" },
+      { label: "Colours", value: "Up to 4 filaments" },
+      { label: "Best for", value: "Presentation models" },
+      { label: "Materials", value: "PLA · PETG" },
     ],
   },
 ];
@@ -86,7 +86,7 @@ export function PrinterShowcaseSection() {
                   <p className="luxury-kicker text-[var(--text-primary)]/80">Printer-led environments</p>
                   <p className="mt-3 editorial-eyebrow text-white/62">{BRAND_TAGLINE}</p>
                   <h2 className="display-font mt-4 text-4xl text-white sm:text-5xl">
-                    Scroll through the hardware language behind the AKAAR experience.
+                    Two machines. Different jobs. This is what runs your order.
                   </h2>
                 </div>
               </motion.div>

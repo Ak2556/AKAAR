@@ -37,10 +37,10 @@ export function HeroSection() {
                 <span className="luxury-kicker">AKAAR Product Atelier</span>
                 <p className="editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
                 <h1 className="display-font max-w-[11ch] text-[clamp(2.9rem,4.35vw,4.8rem)] leading-[0.98] text-[var(--text-primary)]">
-                  Product-grade 3D printing for teams that want the object to feel resolved before it ships.
+                  3D printing studio in Jaipur. Your file, finished parts, shipped across India.
                 </h1>
                 <p className="max-w-xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                  Launch-ready prototyping and short-run production for engineering teams. Upload your CAD, choose from the live material set, and move from digital model to finished part with calmer, faster decisions.
+                  Upload your CAD file, pick a material, and we'll review it and send you a quote within 48 hours. PLA, ABS, TPU, and PETG — from concept prints to functional parts ready for the field.
                 </p>
               </div>
 
@@ -86,9 +86,9 @@ export function HeroSection() {
                 <div className="relative z-10 w-full pb-6">
                   <div className="mx-auto max-w-[360px] rounded-[1.6rem] border border-white/10 bg-[rgba(10,10,12,0.58)] px-5 py-5 backdrop-blur-md sm:max-w-[420px]">
                     <p className="luxury-metric-label text-white/56">Machine environment</p>
-                    <p className="mt-3 text-2xl font-semibold text-white">P1S-driven prototype bay</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">Bambu Lab P1S enclosed chamber</p>
                     <p className="mt-3 text-sm leading-6 text-white/72">
-                      Enclosed speed, clean repeatability, and the industrial calm that should sit behind a high-trust manufacturing brand.
+                      Temperature-controlled enclosure for consistent results across long prints. Reliable for engineering parts, tight tolerances, and multi-layer builds.
                     </p>
                   </div>
                 </div>

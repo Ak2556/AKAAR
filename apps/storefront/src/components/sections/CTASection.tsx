@@ -7,10 +7,10 @@ import { MessageSquare, Upload } from "lucide-react";
 import { BRAND_TAGLINE } from "@/lib/brand";
 
 const stats = [
-  { value: "10", label: "orders delivered" },
-  { value: "48h", label: "review window" },
-  { value: "4", label: "live core materials" },
-  { value: "Studio", label: "built from the current setup" },
+  { value: "48h", label: "quote review window" },
+  { value: "4", label: "core materials" },
+  { value: "FDM", label: "print technology" },
+  { value: "Jaipur", label: "studio location" },
 ];
 
 export function CTASection() {
@@ -31,10 +31,10 @@ export function CTASection() {
               <span className="luxury-kicker">Move from file to part</span>
               <p className="mt-3 editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
               <h2 className="display-font mt-4 max-w-3xl text-4xl text-[var(--text-primary)] sm:text-5xl">
-                Every build starts with clarity: geometry, intent, and a production path worth approving.
+                Upload your file. Tell us what it needs to do. We’ll send you a real quote.
               </h2>
               <p className="mt-5 max-w-2xl text-[var(--text-secondary)]">
-                Upload your model, tell us what the part needs to do, and we’ll respond with a reviewed manufacturing recommendation instead of generic automation.
+                Attach your CAD file, choose a material, and describe what the part is for. We review every request and reply with pricing, production guidance, and a clear next step.
               </p>
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">

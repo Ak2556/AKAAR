@@ -24,13 +24,9 @@ export const teamMembers: TeamMember[] = [
     role: "Founder & CEO",
     domain: "Vision, Strategy, Technology & Product Leadership",
     image: "/team/akash-thakur.png",
-    bio: `Akash is the visionary founder behind AKAAR 3D. What started as a simple observation—that local manufacturing was broken by friction, opacity, and inconsistency—became a mission to build something better. He assembled the team, defined the vision, and leads every aspect of the company from technology to strategy.
+    bio: `Akash started AKAAR 3D after spending time building software and noticing that getting physical parts made was harder than it needed to be. He handles the technical side of the studio — the ordering platform, backend infrastructure, and product development. His background is in software engineering and AI/ML, applied here to build systems that make the quote-to-delivery process clearer for customers.
 
-As both the technical architect and business leader, Akash wears multiple hats. He personally designed and built the quote-request workflow, the customer-facing storefront, and the backend infrastructure that powers AKAAR's operations. His background in AI/ML and systems architecture enables him to solve complex problems at the intersection of software and manufacturing.
-
-Beyond code, Akash sets the company's direction, builds partnerships, and ensures every team member is aligned with the mission: to make professional 3D printing accessible to everyone. He brought together Mohit, Harish, and Tarveen—each an expert in their domain—to create a team capable of delivering on this ambitious vision.
-
-When he's not leading AKAAR, Akash explores cutting-edge developments in machine learning and contributes to open-source projects. He believes that the future of manufacturing is digital-first, and AKAAR 3D is just the beginning.`,
+He also sets the direction for what AKAAR builds next. Mohit handles design and file review, Harish keeps the machines running, and Tarveen manages procurement and fulfillment. Together the four of them run the whole operation out of a studio in Jaipur.`,
     skills: ["Leadership", "Product Strategy", "Python", "Machine Learning", "Next.js", "System Design", "API Development", "Cloud Architecture", "Business Development", "TypeScript"],
     social: {
       linkedin: "https://www.linkedin.com/in/akash-thakur-dev/",
@@ -39,7 +35,7 @@ When he's not leading AKAAR, Akash explores cutting-edge developments in machine
       email: "akaar3d.printing@gmail.com",
     },
     isFounder: true,
-    founderVision: "I started AKAAR 3D because I saw a broken system—manual quoting, inconsistent quality, and endless friction that slowed down innovators. We're not just a 3D printing service; we're building the infrastructure for the next generation of hardware creators. Every engineer, every startup, every maker deserves access to manufacturing that just works.",
+    founderVision: "I started AKAAR 3D because getting parts made in India was unnecessarily hard — unclear pricing, no feedback on files, and no way to know if your order was on track. We built a system that fixes that: clear quotes, file review before printing, and a team you can actually reach.",
   },
   {
     slug: "mohit-sherawat",
@@ -47,11 +43,7 @@ When he's not leading AKAAR, Akash explores cutting-edge developments in machine
     role: "Lead Industrial Designer",
     domain: "CAD optimization, mesh validation, and model slicing for structural integrity",
     image: "/team/mohit-sherawat.jpeg",
-    bio: `Mohit brings years of industrial design experience to AKAAR 3D, ensuring every print meets the highest standards of quality and precision. As Lead Industrial Designer, he oversees the entire design-to-print pipeline, from initial CAD file validation to final slicing optimization.
-
-His expertise in mesh repair and optimization means that even complex geometries are handled with care, resulting in prints that are structurally sound and dimensionally accurate. Mohit works closely with customers to understand their design requirements and provides guidance on design-for-manufacturing best practices.
-
-With a keen eye for detail and a deep understanding of 3D printing constraints, Mohit ensures that every part that leaves the facility meets AKAAR's quality standards.`,
+    bio: `Mohit reviews every file that comes through — checking geometry, wall thickness, and print orientation before anything goes to the machine. He's worked with CAD for years and knows which designs will print cleanly and which will cause problems halfway through a build. If your file needs changes, he'll tell you exactly what and why, not just reject it.`,
     skills: ["CAD Design", "Mesh Optimization", "3D Modeling", "Slicing Software", "Design for Manufacturing", "Quality Assurance", "SolidWorks", "Fusion 360"],
     social: {
       linkedin: "https://linkedin.com/in/mohit-sherawat",
@@ -65,11 +57,7 @@ With a keen eye for detail and a deep understanding of 3D printing constraints, 
     role: "Head of Hardware Infrastructure",
     domain: "Print farm operations, electronics maintenance, and machine uptime maximization",
     image: "/team/harish-kumar-meena.jpeg",
-    bio: `Harish is the hands-on expert who keeps AKAAR 3D's print farm running at peak efficiency. As Head of Hardware Infrastructure, he manages the fleet of 3D printers, ensuring maximum uptime and consistent print quality across all machines.
-
-His deep understanding of FDM printing technology - from extruder mechanics to bed leveling systems - allows him to quickly diagnose and resolve issues before they impact production. Harish has implemented preventive maintenance schedules that have significantly reduced machine downtime.
-
-Beyond maintenance, Harish continuously evaluates and tests new hardware, materials, and upgrades to improve print quality and expand AKAAR's capabilities. His technical expertise is crucial to delivering reliable, high-quality prints.`,
+    bio: `Harish keeps the print farm running. That means calibration, maintenance schedules, bed leveling, extruder tuning — the physical work that determines whether a 10-hour print finishes cleanly or fails at hour 9. He manages machine uptime day-to-day and handles hardware issues before they affect customer orders going out the door.`,
     skills: ["3D Printer Maintenance", "FDM Technology", "Electronics Repair", "Print Farm Management", "Quality Control", "Hardware Troubleshooting", "Preventive Maintenance", "Technical Documentation"],
     social: {
       linkedin: "https://linkedin.com/in/harish-kumar-meena",
@@ -82,11 +70,7 @@ Beyond maintenance, Harish continuously evaluates and tests new hardware, materi
     role: "Head of Operations & Unit Economics",
     domain: "Supply chain logistics, material procurement, and cost-margin optimization",
     image: "/team/tarveen-sherawat.jpeg",
-    bio: `Tarveen drives the operational excellence that makes AKAAR 3D a reliable partner for businesses and individuals alike. As Head of Operations, she manages everything from material procurement to order fulfillment, ensuring smooth end-to-end delivery.
-
-Her analytical approach to unit economics has been instrumental in developing AKAAR's competitive pricing model while maintaining healthy margins. Tarveen has built strong relationships with material suppliers and logistics partners across India.
-
-She oversees the supply chain, inventory management, and shipping operations, working to reduce lead times and improve customer satisfaction. Tarveen's operational expertise ensures that AKAAR can scale efficiently while maintaining service quality.`,
+    bio: `Tarveen manages procurement, inventory, and order fulfillment. She tracks material stock, coordinates with shipping partners, and handles the operational side of getting orders out the door on time. Her cost work keeps pricing honest while the studio stays sustainable — sourcing the right filament at the right volumes so customers aren't paying for inefficiency.`,
     skills: ["Operations Management", "Supply Chain", "Inventory Management", "Cost Analysis", "Vendor Relations", "Logistics", "Process Optimization", "Project Management"],
     social: {
       linkedin: "https://linkedin.com/in/tarveen-sherawat",
@@ -116,53 +100,8 @@ export interface Testimonial {
   project?: string;
 }
 
-export const testimonials: Testimonial[] = [
-  {
-    id: "1",
-    name: "Rahul Sharma",
-    company: "TechStart Innovations",
-    role: "Founder & CTO",
-    quote: "AKAAR 3D transformed our prototyping workflow. What used to take weeks now takes days. Their quote review workflow is a game-changer for hardware startups like ours.",
-    rating: 5,
-    project: "IoT Device Housing",
-  },
-  {
-    id: "2",
-    name: "Priya Patel",
-    company: "DesignWorks Studio",
-    role: "Lead Product Designer",
-    quote: "The print quality is exceptional. We've tried multiple vendors, but AKAAR's attention to detail and consistent results keep us coming back. The team actually understands design intent.",
-    rating: 5,
-    project: "Consumer Electronics Prototype",
-  },
-  {
-    id: "3",
-    name: "Vikram Reddy",
-    company: "MechSolutions",
-    role: "Engineering Manager",
-    quote: "Finally, a 3D printing service that gets manufacturing right. Fast turnaround, accurate quotes, and parts that fit perfectly every time. Our go-to for functional prototypes.",
-    rating: 5,
-    project: "Industrial Fixtures",
-  },
-  {
-    id: "4",
-    name: "Ananya Krishnan",
-    company: "Robotics Lab IIT",
-    role: "Research Lead",
-    quote: "For our robotics research, precision is non-negotiable. AKAAR delivers parts with tolerances that actually match the specs. Great communication and technical expertise.",
-    rating: 5,
-    project: "Custom Robot Components",
-  },
-  {
-    id: "5",
-    name: "Sanjay Mehta",
-    company: "AutoParts India",
-    role: "Procurement Head",
-    quote: "We needed 200+ custom jigs for our assembly line. AKAAR handled the volume, maintained quality, and delivered on time. Their platform made ordering at scale surprisingly easy.",
-    rating: 5,
-    project: "Assembly Line Jigs",
-  },
-];
+// Add real customer testimonials here as they come in.
+export const testimonials: Testimonial[] = [];
 
 // Projects for gallery
 export interface Project {
