@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star, Quote, User } from "lucide-react";
@@ -44,10 +45,12 @@ function TestimonialCard({ testimonial, isActive }: { testimonial: Testimonial; 
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center">
           {testimonial.avatar ? (
-            <img
+            <Image
               src={testimonial.avatar}
               alt={testimonial.name}
-              className="w-full h-full rounded-full object-cover"
+              width={48}
+              height={48}
+              className="rounded-full object-cover"
             />
           ) : (
             <User className="w-6 h-6 text-white" />

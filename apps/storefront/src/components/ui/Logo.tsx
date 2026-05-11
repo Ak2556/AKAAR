@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { BRAND_TAGLINE_SHORT } from "@/lib/brand";
 
@@ -52,10 +53,14 @@ export function Logo({
   const content = (
     <div className={cn("flex items-center", config.gap, className)}>
       {showFullLogo ? (
-        <img
+        <Image
           src="/brand/akaar-logo-full.png"
           alt="AKAAR 3D"
+          width={320}
+          height={80}
           className={cn("block", config.fullImage)}
+          style={{ width: "auto" }}
+          priority
         />
       ) : (
         <>
@@ -65,10 +70,13 @@ export function Logo({
               config.crest
             )}
           >
-            <img
+            <Image
               src="/brand/akaar-logo-mark.png"
               alt="AKAAR mark"
+              width={48}
+              height={48}
               className={cn("block object-contain p-1.5", config.markImage)}
+              priority
             />
           </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
@@ -119,10 +120,13 @@ export default function ContactPage() {
               <div className="luxury-stage relative min-h-[320px] overflow-hidden rounded-[2rem] border border-white/8 p-5">
                 <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">Studio context</div>
                 <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
-                  <img
+                  <Image
                     src="/showcase/studio/workspace-setup.png"
                     alt="AKAAR studio workspace"
-                    className="hero-image-shadow"
+                    fill
+                    className="hero-image-shadow object-cover"
+                    sizes="(max-width: 1024px) 100vw, 52vw"
+                    priority
                   />
                 </div>
               </div>
@@ -258,10 +262,12 @@ export default function ContactPage() {
               <div className="luxury-stage relative min-h-[260px] overflow-hidden p-5">
                 <div className="absolute left-5 top-5 editorial-eyebrow text-white/52">Studio objects</div>
                 <div className="editorial-media-frame absolute inset-x-5 bottom-5 top-16">
-                  <img
+                  <Image
                     src="/showcase/studio/planter-lineup.png"
                     alt="AKAAR planter lineup"
-                    className="hero-image-shadow"
+                    fill
+                    className="hero-image-shadow object-cover"
+                    sizes="(max-width: 1024px) 100vw, 48vw"
                   />
                 </div>
               </div>

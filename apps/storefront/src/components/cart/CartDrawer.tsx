@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, Trash2, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -90,10 +91,12 @@ export function CartDrawer() {
                       {/* Product image or fallback */}
                       <div className="relative w-20 h-20 bg-[var(--bg-tertiary)] rounded-xl flex-shrink-0 overflow-hidden">
                         {item.image ? (
-                          <img
+                          <Image
                             src={item.image}
                             alt={item.name}
-                            className="absolute inset-0 h-full w-full object-contain p-1"
+                            fill
+                            className="object-contain p-1"
+                            sizes="80px"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
