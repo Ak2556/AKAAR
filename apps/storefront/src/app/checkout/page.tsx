@@ -86,8 +86,8 @@ export default function CheckoutPage() {
 
   const selectedShipping = shippingMethods.find((method) => method.id === formData.shippingMethod);
   const shippingCost = selectedShipping?.price || 0;
-  const tax = Math.round(totalPrice * 0.18);
-  const orderTotal = totalPrice + shippingCost + tax;
+  const tax = 0;
+  const orderTotal = totalPrice + shippingCost;
   const featuredCartItem = items[0];
 
   const validateStep = () => {
@@ -735,9 +735,11 @@ export default function CheckoutPage() {
                   <div className="mt-6 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)]">
                     <TotalRow label="Subtotal" value={formatPrice(totalPrice)} />
                     <TotalRow label="Shipping" value={shippingCost === 0 ? 'FREE' : formatPrice(shippingCost)} />
-                    <TotalRow label="GST (18%)" value={formatPrice(tax)} />
                     <div className="flex items-center justify-between bg-[var(--bg-secondary)] px-4 py-5">
-                      <span className="text-sm font-medium text-[var(--text-primary)]">Total</span>
+                      <div>
+                        <span className="text-sm font-medium text-[var(--text-primary)]">Total</span>
+                        <p className="mt-0.5 text-xs text-[var(--text-muted)]">Prices inclusive of GST</p>
+                      </div>
                       <span className="text-lg font-semibold text-[var(--text-primary)]">{formatPrice(orderTotal)}</span>
                     </div>
                   </div>
