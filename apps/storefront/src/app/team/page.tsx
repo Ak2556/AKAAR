@@ -19,13 +19,13 @@ export default function TeamPage() {
               <span className="luxury-kicker">Team AKAAR</span>
               <p className="editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
               <h1 className="display-font max-w-[11ch] text-[clamp(2.9rem,4.8vw,4.9rem)] leading-[0.96] text-[var(--text-primary)]">
-                The people building the studio, systems, and production logic behind AKAAR.
+                Four people running one studio in Jaipur.
               </h1>
               <p className="max-w-xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                This page keeps the team in one dedicated place: founder context, operating roles, and the individual people responsible for turning ideas into finished output.
+                Akash, Mohit, Harish, and Tarveen. Between them they cover software, design review, hardware, and operations — everything that goes into getting your part made and shipped.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
-                {["Founder-led direction", "Hardware operations", "Design review", "Operations and unit economics"].map((item) => (
+                {["Product & software", "CAD & file review", "Hardware & machines", "Operations & fulfillment"].map((item) => (
                   <span
                     key={item}
                     className="inline-flex items-center gap-2 rounded-full border border-[var(--border-accent)] px-4 py-2 text-sm text-[var(--text-secondary)]"
@@ -69,7 +69,7 @@ export default function TeamPage() {
                   {founder.domain}
                 </p>
                 <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
-                  AKAAR exists because Akash set out to remove the friction between ambition and manufacturing. The business model, storefront, quote flow, and product direction all stem from that same founder thesis: hardware creation should feel composed, transparent, and fast enough to keep momentum alive.
+                  Akash built the platform you're using — the quote system, the storefront, and the admin tools. He runs product direction and connects the software side of the studio with the physical production side.
                 </p>
                 <div className="mt-6 space-y-4">
                   <p className="rounded-[1.35rem] border border-[var(--border)] bg-[var(--bg-primary)] px-5 py-4 text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
@@ -109,12 +109,12 @@ export default function TeamPage() {
 
         <section>
           <div className="mb-5 max-w-2xl">
-            <p className="luxury-kicker">Leadership bench</p>
+            <p className="luxury-kicker">The team</p>
             <h2 className="display-font mt-4 max-w-[12ch] text-3xl leading-[1.02] text-[var(--text-primary)] sm:text-4xl">
-              Each team member gets space to stand on their own.
+              Who handles your order.
             </h2>
             <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
-              Instead of compressing everyone into the About page, the team now reveals here one by one with room for role context, operating focus, and a fuller biography.
+              Mohit, Harish, and Tarveen each own a distinct part of production. Here's what they do.
             </p>
           </div>
 
@@ -203,10 +203,10 @@ export default function TeamPage() {
             <span className="luxury-kicker">Next step</span>
             <p className="mt-3 editorial-eyebrow text-[var(--accent)]">{BRAND_TAGLINE}</p>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              Build with the team behind the studio.
+              Ready to get your part made?
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
-              If the work, process, and people align with what you need, move into a reviewed build request and we'll take it from there.
+              Upload your file, choose a material, and we'll review it and quote you within 48 hours.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <Link href="/quote">

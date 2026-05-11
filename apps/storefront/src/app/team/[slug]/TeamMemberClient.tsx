@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Linkedin, Github, Instagram, Mail, Twitter, Quote, Sparkles, Star, Lightbulb, Users, Target, Rocket } from "lucide-react";
+import { ArrowLeft, Linkedin, Github, Instagram, Mail, Twitter, Quote, Sparkles, Lightbulb, Users, Target, Rocket } from "lucide-react";
 import { TeamMember, teamMembers } from "@/lib/team-data";
 
 export function TeamMemberClient({ member }: { member: TeamMember }) {
@@ -41,16 +41,6 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
           <div className="absolute inset-0 bg-[var(--bg-primary)]/20" />
         </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 border border-[var(--accent)]/20 rounded-full animate-pulse" />
-        <div className="absolute top-40 right-20 w-20 h-20 border border-[var(--accent)]/30 rotate-45" />
-        <div className="absolute bottom-40 left-1/4 w-2 h-2 bg-[var(--accent)] rounded-full animate-ping" />
-        {member.isFounder && (
-          <>
-            <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
-            <div className="absolute bottom-1/3 right-10 w-24 h-24 border-2 border-[var(--accent)]/40 rounded-full" />
-          </>
-        )}
 
         {/* Grid Overlay */}
         <div className="absolute inset-0 grid-overlay opacity-20" />
@@ -58,7 +48,6 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
         {/* Content */}
         <div className="relative z-10 container mx-auto px-6 pb-16">
           <div className="max-w-4xl">
-            {/* Founder Badge - Special for founder */}
             {member.isFounder && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -66,10 +55,7 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="mb-4"
               >
-                <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[var(--accent)] via-blue-500 to-purple-600 text-white text-sm font-bold rounded-full shadow-lg shadow-[var(--accent)]/25">
-                  <Star className="w-4 h-4" />
-                  FOUNDER & CEO
-                </span>
+                <span className="luxury-kicker">Founder & CEO</span>
               </motion.div>
             )}
 
@@ -188,20 +174,18 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
             >
               {/* Section Header */}
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-14 h-14 bg-gradient-to-br from-[var(--accent)] to-blue-600 rounded-2xl flex items-center justify-center">
-                  <Lightbulb className="w-7 h-7 text-white" />
+                <div className="w-14 h-14 bg-[var(--surface-highlight)] border border-[var(--border-accent)] rounded-2xl flex items-center justify-center">
+                  <Lightbulb className="w-7 h-7 text-[var(--accent)]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Founder&apos;s Vision</h2>
-                  <p className="text-[var(--text-muted)]">Why AKAAR 3D exists</p>
+                  <h2 className="text-2xl font-bold">Why AKAAR exists</h2>
+                  <p className="text-[var(--text-muted)]">In Akash&apos;s words</p>
                 </div>
               </div>
 
               {/* Vision Quote Card */}
               <div className="relative">
-                {/* Decorative glow */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-[var(--accent)]/20 via-blue-500/20 to-purple-600/20 rounded-3xl blur-2xl" />
-
+  
                 <div className="relative p-8 md:p-12 bg-[var(--bg-primary)] border border-[var(--accent)]/30 rounded-3xl">
                   <div className="absolute top-6 left-8 text-8xl text-[var(--accent)]/10 font-serif leading-none">&quot;</div>
                   <p className="text-xl md:text-2xl text-[var(--text-primary)] leading-relaxed relative z-10 pl-8">
@@ -239,11 +223,9 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-bold mb-4">
-                What Akash <span className="gradient-text">Built</span>
-              </h2>
+              <h2 className="text-3xl font-bold mb-4">What Akash built</h2>
               <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
-                From concept to execution, Akash designed and built the core systems that power AKAAR 3D
+                The systems running the studio — built by Akash from scratch.
               </p>
             </motion.div>
 
@@ -251,18 +233,18 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
               {[
                 {
                   icon: Target,
-                  title: "Automated Quoting Engine",
-                  description: "AI-powered algorithms that analyze 3D models and provide instant, accurate pricing based on geometry, material, and complexity."
+                  title: "Quote request system",
+                  description: "The form, review workflow, and admin tools that let customers submit files and get a real quote back from the team."
                 },
                 {
                   icon: Rocket,
-                  title: "Digital Storefront",
-                  description: "The customer-facing platform you're using right now—designed for a frictionless experience from upload to delivery."
+                  title: "Storefront and product pages",
+                  description: "The site you're on now — product listings, cart, checkout, and order management built on Next.js with Supabase."
                 },
                 {
                   icon: Users,
-                  title: "Team & Operations",
-                  description: "Assembled a team of experts and built the operational framework that enables AKAAR to deliver consistent quality at scale."
+                  title: "Studio infrastructure",
+                  description: "Recruited Mohit, Harish, and Tarveen, and built the operational setup that connects online orders to physical production."
                 }
               ].map((item, index) => (
                 <motion.div
@@ -411,18 +393,11 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
             className="max-w-4xl mx-auto text-center"
           >
             <div className="relative">
-              {/* Decorative */}
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 border border-[var(--accent)]/20 rounded-full" />
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 border border-[var(--accent)]/30 rounded-full" />
-
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Ready to Build Something <span className="gradient-text">Amazing</span>?
+                Start a build request.
               </h2>
               <p className="text-lg text-[var(--text-secondary)] mb-8 max-w-2xl mx-auto">
-                {member.isFounder
-                  ? "Join the hundreds of creators and engineers who trust AKAAR 3D to bring their ideas to life."
-                  : "Our team is ready to help bring your ideas to life. Get an instant quote for your 3D printing project today."
-                }
+                Upload your CAD file, pick a material, and tell us what the part needs to do. We'll review it and send you a quote within 48 hours.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
