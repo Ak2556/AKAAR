@@ -96,33 +96,27 @@ export function ProductCard({
             )}
           </div>
 
-          <div className="grid gap-px border-t border-[var(--border)] bg-[var(--border)] sm:grid-cols-[1.2fr_0.82fr_0.72fr_auto]">
-            <div className="bg-[var(--bg-secondary)] px-5 py-5">
-              <p className="display-font text-[1.65rem] uppercase leading-none text-[var(--text-primary)]">{name}</p>
-              <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--text-secondary)]">
-                {description || "Handcrafted in the AKAAR studio, Jaipur."}
-              </p>
-            </div>
-            <div className="bg-[var(--bg-secondary)] px-5 py-5">
-              <p className="luxury-metric-label">Starting from</p>
-              <p className="mt-3 text-lg font-semibold text-[var(--text-primary)]">{formatPrice(price)}</p>
-              {stockLabel ? (
-                <p className="mt-1.5 text-xs font-medium text-amber-400">{stockLabel}</p>
-              ) : null}
-            </div>
-            <div className="bg-[var(--bg-secondary)] px-5 py-5">
-              <p className="luxury-metric-label">Shipping</p>
-              <p className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-emerald-400">
-                <Truck className="h-3.5 w-3.5" />
-                Free
-              </p>
+          <div className="grid grid-cols-[1fr_auto] gap-px border-t border-[var(--border)] bg-[var(--border)]">
+            <div className="bg-[var(--bg-secondary)] px-4 py-4 sm:px-5 sm:py-5">
+              <p className="display-font text-xl uppercase leading-tight tracking-tight text-[var(--text-primary)] line-clamp-1">{name}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="text-sm font-semibold text-[var(--text-primary)]">{formatPrice(price)}</span>
+                {stockLabel ? (
+                  <span className="text-xs font-medium text-amber-400">{stockLabel}</span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-400">
+                    <Truck className="h-3 w-3" />
+                    Free shipping
+                  </span>
+                )}
+              </div>
             </div>
             <button
               onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-[var(--bg-secondary)] px-5 py-5 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-highlight)]"
+              className="flex flex-col items-center justify-center gap-1 bg-[var(--bg-secondary)] px-4 py-4 sm:px-5 transition-colors hover:bg-[var(--surface-highlight)]"
             >
-              <ShoppingCart className="h-4 w-4" />
-              Add
+              <ShoppingCart className="h-4 w-4 text-[var(--text-primary)]" />
+              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--text-primary)]">Add</span>
             </button>
           </div>
         </article>
