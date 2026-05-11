@@ -23,7 +23,7 @@ const materials = [
   { id: "pla", name: "PLA", description: "Reliable entry point for prototype reviews" },
   { id: "abs", name: "ABS", description: "Durable and heat-tolerant for functional parts" },
   { id: "petg", name: "PETG", description: "Balanced strength and flexibility" },
-  { id: "nylon", name: "Nylon PA12", description: "Engineering-grade strength and wear resistance" },
+  { id: "tpu", name: "TPU", description: "Flexible and impact-resistant for grips, seals, and living hinges" },
 ];
 
 const services = [

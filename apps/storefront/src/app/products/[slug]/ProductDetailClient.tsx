@@ -73,6 +73,11 @@ export function ProductDetailClient({
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [showViewer, setShowViewer] = useState(false);
   const [isCartButtonVisible, setIsCartButtonVisible] = useState(true);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  const handleImageError = (src: string) => {
+    setFailedImages((prev) => new Set(prev).add(src));
+  };
 
   // Refs for sticky bar IntersectionObserver and swipe gesture
   const cartButtonRef = useRef<HTMLButtonElement>(null);
@@ -232,8 +237,8 @@ export function ProductDetailClient({
                   {allImages.map((img, i) => (
                     <div
                       key={img}
-                      className={`absolute inset-4 sm:inset-5 rounded-[1rem] object-contain transition-opacity duration-150 ${
-                        !showViewer && selectedImageIdx === i
+                      className={`absolute inset-4 sm:inset-5 rounded-[1rem] transition-opacity duration-150 ${
+                        !showViewer && selectedImageIdx === i && !failedImages.has(img)
                           ? "opacity-100"
                           : "opacity-0 pointer-events-none"
                       }`}
@@ -245,6 +250,7 @@ export function ProductDetailClient({
                         sizes="(max-width: 1024px) 100vw, 560px"
                         className="object-contain"
                         priority={i === 0}
+                        onError={() => handleImageError(img)}
                       />
                     </div>
                   ))}
@@ -255,7 +261,7 @@ export function ProductDetailClient({
                       modelUrl={product.meshFile?.storagePath || product.meshFile?.s3Key}
                     />
                   ) : null}
-                  {!showViewer && allImages.length === 0 ? (
+                  {!showViewer && (allImages.length === 0 || failedImages.has(allImages[selectedImageIdx])) ? (
                     <div className="absolute inset-4 flex items-center justify-center rounded-[1rem] border border-[var(--border)] bg-[var(--bg-tertiary)] text-sm text-[var(--text-secondary)] sm:inset-5">
                       Preview unavailable
                     </div>
@@ -290,7 +296,7 @@ export function ProductDetailClient({
                           !showViewer && selectedImageIdx === i
                             ? "border-[var(--accent)]"
                             : "border-transparent hover:border-[var(--border-accent)]"
-                        }`}
+                        } ${failedImages.has(img) ? "opacity-30" : ""}`}
                       >
                         <Image
                           src={img}
@@ -298,6 +304,7 @@ export function ProductDetailClient({
                           fill
                           sizes="64px"
                           className="object-cover"
+                          onError={() => handleImageError(img)}
                         />
                       </button>
                     ))}

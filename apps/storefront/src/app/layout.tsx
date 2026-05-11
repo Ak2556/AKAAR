@@ -16,6 +16,7 @@ import { RuntimeCapabilitiesProvider } from "@/context/RuntimeCapabilitiesContex
 import { SupabaseProvider } from "@/context/SupabaseContext";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
 import { DevelopmentSetupBanner } from "@/components/layout/DevelopmentSetupBanner";
 
@@ -77,6 +78,7 @@ export default function RootLayout({
                         <main className="min-h-screen pb-16 md:pb-0">{children}</main>
                         <Footer />
                         <BottomNav />
+                        <WhatsAppButton />
                         <LazyCartDrawer />
                       </CartProvider>
                     </WishlistProvider>

@@ -79,9 +79,6 @@ export function HeroSection() {
                 <div className="absolute left-6 top-6 editorial-eyebrow">
                   Bambu Lab P1S
                 </div>
-                <div className="absolute right-6 top-6 rounded-full border border-[var(--border-accent)] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">
-                  3D Preview Ready
-                </div>
 
                 <div className="relative z-10 w-full pb-6">
                   <div className="mx-auto max-w-[360px] rounded-[1.6rem] border border-white/10 bg-[rgba(10,10,12,0.58)] px-5 py-5 backdrop-blur-md sm:max-w-[420px]">

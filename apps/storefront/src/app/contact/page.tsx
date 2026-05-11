@@ -59,6 +59,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -72,9 +73,20 @@ export default function ContactPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    setSubmitError(null);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error("Failed to send message");
+      setIsSubmitted(true);
+    } catch {
+      setSubmitError("Something went wrong. Please try emailing us directly at akaar3d.printing@gmail.com.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -244,6 +256,11 @@ export default function ContactPage() {
                 </div>
               </div>
 
+              {submitError && (
+                <p className="rounded-[1.2rem] border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+                  {submitError}
+                </p>
+              )}
               <Button type="submit" size="lg" disabled={isSubmitting}>
                 {isSubmitting ? (
                   "Sending..."
