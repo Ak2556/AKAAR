@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
@@ -392,11 +393,15 @@ export default function CheckoutPage() {
                     {featuredCartItem?.name || "Order"}
                   </p>
                   {featuredCartItem?.image ? (
-                    <img
-                      src={featuredCartItem.image}
-                      alt={featuredCartItem.name}
-                      className="hero-image-shadow absolute inset-x-5 bottom-5 top-16 h-[calc(100%-5.25rem)] w-[calc(100%-2.5rem)] rounded-[1.6rem] object-contain"
-                    />
+                    <div className="hero-image-shadow absolute inset-x-5 bottom-5 top-16 overflow-hidden rounded-[1.6rem]">
+                      <Image
+                        src={featuredCartItem.image}
+                        alt={featuredCartItem.name}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 1024px) 100vw, 52vw"
+                      />
+                    </div>
                   ) : (
                     <div className="absolute inset-x-5 bottom-5 top-16 overflow-hidden rounded-[1.6rem] border border-[var(--border)] bg-[linear-gradient(145deg,#14171c_0%,#232a33_52%,#101114_100%)]">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(214,178,114,0.18),transparent_28%),radial-gradient(circle_at_78%_76%,rgba(125,211,199,0.12),transparent_28%)]" />
@@ -709,9 +714,9 @@ export default function CheckoutPage() {
                         key={`${item.id}-${item.material}`}
                         className="flex gap-4 rounded-[1.4rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-4"
                       >
-                        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-[1rem] bg-[var(--bg-primary)]">
+                        <div className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-[1rem] bg-[var(--bg-primary)]">
                           {item.image ? (
-                            <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                            <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
                           ) : (
                             <Package className="h-5 w-5 text-[var(--text-muted)]" />
                           )}

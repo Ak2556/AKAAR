@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -54,10 +55,13 @@ export default function TeamPage() {
           <section className="luxury-card overflow-hidden rounded-[2rem]">
             <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[0.74fr_1.26fr]">
               <div className="relative min-h-[360px] overflow-hidden bg-[var(--bg-secondary)]">
-                <img
+                <Image
                   src={founder.image}
                   alt={founder.name}
-                  className="h-full w-full object-cover object-center"
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  priority
                 />
               </div>
               <div className="bg-[var(--bg-secondary)] px-6 py-7 sm:px-7 lg:px-8">
@@ -132,11 +136,13 @@ export default function TeamPage() {
                   <Link href={`/team/${member.slug}`} className="luxury-card group block overflow-hidden rounded-[1.8rem]">
                     <div className="grid gap-px bg-[var(--border)] lg:grid-cols-[0.34fr_0.66fr]">
                       <div className="relative min-h-[320px] overflow-hidden bg-[var(--bg-secondary)]">
-                        <img
+                        <Image
                           src={member.image}
                           alt=""
                           aria-hidden="true"
-                          className={`absolute inset-0 h-full w-full scale-110 object-cover ${isHarish ? "object-center opacity-32 blur-3xl" : "object-center opacity-45 blur-2xl"}`}
+                          fill
+                          className={`scale-110 object-cover ${isHarish ? "object-center opacity-32 blur-3xl" : "object-center opacity-45 blur-2xl"}`}
+                          sizes="(max-width: 1024px) 40vw, 25vw"
                         />
                         <div
                           className={`absolute inset-0 ${
@@ -145,10 +151,12 @@ export default function TeamPage() {
                               : "bg-[linear-gradient(180deg,rgba(10,10,12,0.02)_0%,rgba(10,10,12,0.12)_100%)]"
                           }`}
                         />
-                        <img
+                        <Image
                           src={member.image}
                           alt={member.name}
-                          className={`relative z-10 h-full w-full transition-transform duration-500 group-hover:scale-[1.03] ${isHarish ? "object-cover object-top scale-[1.01]" : "object-contain object-bottom"}`}
+                          fill
+                          className={`z-10 transition-transform duration-500 group-hover:scale-[1.03] ${isHarish ? "object-cover object-top scale-[1.01]" : "object-contain object-bottom"}`}
+                          sizes="(max-width: 1024px) 40vw, 25vw"
                         />
                       </div>
                       <div className="bg-[var(--bg-secondary)] px-5 py-5 sm:px-6 sm:py-6">
