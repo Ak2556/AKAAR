@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Package, ChevronRight, Search, Filter } from 'lucide-react'
+import { Package, Truck, ChevronRight, Search, Filter } from 'lucide-react'
 
 interface OrderItem {
   id: string
