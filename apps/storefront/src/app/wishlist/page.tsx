@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { Heart, Trash2, ShoppingCart, ArrowRight, Package } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -112,9 +113,21 @@ export default function WishlistPage() {
                           {item.category}
                         </span>
                       ) : null}
-                      <div className="flex h-full items-center justify-center">
-                        <Package className="h-16 w-16 text-[var(--text-muted)]" />
-                      </div>
+                      {item.imageUrl ? (
+                        <div className="absolute inset-0">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                            className="object-contain p-6"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Package className="h-16 w-16 text-[var(--text-muted)]" />
+                        </div>
+                      )}
                     </div>
                   </Link>
 

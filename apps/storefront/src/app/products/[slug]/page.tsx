@@ -1,8 +1,47 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProductDetailClient, type ProductData } from "./ProductDetailClient";
 
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select("name, short_description, image_url")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
+
+  if (!data) return {};
+
+  const title = `${data.name} | AKAAR 3D`;
+  const description = (data.short_description as string | null) ?? "Handcrafted 3D printed part from the AKAAR studio, Jaipur.";
+  const imageUrl = data.image_url as string | null;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: imageUrl ? [{ url: imageUrl, alt: data.name as string }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+  };
+}
 
 function mapProduct(p: Record<string, unknown>): ProductData {
   const mf = p.mesh_files as Record<string, unknown> | null;

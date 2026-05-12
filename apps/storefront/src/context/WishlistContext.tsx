@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 interface WishlistItem {
   id: string;
@@ -46,6 +47,18 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("akaar-wishlist", JSON.stringify(items));
     }
   }, [items, isInitialized]);
+
+  // Clear wishlist when user signs out (privacy: don't leak between sessions)
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setItems([]);
+        localStorage.removeItem("akaar-wishlist");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const addItem = (item: WishlistItem) => {
     setItems((prev) => {

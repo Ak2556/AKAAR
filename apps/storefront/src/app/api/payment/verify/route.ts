@@ -29,10 +29,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 })
     }
 
-    // ── 2. Create order record in DB ────────────────────────────────────
+    // ── 2. Idempotency — return existing order if payment already processed ─
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     const admin = createAdminClient()
+
+    const { data: existingOrder } = await admin
+      .from('orders')
+      .select('id, order_number')
+      .eq('razorpay_payment_id', razorpay_payment_id)
+      .maybeSingle()
+
+    if (existingOrder) {
+      return NextResponse.json({
+        success: true,
+        orderNumber: existingOrder.order_number,
+        orderId: existingOrder.id,
+      })
+    }
 
     const {
       items = [],

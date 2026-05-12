@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
-// Supabase handles token verification automatically via the reset-password redirect.
-// This endpoint is kept for backwards compatibility but is no longer needed.
+// Token verification is now handled client-side via supabase.auth.verifyOtp()
+// This route is kept so existing bookmarked URLs don't 404.
 export async function GET() {
-  return NextResponse.json({ message: 'Use Supabase password reset flow' }, { status: 200 })
+  return NextResponse.json({ message: 'Use the reset-password page directly.' }, { status: 200 })
 }

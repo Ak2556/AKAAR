@@ -83,7 +83,7 @@ export function ProductDetailClient({
   const cartButtonRef = useRef<HTMLButtonElement>(null);
   const touchStartX = useRef<number>(0);
 
-  const price = product.price ? Number(product.price) : 0;
+  const price = product.price != null ? Number(product.price) : null;
   const isWishlisted = isInWishlist(product.id);
 
   const allImages = useMemo(() => {
@@ -106,6 +106,7 @@ export function ProductDetailClient({
   }, []);
 
   const handleAddToCart = () => {
+    if (price == null) return;
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
     addItem(
       { id: product.id, name: product.name, slug: product.slug, price, image: allImages[0] || undefined },
@@ -119,7 +120,7 @@ export function ProductDetailClient({
       id: product.id,
       name: product.name,
       slug: product.slug,
-      price,
+      price: price ?? 0,
       category: product.category || undefined,
       imageUrl: allImages[0] || undefined,
     });
@@ -349,7 +350,7 @@ export function ProductDetailClient({
                   <div className="bg-[var(--bg-secondary)] px-5 py-5">
                     <p className="luxury-metric-label">Starting price</p>
                     <p className="mt-3 text-3xl font-semibold text-[var(--text-primary)]">
-                      {formatPrice(price)}
+                      {price != null ? formatPrice(price) : "Price on request"}
                     </p>
                   </div>
                   <div className="bg-[var(--bg-secondary)] px-5 py-5">
@@ -373,9 +374,9 @@ export function ProductDetailClient({
                 </div>
 
                 <div className="mt-6 flex items-center gap-3 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/8 px-4 py-3">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
                   <p className="text-xs font-medium text-emerald-400">
-                    In stock · Ships within 48 hours if ordered today
+                    Ships within 48 hours of order confirmation
                   </p>
                 </div>
 
@@ -385,6 +386,7 @@ export function ProductDetailClient({
                     variant="primary"
                     size="lg"
                     className="w-full"
+                    disabled={price == null}
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
@@ -488,7 +490,7 @@ export function ProductDetailClient({
                     <div className="bg-[var(--bg-secondary)] px-5 py-5">
                       <p className="luxury-metric-label">Starting from</p>
                       <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">
-                        {formatPrice(Number(related.price) || 0)}
+                        {related.price != null ? formatPrice(Number(related.price)) : "—"}
                       </p>
                     </div>
                   </div>
@@ -511,7 +513,7 @@ export function ProductDetailClient({
               {product.name}
             </p>
             <p className="mt-0.5 text-base font-semibold text-[var(--text-primary)]">
-              {formatPrice(price)}
+              {price != null ? formatPrice(price) : "Price on request"}
             </p>
           </div>
           <div className="input-stepper flex shrink-0 items-center overflow-hidden rounded-full">
@@ -529,7 +531,7 @@ export function ProductDetailClient({
               +
             </button>
           </div>
-          <Button variant="primary" size="sm" onClick={handleAddToCart} className="shrink-0">
+          <Button variant="primary" size="sm" onClick={handleAddToCart} disabled={price == null} className="shrink-0">
             <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
             Add
           </Button>

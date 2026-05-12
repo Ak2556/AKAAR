@@ -69,7 +69,6 @@ export function HeroSection() {
                     alt="Bambu Lab P1S"
                     fill
                     priority
-                    unoptimized
                     sizes="(max-width: 1024px) 100vw, 560px"
                     className="object-cover"
                   />

@@ -13,11 +13,11 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
 
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,32 +26,35 @@ function ResetPasswordForm() {
   const [verifying, setVerifying] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [tokenValid, setTokenValid] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
 
+  // Exchange the Supabase recovery token for a live session
   useEffect(() => {
-    if (!token) {
+    const tokenHash = searchParams.get("token_hash");
+    const type = searchParams.get("type");
+
+    if (!tokenHash || type !== "recovery") {
+      setError("Invalid or missing reset link. Please request a new one.");
       setVerifying(false);
-      setError("Invalid or missing reset token");
       return;
     }
 
-    // Verify token validity
-    fetch(`/api/auth/verify-reset-token?token=${token}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid) {
-          setTokenValid(true);
+    const supabase = createClient();
+    supabase.auth
+      .verifyOtp({ token_hash: tokenHash, type: "recovery" })
+      .then(({ error: otpError }) => {
+        if (otpError) {
+          setError(
+            otpError.message === "Token has expired or is invalid"
+              ? "This reset link has expired. Please request a new one."
+              : otpError.message
+          );
         } else {
-          setError(data.error || "This reset link is invalid or has expired");
+          setSessionReady(true);
         }
       })
-      .catch(() => {
-        setError("Failed to verify reset token");
-      })
-      .finally(() => {
-        setVerifying(false);
-      });
-  }, [token]);
+      .finally(() => setVerifying(false));
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,31 +64,20 @@ function ResetPasswordForm() {
       setError("Password must be at least 8 characters");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
     setLoading(true);
-
     try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
-      }
-
+      const supabase = createClient();
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) throw updateError;
       setSuccess(true);
       setTimeout(() => router.push("/auth/signin"), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -115,7 +107,7 @@ function ResetPasswordForm() {
           </div>
           <h1 className="text-2xl font-bold mb-4">Password Reset!</h1>
           <p className="text-[var(--text-secondary)] mb-6">
-            Your password has been successfully reset. You'll be redirected to
+            Your password has been successfully reset. You&apos;ll be redirected to
             sign in shortly.
           </p>
           <Link href="/auth/signin">
@@ -126,7 +118,7 @@ function ResetPasswordForm() {
     );
   }
 
-  if (!tokenValid) {
+  if (!sessionReady) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 py-12">
         <motion.div

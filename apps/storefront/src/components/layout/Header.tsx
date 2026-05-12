@@ -118,6 +118,7 @@ export function Header() {
 
               <Link
                 href="/wishlist"
+                aria-label="Wishlist"
                 className="relative luxury-pill rounded-full p-2.5 hover:text-[var(--text-primary)]"
               >
                 <Heart className="h-4 w-4" />
@@ -130,6 +131,7 @@ export function Header() {
 
               <button
                 onClick={openCart}
+                aria-label="Open cart"
                 className="relative luxury-pill rounded-full p-2.5 hover:text-[var(--text-primary)]"
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -232,12 +234,14 @@ export function Header() {
               </button>
               <button
                 onClick={() => setIsSearchOpen(true)}
+                aria-label="Search"
                 className="luxury-pill rounded-full p-2.5"
               >
                 <Search className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setIsOpen((value) => !value)}
+                aria-label={isOpen ? "Close menu" : "Open menu"}
                 className="luxury-pill rounded-full p-2.5"
               >
                 {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

@@ -42,10 +42,27 @@ export const viewport = {
   viewportFit: "cover",
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
+const defaultOgImage = `${siteUrl}/og-default.jpg`;
+
 export const metadata: Metadata = {
   title: "AKAAR 3D | Giving AKAAR to Ideas | 3D Printing Services in Jaipur",
   description: "AKAAR 3D gives shape to your ideas. From CAD to physical part in days. Professional 3D printing services in Jaipur, Rajasthan. PLA, PETG, ABS materials. Reviewed quote requests for engineers and hardware startups.",
   keywords: ["3D printing", "3D printing Jaipur", "rapid prototyping", "FDM printing", "PLA printing", "PETG printing", "ABS printing", "CAD to part", "quote request", "hardware startups", "AKAAR 3D", "3D printing India", "custom 3D prints"],
+  openGraph: {
+    type: "website",
+    siteName: "AKAAR 3D",
+    title: "AKAAR 3D | Giving AKAAR to Ideas",
+    description: "Professional 3D printing studio in Jaipur. Upload your CAD file, pick a material, and get a reviewed quote within 48 hours.",
+    images: [{ url: defaultOgImage, width: 1200, height: 630, alt: "AKAAR 3D Studio" }],
+    url: siteUrl,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AKAAR 3D | Giving AKAAR to Ideas",
+    description: "Professional 3D printing studio in Jaipur. Upload your CAD file, pick a material, and get a reviewed quote within 48 hours.",
+    images: [defaultOgImage],
+  },
 };
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export interface CartItem {
   id: string;
@@ -51,6 +52,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("akaar-cart", JSON.stringify(items));
     }
   }, [items, isInitialized]);
+
+  // Clear cart when user signs out (privacy: don't leak one user's cart to the next)
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setItems([]);
+        localStorage.removeItem("akaar-cart");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {

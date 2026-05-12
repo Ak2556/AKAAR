@@ -19,18 +19,6 @@ interface ProductGridProps {
   viewMode?: "grid" | "list";
 }
 
-function getBadge(index: number): string | undefined {
-  if (index === 0) return "Bestseller";
-  if (index === 1) return "Popular";
-  if (index > 1 && index % 4 === 2) return "Limited run";
-  return undefined;
-}
-
-function getStockLabel(index: number): string | undefined {
-  if (index === 0) return "Selling fast";
-  if (index % 3 === 1) return "Limited stock";
-  return undefined;
-}
 
 export function ProductGrid({ products, loading = false, viewMode = "grid" }: ProductGridProps) {
   if (loading) {
@@ -93,13 +81,9 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map((product, index) => (
+      {products.map((product) => (
         <div key={product.id}>
-          <ProductCard
-            {...product}
-            badge={getBadge(index)}
-            stockLabel={getStockLabel(index)}
-          />
+          <ProductCard {...product} />
         </div>
       ))}
     </div>
