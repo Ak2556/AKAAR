@@ -58,6 +58,7 @@ export default async function AdminProductEditPage({ params }: Props) {
             price: product.price,
             isActive: product.is_active,
             imageUrl: product.image_url ?? null,
+            images: (product.images as string[] | null) ?? [],
             modelUrl: (product.mesh_files as { storage_path?: string } | null)?.storage_path ?? null,
             modelFilename: (product.mesh_files as { original_filename?: string } | null)?.original_filename ?? null,
           }}

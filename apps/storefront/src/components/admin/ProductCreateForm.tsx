@@ -62,7 +62,7 @@ export function ProductCreateForm({
   const [success, setSuccess] = useState<{ name: string; slug: string } | null>(
     null
   );
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [modelFile, setModelFile] = useState<File | null>(null);
 
   const isSubmitting = stage !== "idle" && stage !== "done";
@@ -93,13 +93,20 @@ export function ProductCreateForm({
       const supabase = createClient();
       const timestamp = Date.now();
 
-      // ── 1. Upload preview image (optional) ──────────────────────────────
+      // ── 1. Upload preview images (optional, multiple) ───────────────────
       let imageUrl: string | null = null;
-      if (imageFile) {
+      let imageUrls: string[] = [];
+      if (imageFiles.length > 0) {
         setStage("uploading-image");
-        const ext = imageFile.name.split(".").pop() ?? "jpg";
-        const path = `images/${timestamp}-${slugify(name)}.${ext}`;
-        imageUrl = await uploadToStorage(supabase, "product-assets", path, imageFile);
+        imageUrls = await Promise.all(
+          imageFiles.map((file, i) => {
+            const ext = file.name.split(".").pop() ?? "jpg";
+            const suffix = i === 0 ? "" : `-${i + 1}`;
+            const path = `images/${timestamp}-${slugify(name)}${suffix}.${ext}`;
+            return uploadToStorage(supabase, "product-assets", path, file);
+          })
+        );
+        imageUrl = imageUrls[0];
       }
 
       // ── 2. Upload 3D model (optional) ────────────────────────────────────
@@ -131,6 +138,7 @@ export function ProductCreateForm({
           price,
           isActive: isActiveRaw === "true",
           imageUrl,
+          images: imageUrls.length > 0 ? imageUrls : undefined,
           modelUrl,
           modelFilename,
           modelSize,
@@ -143,7 +151,7 @@ export function ProductCreateForm({
       setSuccess({ name: data.product.name, slug: data.product.slug });
       setStage("done");
       form.reset();
-      setImageFile(null);
+      setImageFiles([]);
       setModelFile(null);
       router.refresh();
     } catch (err) {
@@ -277,25 +285,50 @@ export function ProductCreateForm({
         </div>
 
         <div className="grid lg:grid-cols-2 gap-4">
-          {/* Image upload */}
-          <label className="block rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 cursor-pointer hover:border-[var(--accent)]/60 transition-colors">
-            <span className="flex items-center gap-2 text-sm font-medium mb-2">
+          {/* Image upload — multiple */}
+          <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 space-y-3">
+            <span className="flex items-center gap-2 text-sm font-medium">
               <Upload className="w-4 h-4 text-[var(--accent)]" />
-              Preview Image
+              Preview Images
             </span>
-            <p className="text-xs text-[var(--text-secondary)] mb-3">
-              Optional. PNG, JPG, WEBP, or AVIF up to 10 MB.
+            <p className="text-xs text-[var(--text-secondary)]">
+              Optional. Select multiple photos — the first becomes the cover. PNG, JPG, WEBP, AVIF up to 10 MB each.
             </p>
-            <input
-              type="file"
-              accept=".png,.jpg,.jpeg,.webp,.avif"
-              className="hidden"
-              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            />
-            <span className="text-sm text-[var(--text-muted)]">
-              {imageFile ? imageFile.name : "Choose an image file"}
-            </span>
-          </label>
+
+            {imageFiles.length > 0 && (
+              <ul className="space-y-1">
+                {imageFiles.map((f, i) => (
+                  <li key={i} className="flex items-center justify-between gap-2 text-xs text-[var(--text-secondary)] rounded-lg bg-[var(--bg-secondary)] px-3 py-2">
+                    <span className="truncate flex-1">{f.name}</span>
+                    {i === 0 && <span className="shrink-0 rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[var(--accent)] text-[10px]">cover</span>}
+                    <button
+                      type="button"
+                      onClick={() => setImageFiles((prev) => prev.filter((_, j) => j !== i))}
+                      className="shrink-0 text-[var(--text-muted)] hover:text-red-400 transition-colors ml-1"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--accent)] hover:underline">
+              <Upload className="w-3.5 h-3.5" />
+              {imageFiles.length > 0 ? "Add more photos" : "Choose photos"}
+              <input
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp,.avif"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  const picked = Array.from(e.target.files ?? []);
+                  setImageFiles((prev) => [...prev, ...picked]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
 
           {/* Model upload */}
           <label className="block rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 cursor-pointer hover:border-[var(--accent)]/60 transition-colors">

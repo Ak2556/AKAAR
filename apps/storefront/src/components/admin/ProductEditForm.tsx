@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Upload, CheckCircle2, Trash2 } from "lucide-react";
+import { Loader2, Upload, CheckCircle2, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -16,6 +16,7 @@ interface Product {
   price: number;
   isActive: boolean;
   imageUrl: string | null;
+  images: string[];
   modelUrl: string | null;
   modelFilename: string | null;
 }
@@ -56,12 +57,20 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  // New file selections (null = keep existing)
-  const [newImageFile, setNewImageFile] = useState<File | null>(null);
-  const [newModelFile, setNewModelFile] = useState<File | null>(null);
+  // Existing images — starts from product.images (or falls back to imageUrl)
+  const initialImages = product.images?.length
+    ? product.images
+    : product.imageUrl
+    ? [product.imageUrl]
+    : [];
+  const [existingImages, setExistingImages] = useState<string[]>(initialImages);
+  const [removedUrls, setRemovedUrls] = useState<Set<string>>(new Set());
 
-  // Clear-flags (user clicked ✕ to remove existing asset)
-  const [clearImage, setClearImage] = useState(false);
+  // New image files the admin is adding
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+
+  // 3D model state (single file, unchanged logic)
+  const [newModelFile, setNewModelFile] = useState<File | null>(null);
   const [clearModel, setClearModel] = useState(false);
 
   const isSubmitting = stage !== "idle" && stage !== "done";
@@ -90,16 +99,22 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
       const supabase = createClient();
       const timestamp = Date.now();
 
-      // ── Upload new image if chosen ──────────────────────────────────────
-      let imageUrl: string | null | undefined = undefined; // undefined = no change
-      if (newImageFile) {
+      // ── Upload new images if any were added ─────────────────────────────
+      const keptImages = existingImages.filter((u) => !removedUrls.has(u));
+      let newlyUploadedUrls: string[] = [];
+      if (newImageFiles.length > 0) {
         setStage("uploading-image");
-        const ext = newImageFile.name.split(".").pop() ?? "jpg";
-        const path = `images/${timestamp}-${slugify(name)}.${ext}`;
-        imageUrl = await uploadToStorage(supabase, "product-assets", path, newImageFile);
-      } else if (clearImage) {
-        imageUrl = null;
+        newlyUploadedUrls = await Promise.all(
+          newImageFiles.map((file, i) => {
+            const ext = file.name.split(".").pop() ?? "jpg";
+            const suffix = i === 0 && keptImages.length === 0 ? "" : `-${timestamp}-${i + 1}`;
+            const path = `images/${timestamp}-${slugify(name)}${suffix}.${ext}`;
+            return uploadToStorage(supabase, "product-assets", path, file);
+          })
+        );
       }
+      const finalImages = [...keptImages, ...newlyUploadedUrls];
+      const imageUrl: string | null = finalImages[0] ?? null;
 
       // ── Upload new model if chosen ──────────────────────────────────────
       let modelUrl: string | null | undefined = undefined;
@@ -129,10 +144,10 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
         description: (fd.get("description") as string)?.trim() || null,
         price,
         isActive: fd.get("isActive") === "true",
+        imageUrl,
+        images: finalImages,
       };
 
-      // Only include asset fields if they changed
-      if (imageUrl !== undefined) body.imageUrl = imageUrl;
       if (modelUrl !== undefined) {
         body.modelUrl = modelUrl;
         body.modelFilename = modelFilename ?? null;
@@ -149,9 +164,11 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
 
       setSaved(true);
       setStage("done");
-      setNewImageFile(null);
+      // Update local state to reflect what was just saved
+      setExistingImages(finalImages);
+      setRemovedUrls(new Set());
+      setNewImageFiles([]);
       setNewModelFile(null);
-      setClearImage(false);
       setClearModel(false);
       router.refresh();
     } catch (err) {
@@ -160,8 +177,6 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
     }
   };
 
-  // Determine what image/model is "currently active" for display
-  const currentImage = clearImage ? null : (newImageFile ? URL.createObjectURL(newImageFile) : product.imageUrl);
   const currentModelLabel = clearModel
     ? "No model"
     : newModelFile
@@ -270,41 +285,73 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
 
       {/* ── Assets ─────────────────────────────────────────────────────── */}
       <div className="grid lg:grid-cols-2 gap-4">
-        {/* Preview Image */}
+        {/* Preview Images — multi-photo */}
         <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-primary)] p-5 space-y-3">
           <span className="flex items-center gap-2 text-sm font-medium">
             <Upload className="w-4 h-4 text-[var(--accent)]" />
-            Preview Image
+            Preview Images
           </span>
 
-          {currentImage && (
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-[var(--border)]">
-              <img src={currentImage} alt="preview" className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => { setClearImage(true); setNewImageFile(null); }}
-                className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-red-500 transition-colors"
-                title="Remove image"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
+          {/* Existing images grid */}
+          {existingImages.filter((u) => !removedUrls.has(u)).length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {existingImages.map((url) =>
+                removedUrls.has(url) ? null : (
+                  <div key={url} className="relative aspect-square rounded-lg overflow-hidden border border-[var(--border)] group">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setRemovedUrls((prev) => new Set(prev).add(url))}
+                      className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all"
+                      title="Remove photo"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    {url === existingImages.filter((u) => !removedUrls.has(u))[0] && (
+                      <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] text-white">cover</span>
+                    )}
+                  </div>
+                )
+              )}
             </div>
+          )}
+
+          {/* New files queued for upload */}
+          {newImageFiles.length > 0 && (
+            <ul className="space-y-1">
+              {newImageFiles.map((f, i) => (
+                <li key={i} className="flex items-center justify-between gap-2 text-xs text-[var(--text-secondary)] rounded-lg bg-[var(--bg-secondary)] px-3 py-2">
+                  <span className="truncate flex-1">{f.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setNewImageFiles((prev) => prev.filter((_, j) => j !== i))}
+                    className="shrink-0 text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
 
           <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--accent)] hover:underline">
             <Upload className="w-3.5 h-3.5" />
-            {currentImage ? "Replace image" : "Upload image"}
+            {existingImages.filter((u) => !removedUrls.has(u)).length > 0 || newImageFiles.length > 0
+              ? "Add more photos"
+              : "Upload photos"}
             <input
               type="file"
               accept=".png,.jpg,.jpeg,.webp,.avif"
+              multiple
               className="hidden"
               onChange={(e) => {
-                setNewImageFile(e.target.files?.[0] ?? null);
-                setClearImage(false);
+                const picked = Array.from(e.target.files ?? []);
+                setNewImageFiles((prev) => [...prev, ...picked]);
+                e.target.value = "";
               }}
             />
           </label>
-          <p className="text-xs text-[var(--text-muted)]">PNG, JPG, WEBP or AVIF · max 10 MB</p>
+          <p className="text-xs text-[var(--text-muted)]">PNG, JPG, WEBP or AVIF · max 10 MB each · first photo = cover</p>
         </div>
 
         {/* 3D Model */}
