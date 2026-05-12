@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = buildMetadata(
+  "3D Printing Services & Capabilities | AKAAR 3D",
+  "FDM printing in PLA, ABS, TPU, and PETG. Custom geometries, functional parts, and rapid prototyping from AKAAR's studio in Jaipur.",
+  "/services"
+);
 import {
   ArrowRight,
   CheckCircle,

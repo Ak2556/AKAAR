@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { ArrowRight, Truck, Upload, Zap } from "lucide-react";
 import Link from "next/link";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { getCatalog } from "@/lib/catalog";
 import { ProductsShell } from "./ProductsShell";
+
+export const metadata: Metadata = buildMetadata(
+  "Shop 3D Printed Products | AKAAR 3D",
+  "Browse handcrafted 3D printed products from AKAAR's studio in Jaipur. FDM printed in PLA, ABS, TPU, and PETG. Ready to ship across India.",
+  "/products"
+);
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const PRODUCTS_PER_PAGE = 12;

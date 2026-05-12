@@ -72,11 +72,53 @@ export default function RootLayout({
 }>) {
   const runtimeCapabilities = getRuntimeCapabilities();
 
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "AKAAR 3D",
+        url: siteUrl,
+        logo: `${siteUrl}/logo.svg`,
+        email: "akaar3d.printing@gmail.com",
+        telephone: "+91-7300431301",
+        sameAs: [
+          "https://www.instagram.com/akaar3d/",
+          "https://www.linkedin.com/company/akaar3d/",
+        ],
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": `${siteUrl}/#business`,
+        name: "AKAAR 3D",
+        url: siteUrl,
+        telephone: "+91-7300431301",
+        email: "akaar3d.printing@gmail.com",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "9-B, 69, Block-B, Ring Road, Boorthal",
+          addressLocality: "Jaipur",
+          addressRegion: "Rajasthan",
+          postalCode: "303012",
+          addressCountry: "IN",
+        },
+        openingHours: "Mo-Sa 10:00-19:00",
+        priceRange: "₹₹",
+        description: "Professional 3D printing studio in Jaipur offering FDM printing in PLA, ABS, TPU, and PETG. Custom geometries, rapid prototyping, and product parts shipped across India.",
+      },
+    ],
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeInitializer />
         <SettingsInitializer />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
       </head>
       <body
         className={`${manrope.variable} ${syne.variable} ${ibmPlexMono.variable} antialiased bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-200`}

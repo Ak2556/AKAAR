@@ -21,6 +21,7 @@ export async function generateMetadata({
 
   if (!data) return {};
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
   const title = `${data.name} | AKAAR 3D`;
   const description = (data.short_description as string | null) ?? "Handcrafted 3D printed part from the AKAAR studio, Jaipur.";
   const imageUrl = data.image_url as string | null;
@@ -28,6 +29,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `${siteUrl}/products/${slug}` },
     openGraph: {
       title,
       description,
@@ -89,10 +91,41 @@ export default async function ProductDetailPage({
     .neq("id", raw.id)
     .limit(4);
 
+  const product = mapProduct(raw as Record<string, unknown>);
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription ?? product.description ?? undefined,
+    image: product.imageUrl ?? undefined,
+    url: `${BASE_URL}/products/${product.slug}`,
+    brand: { "@type": "Brand", name: "AKAAR 3D" },
+    ...(product.price != null
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: product.price,
+            priceCurrency: "INR",
+            availability: "https://schema.org/InStock",
+            url: `${BASE_URL}/products/${product.slug}`,
+            seller: { "@type": "Organization", name: "AKAAR 3D" },
+          },
+        }
+      : {}),
+  };
+
   return (
-    <ProductDetailClient
-      product={mapProduct(raw as Record<string, unknown>)}
-      relatedProducts={(relatedRaw ?? []).map((r) => mapProduct(r as Record<string, unknown>))}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <ProductDetailClient
+        product={product}
+        relatedProducts={(relatedRaw ?? []).map((r) => mapProduct(r as Record<string, unknown>))}
+      />
+    </>
   );
 }

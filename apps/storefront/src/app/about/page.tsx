@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = buildMetadata(
+  "About Our Studio | AKAAR 3D",
+  "Meet the team behind AKAAR 3D — a 3D printing studio in Jaipur building products and custom parts for engineers and hardware startups across India.",
+  "/about"
+);
 import {
   ArrowRight,
   CheckCircle,

@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react";
+
+export const metadata: Metadata = buildMetadata(
+  "Our Team | AKAAR 3D",
+  "Meet the four people running AKAAR 3D from Jaipur — covering engineering, design, manufacturing, and fulfilment.",
+  "/team"
+);
 import { Button } from "@/components/ui/Button";
 import { teamMembers } from "@/lib/team-data";
 import { BRAND_TAGLINE } from "@/lib/brand";
