@@ -20,7 +20,7 @@ const PRODUCTS = [
     name: "Ganesha Temple Mandap",
     slug: "ganesha-temple-mandap",
     category: "Figurine",
-    price: 599,
+    price: 899,
     shortDescription:
       "Saffron mandap with white Ganesha inside — a complete two-piece altar scene, gift-ready.",
     description:
