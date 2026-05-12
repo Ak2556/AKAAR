@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Center, Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { Box, FileImage, FileQuestion } from "lucide-react";
@@ -30,6 +30,13 @@ export function ProductViewer3D({
     return null;
   }, [modelUrl]);
 
+  const [modelLoaded, setModelLoaded] = useState(false);
+
+  // Reset loading state when model URL changes
+  useEffect(() => {
+    setModelLoaded(false);
+  }, [interactiveModelUrl]);
+
   if (interactiveModelUrl) {
     return (
       <div className="relative aspect-square bg-[var(--bg-tertiary)] rounded-xl overflow-hidden border border-[var(--border)]">
@@ -39,12 +46,23 @@ export function ProductViewer3D({
           <directionalLight position={[5, 8, 6]} intensity={1.5} />
           <Suspense fallback={null}>
             <Center>
-              <PreviewModel modelUrl={interactiveModelUrl} />
+              <PreviewModel modelUrl={interactiveModelUrl} onLoaded={() => setModelLoaded(true)} />
             </Center>
             <Environment preset="city" />
           </Suspense>
           <OrbitControls enablePan={false} minDistance={1.5} maxDistance={8} />
         </Canvas>
+
+        {/* Loading spinner — visible until Suspense resolves */}
+        {!modelLoaded && (
+          <div
+            aria-label="Loading 3D model"
+            className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]/80 z-10"
+          >
+            <div className="h-10 w-10 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+          </div>
+        )}
+
         <div className="absolute left-4 bottom-4 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-primary)]/85 backdrop-blur text-xs text-[var(--text-secondary)] flex items-center gap-2">
           <Box className="w-4 h-4 text-[var(--accent)]" />
           Interactive 3D preview
@@ -89,9 +107,21 @@ export function ProductViewer3D({
   );
 }
 
-function PreviewModel({ modelUrl }: { modelUrl: string }) {
+function PreviewModel({
+  modelUrl,
+  onLoaded,
+}: {
+  modelUrl: string;
+  onLoaded: () => void;
+}) {
   const { scene } = useGLTF(modelUrl);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
+
+  // Once useGLTF resolves (Suspense lifts), signal the parent
+  useEffect(() => {
+    onLoaded();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <primitive object={clonedScene} scale={1} />;
 }

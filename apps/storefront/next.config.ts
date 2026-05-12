@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const securityHeaders = [
   {
@@ -54,6 +55,8 @@ const nextConfig: NextConfig = {
     return [
       { source: '/team/mohit-sheravat', destination: '/team/mohit-sherawat', permanent: true },
       { source: '/team/tarveen-sheravat', destination: '/team/tarveen-sherawat', permanent: true },
+      // Legacy OG image path — now served by the programmatic /og route
+      { source: '/og-default.jpg', destination: '/og', permanent: false },
     ]
   },
   async headers() {
@@ -66,7 +69,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default bundleAnalyzer(withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
@@ -84,4 +91,4 @@ export default withSentryConfig(nextConfig, {
 
   // Enables automatic instrumentation of Vercel Cron Monitors
   automaticVercelMonitors: true,
-});
+}));

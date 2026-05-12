@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@akaar/db": "workspace:*",
-    "zod": "^3.24.0",
-    "@sentry/nextjs": "^8.53.0",
     "@aws-sdk/client-s3": "^3.996.0",
     "@aws-sdk/s3-request-presigner": "^3.996.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@sentry/nextjs": "^8.53.0",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.49.4",
     "@types/nodemailer": "^7.0.11",
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.3",
@@ -28,10 +29,10 @@
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.1",
-    "@supabase/supabase-js": "^2.49.4",
-    "@supabase/ssr": "^0.6.1"
+    "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

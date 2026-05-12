@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.jpg`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og`;
 const SITE_NAME = "AKAAR 3D";
 
 /**

@@ -45,6 +45,7 @@ export function BottomNav() {
         {/* Cart tab — button not link so it opens the drawer */}
         <button
           onClick={openCart}
+          aria-label={`Shopping cart, ${totalItems} item${totalItems !== 1 ? "s" : ""}`}
           className="relative flex flex-1 flex-col items-center justify-center gap-1 py-3 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
         >
           <span className="relative">

@@ -86,6 +86,9 @@ export default function FAQPage() {
                   className="border border-[var(--border)] rounded-xl overflow-hidden"
                 >
                   <button
+                    id={`faq-question-${index}`}
+                    aria-expanded={openIndex === index}
+                    aria-controls={`faq-answer-${index}`}
                     onClick={() => setOpenIndex(openIndex === index ? null : index)}
                     className="w-full flex items-center justify-between p-6 text-left hover:bg-[var(--bg-secondary)] transition-colors"
                   >
@@ -97,6 +100,9 @@ export default function FAQPage() {
                     />
                   </button>
                   <div
+                    id={`faq-answer-${index}`}
+                    role="region"
+                    aria-labelledby={`faq-question-${index}`}
                     className={`overflow-hidden transition-all duration-200 ease-out ${
                       openIndex === index ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     }`}

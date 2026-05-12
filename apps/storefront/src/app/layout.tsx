@@ -43,7 +43,7 @@ export const viewport = {
 };
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
-const defaultOgImage = `${siteUrl}/og-default.jpg`;
+const defaultOgImage = `${siteUrl}/og`;
 
 export const metadata: Metadata = {
   title: "AKAAR 3D | Giving AKAAR to Ideas | 3D Printing Services in Jaipur",
@@ -123,6 +123,13 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${syne.variable} ${ibmPlexMono.variable} antialiased bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-200`}
       >
+        {/* Skip-to-content — WCAG 2.4.1 */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--accent)] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[var(--bg-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2"
+        >
+          Skip to main content
+        </a>
         <ThemeProvider>
           <RuntimeCapabilitiesProvider capabilities={runtimeCapabilities}>
             <SupabaseProvider>
@@ -134,7 +141,7 @@ export default function RootLayout({
                         <ScrollProgress />
                         <Header />
                         <DevelopmentSetupBanner capabilities={runtimeCapabilities} />
-                        <main className="min-h-screen pb-16 md:pb-0">{children}</main>
+                        <main id="main-content" className="min-h-screen pb-16 md:pb-0">{children}</main>
                         <Footer />
                         <BottomNav />
                         <WhatsAppButton />

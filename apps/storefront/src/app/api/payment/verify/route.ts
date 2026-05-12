@@ -3,8 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { nanoid } from 'nanoid'
 import crypto from 'crypto'
+import { withRateLimit, rateLimitPresets } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // ── Rate limiting ─────────────────────────────────────────────────────
+  const rateLimitResult = await withRateLimit(request, rateLimitPresets.strict)
+  if (rateLimitResult) return rateLimitResult
+
   try {
     const body = await request.json()
 
@@ -15,6 +20,11 @@ export async function POST(request: NextRequest) {
       razorpay_signature,
       orderData,
     } = body
+
+    // ── 0. Null-guard all required Razorpay fields ───────────────────────
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return NextResponse.json({ error: 'Missing required payment fields' }, { status: 400 })
+    }
 
     // ── 1. Verify Razorpay signature ────────────────────────────────────
     const secret = process.env.RAZORPAY_KEY_SECRET
