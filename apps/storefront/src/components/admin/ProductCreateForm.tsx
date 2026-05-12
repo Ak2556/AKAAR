@@ -7,16 +7,9 @@ import { Loader2, Upload, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 
+// existingProducts kept for backwards-compat but no longer rendered (list moved to ProductListTable)
 interface ProductCreateFormProps {
-  existingProducts: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    category: string | null;
-    imageUrl: string | null;
-    isActive: boolean;
-    createdAt: string;
-  }>;
+  existingProducts?: unknown[];
 }
 
 type UploadStage =
@@ -51,9 +44,8 @@ async function uploadToStorage(
   return data.publicUrl;
 }
 
-export function ProductCreateForm({
-  existingProducts,
-}: ProductCreateFormProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function ProductCreateForm({ existingProducts: _ }: ProductCreateFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -161,19 +153,17 @@ export function ProductCreateForm({
   };
 
   return (
-    <div className="grid xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] gap-8">
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        className="border border-[var(--border)] rounded-2xl bg-[var(--bg-secondary)] p-6 md:p-8 space-y-6"
-      >
-        <div>
-          <h2 className="text-2xl font-bold">Create Product</h2>
-          <p className="text-sm text-[var(--text-secondary)] mt-2">
-            Upload a product card image plus a GLB or GLTF model. The model
-            becomes the interactive product preview on the storefront.
-          </p>
-        </div>
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className="border border-[var(--border)] rounded-2xl bg-[var(--bg-secondary)] p-6 md:p-8 space-y-6"
+    >
+      <div>
+        <h2 className="text-xl font-bold">Create Product</h2>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
+          Upload images and an optional GLB/GLTF model. The model renders interactively on the product page.
+        </p>
+      </div>
 
         {error && (
           <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -377,72 +367,6 @@ export function ProductCreateForm({
             )}
           </Button>
         </div>
-      </form>
-
-      <aside className="border border-[var(--border)] rounded-2xl bg-[var(--bg-secondary)] p-6 md:p-8">
-        <div className="flex items-center justify-between gap-4 mb-5">
-          <div>
-            <h2 className="text-xl font-bold">Latest Products</h2>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
-              Click any product to edit it.
-            </p>
-          </div>
-          <span className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-            {existingProducts.length} total
-          </span>
-        </div>
-
-        <div className="space-y-3">
-          {existingProducts.length === 0 ? (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-5 text-sm text-[var(--text-secondary)]">
-              No products yet. Create your first marketplace listing from this
-              page.
-            </div>
-          ) : (
-            existingProducts.map((product) => (
-              <Link
-                key={product.id}
-                href={`/admin/products/${product.id}`}
-                className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] p-3 hover:border-[var(--accent)]/60 transition-colors"
-              >
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-[var(--text-muted)]">
-                      No image
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium truncate">{product.name}</p>
-                  <p className="text-xs text-[var(--text-secondary)] truncate">
-                    /products/{product.slug}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2 text-xs">
-                    <span className="rounded-full bg-[var(--bg-tertiary)] px-2 py-1 text-[var(--text-muted)]">
-                      {product.category || "Uncategorized"}
-                    </span>
-                    <span
-                      className={`rounded-full px-2 py-1 ${
-                        product.isActive
-                          ? "bg-emerald-500/15 text-emerald-300"
-                          : "bg-amber-500/15 text-amber-200"
-                      }`}
-                    >
-                      {product.isActive ? "Live" : "Draft"}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
-      </aside>
-    </div>
+    </form>
   );
 }
