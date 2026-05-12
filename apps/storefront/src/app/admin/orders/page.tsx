@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Package, Clock, CheckCircle, Truck, XCircle, ChevronRight, Search, Filter } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { Package, ChevronRight, Search, Filter } from 'lucide-react'
 
 interface OrderItem {
   id: string
@@ -31,10 +32,11 @@ const STATUS_CONFIG: Record<string, { label: string; tone: string }> = {
 }
 
 export default function AdminOrdersPage() {
+  const searchParams = useSearchParams()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? 'all')
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -52,27 +54,16 @@ export default function AdminOrdersPage() {
   })
 
   return (
-    <div className="min-h-screen pt-28 pb-20">
-      <div className="container mx-auto px-6">
-        {/* Header */}
-        <div className="max-w-4xl mb-10">
-          <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">Merchant Console</span>
-          <h1 className="text-4xl md:text-5xl font-bold mt-4 mb-4">
-            <span className="gradient-text">Manage Orders</span>
-          </h1>
-          <p className="text-lg text-[var(--text-secondary)]">
-            Update order status, add tracking numbers, and notify customers.
-          </p>
-        </div>
+    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <p className="luxury-kicker">Admin · Orders</p>
+        <h1 className="display-font mt-2 text-4xl text-[var(--text-primary)]">Orders</h1>
+        <p className="mt-2 text-[var(--text-secondary)]">
+          Update status, add tracking numbers, and notify customers.
+        </p>
+      </div>
 
-        {/* Nav */}
-        <div className="flex gap-4 mb-8">
-          <Link href="/admin/products" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-            ← Products
-          </Link>
-          <span className="text-[var(--accent)] text-sm font-medium">Orders</span>
-        </div>
-
+      <div>
         {/* Filters */}
         <div className="luxury-card rounded-[1.8rem] p-4 mb-6 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
@@ -168,5 +159,5 @@ export default function AdminOrdersPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

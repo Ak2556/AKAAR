@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProductEditForm } from '@/components/admin/ProductEditForm'
 
@@ -10,18 +10,7 @@ interface Props {
 
 export default async function AdminProductEditPage({ params }: Props) {
   const { id } = await params
-
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/signin?callbackUrl=%2Fadmin%2Fproducts')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'ADMIN') redirect('/admin/products')
 
   const { data: product } = await supabase
     .from('products')
@@ -32,18 +21,19 @@ export default async function AdminProductEditPage({ params }: Props) {
   if (!product) notFound()
 
   return (
-    <div className="min-h-screen pt-28 pb-20">
-      <div className="container mx-auto px-6 max-w-3xl">
+    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl">
         <div className="mb-8">
           <a
             href="/admin/products"
-            className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-4"
           >
-            ← Back to Products
+            ← Products
           </a>
-          <h1 className="text-3xl font-bold mt-4 gradient-text">Edit Product</h1>
-          <p className="text-[var(--text-secondary)] mt-2">
-            Update details, swap the preview image, or attach a 3D model.
+          <p className="luxury-kicker">Admin · Edit Product</p>
+          <h1 className="display-font mt-2 text-3xl text-[var(--text-primary)]">Edit Product</h1>
+          <p className="mt-2 text-[var(--text-secondary)]">
+            Update details, swap preview images, or attach a 3D model.
           </p>
         </div>
 
@@ -65,5 +55,5 @@ export default async function AdminProductEditPage({ params }: Props) {
         />
       </div>
     </div>
-  )
+  );
 }

@@ -120,24 +120,22 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
   const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.PENDING
 
   return (
-    <div className="min-h-screen pt-28 pb-20">
-      <div className="container mx-auto px-6 max-w-5xl">
+    <div className="min-h-screen px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
 
-        {/* Back */}
-        <Link href="/admin/orders" className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] mb-8 transition-colors">
+        <Link href="/admin/orders" className="mb-6 inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]">
           <ArrowLeft className="h-4 w-4" /> All Orders
         </Link>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <span className="text-[var(--accent)] font-mono text-sm uppercase tracking-wider">Order Detail</span>
-            <h1 className="text-3xl font-bold mt-2 font-mono">{order.order_number}</h1>
-            <p className="text-[var(--text-muted)] text-sm mt-1">
+            <p className="luxury-kicker">Admin · Order</p>
+            <h1 className="display-font mt-2 text-3xl font-mono text-[var(--text-primary)]">{order.order_number}</h1>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
               {new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
-          <span className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${cfg.tone}`}>
+          <span className={`inline-flex w-fit items-center rounded-full border px-4 py-2 text-sm font-medium ${cfg.tone}`}>
             {cfg.label}
           </span>
         </div>
@@ -340,5 +338,5 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         </div>
       </div>
     </div>
-  )
+  );
 }
