@@ -3,11 +3,12 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Minus, Plus, ShoppingBag, Trash2, ArrowRight } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, Trash2, ArrowRight, Eye } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/context/ToastContext";
+import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
 import { Button } from "@/components/ui/Button";
 
 export function CartDrawer() {
@@ -23,6 +24,11 @@ export function CartDrawer() {
   } = useCart();
   const { formatPrice } = useSettings();
   const toast = useToast();
+  const { items: recentItems } = useRecentlyViewed();
+
+  // Cross-sell: recently viewed products not already in cart (max 3)
+  const cartIds = new Set(items.map((i) => i.id));
+  const crossSell = recentItems.filter((r) => !cartIds.has(r.id)).slice(0, 3);
 
   // Focus management — remember which element opened the drawer
   const triggerRef = useRef<Element | null>(null);
@@ -239,6 +245,51 @@ export function CartDrawer() {
                       </div>
                     </motion.div>
                   ))}
+
+                  {/* Cross-sell: recently viewed but not in cart */}
+                  {crossSell.length > 0 && (
+                    <div className="mt-2 border-t border-[var(--border)] pt-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                        <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                        Continue exploring
+                      </div>
+                      <div className="space-y-2">
+                        {crossSell.map((item) => (
+                          <Link
+                            key={item.id}
+                            href={`/products/${item.slug}`}
+                            onClick={closeCart}
+                            className="flex items-center gap-3 rounded-xl border border-[var(--border)] p-3 transition-colors hover:border-[var(--border-accent)] hover:bg-[var(--bg-tertiary)]"
+                          >
+                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[var(--bg-tertiary)]">
+                              {item.imageUrl ? (
+                                <Image
+                                  src={item.imageUrl}
+                                  alt={item.name}
+                                  fill
+                                  sizes="48px"
+                                  className="object-contain p-1"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <ShoppingBag className="h-5 w-5 text-[var(--text-muted)]" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">{item.name}</p>
+                              {item.price != null && (
+                                <p className="text-xs text-[var(--accent)]">
+                                  {formatPrice(item.price)}
+                                </p>
+                              )}
+                            </div>
+                            <ArrowRight className="h-4 w-4 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Clear Cart */}
                   <button

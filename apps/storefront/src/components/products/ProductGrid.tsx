@@ -2,6 +2,7 @@
 
 import { ProductCard } from "./ProductCard";
 import { ProductListItem } from "./ProductListItem";
+import { badgeForRank } from "@/lib/recommendations";
 
 interface Product {
   id: string;
@@ -81,9 +82,9 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map((product) => (
+      {products.map((product, index) => (
         <div key={product.id}>
-          <ProductCard {...product} />
+          <ProductCard {...product} badge={badgeForRank(index + 1)} />
         </div>
       ))}
     </div>

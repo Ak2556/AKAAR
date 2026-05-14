@@ -19,6 +19,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
+import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
 
 const ProductViewer3D = dynamic(
   () => import("@/components/products/ProductViewer3D").then((mod) => mod.ProductViewer3D),
@@ -68,6 +69,7 @@ export function ProductDetailClient({
   const toast = useToast();
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
+  const { items: recentItems, trackView } = useRecentlyViewed();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
@@ -92,6 +94,19 @@ export function ProductDetailClient({
   }, [product.images, product.imageUrl]);
 
   const has3D = Boolean(product.meshFile?.storagePath || product.meshFile?.s3Key);
+
+  // Record this product view once on mount
+  useEffect(() => {
+    trackView({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: price,
+      category: product.category,
+      imageUrl: allImages[0] ?? null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   // Observe whether the main Add to Cart button is on-screen
   useEffect(() => {
@@ -441,6 +456,67 @@ export function ProductDetailClient({
             </motion.div>
           </div>
         </section>
+
+        {/* Recently Viewed — excludes current product */}
+        {(() => {
+          const recents = recentItems.filter((r) => r.id !== product.id).slice(0, 4);
+          if (recents.length === 0) return null;
+          return (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.36 }}
+              className="mt-14"
+            >
+              <div className="mb-6">
+                <span className="luxury-kicker">Your browsing history</span>
+                <h2 className="display-font mt-3 text-3xl text-[var(--text-primary)]">
+                  Recently viewed
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {recents.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/products/${item.slug}`}
+                    className="luxury-card group overflow-hidden rounded-[1.6rem]"
+                  >
+                    <div className="luxury-stage relative min-h-[140px] overflow-hidden p-4">
+                      {item.imageUrl ? (
+                        <div className="absolute inset-4">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.name}
+                            fill
+                            sizes="(max-width: 640px) 50vw, 25vw"
+                            className="object-contain transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      ) : (
+                        <div className="absolute inset-4 flex items-center justify-center rounded-xl border border-[var(--border)] text-xs text-[var(--text-muted)]">
+                          No preview
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-3">
+                      <p className="truncate text-xs font-medium uppercase tracking-[0.1em] text-[var(--text-muted)]">
+                        {item.category || "Uncategorized"}
+                      </p>
+                      <p className="mt-1 truncate text-sm font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]">
+                        {item.name}
+                      </p>
+                      {item.price != null && (
+                        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                          {formatPrice(item.price)}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </motion.section>
+          );
+        })()}
 
         {relatedProducts.length > 0 ? (
           <motion.section
