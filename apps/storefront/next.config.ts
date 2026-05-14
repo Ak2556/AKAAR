@@ -73,15 +73,18 @@ const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default bundleAnalyzer(withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options
+// Source-map upload and release creation only make sense when an auth token is
+// configured (CI / production deploys). Without one the Sentry plugin would
+// print "No auth token provided" warnings on every local build.
+const hasSentryToken = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
+export default bundleAnalyzer(withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
 
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
+  // Suppress all non-error Sentry output when there is no auth token
+  silent: !hasSentryToken,
 
   // Hides source maps from generated client bundles
   hideSourceMaps: true,
@@ -89,6 +92,10 @@ export default bundleAnalyzer(withSentryConfig(nextConfig, {
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
 
-  // Enables automatic instrumentation of Vercel Cron Monitors
-  automaticVercelMonitors: true,
+  // Skip source-map upload and release creation when no token is present
+  sourcemaps: { disable: !hasSentryToken },
+  release: { create: hasSentryToken, finalize: hasSentryToken },
+
+  // Vercel Cron monitoring requires an authenticated release
+  automaticVercelMonitors: hasSentryToken,
 }));
