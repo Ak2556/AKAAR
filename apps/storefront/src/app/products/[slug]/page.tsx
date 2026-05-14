@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rankRelated, type ScoredProduct } from "@/lib/recommendations";
 import { ProductDetailClient, type ProductData } from "./ProductDetailClient";
 
 export const revalidate = 60;
@@ -83,13 +84,60 @@ export default async function ProductDetailPage({
 
   if (!raw) notFound();
 
-  const { data: relatedRaw } = await supabase
-    .from("products")
-    .select("*, mesh_files(*)")
-    .eq("is_active", true)
-    .eq("category", raw.category ?? "")
-    .neq("id", raw.id)
-    .limit(4);
+  // Fetch candidates: same category first, then fill from entire catalog
+  const [{ data: sameCatRaw }, { data: otherRaw }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("id,name,slug,category,price,image_url,short_description")
+      .eq("is_active", true)
+      .eq("category", raw.category ?? "")
+      .neq("id", raw.id)
+      .limit(20),
+    supabase
+      .from("products")
+      .select("id,name,slug,category,price,image_url,short_description")
+      .eq("is_active", true)
+      .neq("id", raw.id)
+      .neq("category", raw.category ?? "")
+      .limit(20),
+  ]);
+
+  const targetForScoring: ScoredProduct = {
+    id: raw.id as string,
+    name: raw.name as string,
+    slug: raw.slug as string,
+    category: (raw.category as string | null) ?? null,
+    price: raw.price as number | null,
+    imageUrl: (raw.image_url as string | null) ?? null,
+  };
+
+  const candidatesForScoring: ScoredProduct[] = [
+    ...(sameCatRaw ?? []),
+    ...(otherRaw ?? []),
+  ].map((p) => ({
+    id: p.id as string,
+    name: p.name as string,
+    slug: p.slug as string,
+    category: (p.category as string | null) ?? null,
+    price: p.price as number | null,
+    imageUrl: (p.image_url as string | null) ?? null,
+  }));
+
+  const rankedRelated = rankRelated(targetForScoring, candidatesForScoring, 4);
+
+  // Fetch full product data (with mesh files) for the ranked IDs
+  const relatedIds = rankedRelated.map((p) => p.id);
+  const { data: relatedRaw } = relatedIds.length > 0
+    ? await supabase
+        .from("products")
+        .select("*, mesh_files(*)")
+        .in("id", relatedIds)
+    : { data: [] };
+
+  // Preserve ranking order returned by the algorithm
+  const relatedOrdered = rankedRelated
+    .map((ranked) => relatedRaw?.find((r) => r.id === ranked.id))
+    .filter(Boolean) as Record<string, unknown>[];
 
   const product = mapProduct(raw as Record<string, unknown>);
   const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
@@ -124,7 +172,7 @@ export default async function ProductDetailPage({
       />
       <ProductDetailClient
         product={product}
-        relatedProducts={(relatedRaw ?? []).map((r) => mapProduct(r as Record<string, unknown>))}
+        relatedProducts={relatedOrdered.map((r) => mapProduct(r))}
       />
     </>
   );

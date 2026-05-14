@@ -19,6 +19,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
 import { DevelopmentSetupBanner } from "@/components/layout/DevelopmentSetupBanner";
+import { RecentlyViewedProvider } from "@/context/RecentlyViewedContext";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -137,6 +138,7 @@ export default function RootLayout({
                 <AuthProvider enabled={runtimeCapabilities.authAvailable}>
                   <ToastProvider>
                     <WishlistProvider>
+                      <RecentlyViewedProvider>
                       <CartProvider>
                         <ScrollProgress />
                         <Header />
@@ -147,6 +149,7 @@ export default function RootLayout({
                         <WhatsAppButton />
                         <LazyCartDrawer />
                       </CartProvider>
+                      </RecentlyViewedProvider>
                     </WishlistProvider>
                   </ToastProvider>
                 </AuthProvider>
