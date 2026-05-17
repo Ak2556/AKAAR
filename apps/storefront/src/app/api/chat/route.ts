@@ -38,15 +38,15 @@ Conversion rules (follow strictly):
 - Never leave a user without a clear action they can take next`;
 
 export async function GET() {
-  const hasKey = !!process.env.GEMINI_API_KEY;
+  const hasKey = !!process.env.ANTHROPIC_API_KEY;
   return Response.json({ ok: true, hasKey });
 }
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return Response.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
+      return Response.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
     }
 
     const body = await request.json();
@@ -60,32 +60,32 @@ export async function POST(request: Request) {
       ? `\nUser context: currently viewing "${page}" — if relevant, reference what they might be looking at.`
       : "";
 
-    const geminiContents = messages.map((m: { role: string; content: string }) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    const upstream = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: BASE_SYSTEM_PROMPT + pageContext }] },
-          contents: geminiContents,
-          generationConfig: { maxOutputTokens: 600, temperature: 0.65 },
-        }),
-      }
-    );
+    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5",
+        max_tokens: 600,
+        system: BASE_SYSTEM_PROMPT + pageContext,
+        messages: messages.map((m: { role: string; content: string }) => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          content: m.content,
+        })),
+      }),
+    });
 
     if (!upstream.ok) {
       const text = await upstream.text();
-      console.error("[ARIA] Gemini error:", upstream.status, text);
+      console.error("[ARIA] Anthropic error:", upstream.status, text);
       return Response.json({ error: "Upstream error", detail: text }, { status: 502 });
     }
 
     const data = await upstream.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const content = data.content?.[0]?.text ?? "";
     return Response.json({ content });
 
   } catch (err) {
