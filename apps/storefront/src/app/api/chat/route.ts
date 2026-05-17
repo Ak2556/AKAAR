@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       "X-Title": "AKAAR 3D — ARIA",
     },
     body: JSON.stringify({
-      model: "anthropic/claude-3.5-haiku",
+      model: "google/gemma-2-9b-it:free",
       stream: true,
       messages: [
         { role: "system", content: BASE_SYSTEM_PROMPT + pageContext },
