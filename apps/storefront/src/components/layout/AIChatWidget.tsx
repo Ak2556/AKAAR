@@ -346,37 +346,17 @@ export function AIChatWidget() {
           signal: ctrl.signal,
         });
 
+        const json = await res.json();
+
         if (!res.ok) {
-          const errText = await res.text();
-          console.error("[ARIA] API error", res.status, errText);
-          throw new Error(`API ${res.status}: ${errText}`);
+          console.error("[ARIA] API error", res.status, json);
+          throw new Error(json.detail || json.error || "API error");
         }
-        if (!res.body) throw new Error("No response body");
 
-        const reader  = res.body.getReader();
-        const decoder = new TextDecoder();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          for (const line of chunk.split("\n")) {
-            if (!line.startsWith("data: ")) continue;
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(data);
-              const delta  = parsed.choices?.[0]?.delta?.content;
-              if (delta) {
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === botMsg.id ? { ...m, content: m.content + delta } : m
-                  )
-                );
-              }
-            } catch { /* ignore malformed chunks */ }
-          }
-        }
+        const content: string = json.content ?? "";
+        setMessages((prev) =>
+          prev.map((m) => (m.id === botMsg.id ? { ...m, content } : m))
+        );
       } catch (err: unknown) {
         if (err instanceof Error && err.name !== "AbortError") {
           setMessages((prev) =>
