@@ -5,7 +5,6 @@ About AKAAR 3D:
 - Tagline: "We give AKAAR to ideas" (AKAAR means "form" or "shape" in Hindi/Urdu)
 - Website: https://akaar3d.in | Email: akaar3d.printing@gmail.com
 - WhatsApp / Phone: +91-7300431301
-- Address: 9-B, 69, Block-B, Ring Road, Boorthal, Jaipur 303012
 - Open: Monday–Saturday, 10 AM – 7 PM IST
 - No minimum order — single prototypes are welcome
 - Lead time: most orders ship in 3–7 business days after quote approval
@@ -30,75 +29,69 @@ Quote process:
 4. Receive a reviewed quote within 48 hours via email
 
 Conversion rules (follow strictly):
-- Always end every response with ONE clear next step the user can take (e.g. "Ready to get started? Head to the Quote page and upload your file.")
-- If the user is asking about a specific product, material, or use case — suggest getting a quote for it
-- If the user seems hesitant or uncertain — reassure them (no minimums, fast turnaround, reviewed quotes)
-- If the user asks about price — explain it depends on volume, material, and complexity, then direct to the Quote page for an accurate number
-- For urgent or complex projects, suggest WhatsApp for the fastest response
-- Keep responses concise and scannable — use bullet points for lists of 3+ items
+- Always end every response with ONE clear next step the user can take
+- If the user asks about a specific material or use case — suggest getting a quote
+- If the user asks about price — explain it depends on volume, material, and complexity, then direct to the Quote page
+- For urgent projects, suggest WhatsApp for the fastest response
+- Keep responses concise — use bullet points for lists of 3+ items
 - Use **bold** for material names and key specs
 - Never leave a user without a clear action they can take next`;
 
+export async function GET() {
+  const hasKey = !!process.env.OPENROUTER_API_KEY;
+  return Response.json({ ok: true, hasKey });
+}
+
 export async function POST(request: Request) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: "AI service not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  let messages: { role: string; content: string }[];
-  let page: string | undefined;
   try {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return Response.json({ error: "OPENROUTER_API_KEY not configured" }, { status: 500 });
+    }
+
     const body = await request.json();
-    messages = body.messages;
-    page = typeof body.page === "string" ? body.page : undefined;
-    if (!Array.isArray(messages) || messages.length === 0) throw new Error("Invalid messages");
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid request body" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
+    const { messages, page } = body;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return Response.json({ error: "Invalid messages" }, { status: 400 });
+    }
+
+    const pageContext = page
+      ? `\nUser context: currently viewing "${page}" — if relevant, reference what they might be looking at.`
+      : "";
+
+    const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://akaar3d.in",
+        "X-Title": "AKAAR 3D — ARIA",
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-chat:free",
+        stream: false,
+        messages: [
+          { role: "system", content: BASE_SYSTEM_PROMPT + pageContext },
+          ...messages,
+        ],
+        max_tokens: 600,
+        temperature: 0.65,
+      }),
     });
+
+    if (!upstream.ok) {
+      const text = await upstream.text();
+      console.error("[ARIA] OpenRouter error:", upstream.status, text);
+      return Response.json({ error: "Upstream error", detail: text }, { status: upstream.status });
+    }
+
+    const data = await upstream.json();
+    const content = data.choices?.[0]?.message?.content ?? "";
+    return Response.json({ content });
+
+  } catch (err) {
+    console.error("[ARIA] Route exception:", err);
+    return Response.json({ error: "Internal error", detail: String(err) }, { status: 500 });
   }
-
-  const pageContext = page
-    ? `\nUser context: currently viewing "${page}" — if relevant, reference what they might be looking at on that page.`
-    : "";
-
-  const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://akaar3d.in",
-      "X-Title": "AKAAR 3D — ARIA",
-    },
-    body: JSON.stringify({
-      model: "deepseek/deepseek-chat:free",
-      stream: true,
-      messages: [
-        { role: "system", content: BASE_SYSTEM_PROMPT + pageContext },
-        ...messages,
-      ],
-      max_tokens: 600,
-      temperature: 0.65,
-    }),
-  });
-
-  if (!upstream.ok) {
-    const text = await upstream.text();
-    return new Response(JSON.stringify({ error: "AI upstream error", detail: text }), {
-      status: upstream.status,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  return new Response(upstream.body, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "X-Accel-Buffering": "no",
-    },
-  });
 }
