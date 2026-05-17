@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         "X-Title": "AKAAR 3D - ARIA",
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-chat:free",
+        model: "meta-llama/llama-3.3-70b-instruct:free",
         stream: false,
         messages: [
           { role: "system", content: BASE_SYSTEM_PROMPT + pageContext },
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     if (!upstream.ok) {
       const text = await upstream.text();
       console.error("[ARIA] OpenRouter error:", upstream.status, text);
-      return Response.json({ error: "Upstream error", detail: text }, { status: upstream.status });
+      return Response.json({ error: "Upstream error", detail: text }, { status: 502 });
     }
 
     const data = await upstream.json();
