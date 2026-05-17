@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://akaar3d.in",
-        "X-Title": "AKAAR 3D — ARIA",
+        "X-Title": "AKAAR 3D - ARIA",
       },
       body: JSON.stringify({
         model: "deepseek/deepseek-chat:free",
