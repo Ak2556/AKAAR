@@ -17,6 +17,7 @@ import { SupabaseProvider } from "@/context/SupabaseContext";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
+import { LazyAIChatWidget } from "@/components/layout/LazyAIChatWidget";
 import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
 import { DevelopmentSetupBanner } from "@/components/layout/DevelopmentSetupBanner";
 import { RecentlyViewedProvider } from "@/context/RecentlyViewedContext";
@@ -147,6 +148,7 @@ export default function RootLayout({
                         <Footer />
                         <BottomNav />
                         <WhatsAppButton />
+                        <LazyAIChatWidget />
                         <LazyCartDrawer />
                       </CartProvider>
                       </RecentlyViewedProvider>
