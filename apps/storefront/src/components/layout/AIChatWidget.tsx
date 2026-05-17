@@ -346,7 +346,12 @@ export function AIChatWidget() {
           signal: ctrl.signal,
         });
 
-        if (!res.ok || !res.body) throw new Error("Request failed");
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("[ARIA] API error", res.status, errText);
+          throw new Error(`API ${res.status}: ${errText}`);
+        }
+        if (!res.body) throw new Error("No response body");
 
         const reader  = res.body.getReader();
         const decoder = new TextDecoder();

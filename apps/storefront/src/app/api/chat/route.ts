@@ -1,5 +1,3 @@
-export const runtime = "edge";
-
 const BASE_SYSTEM_PROMPT = `You are ARIA — AKAAR's Responsive Intelligence Assistant. You help visitors of AKAAR 3D's website choose the right service, understand materials, and move toward placing an order or requesting a quote.
 
 About AKAAR 3D:
