@@ -313,7 +313,11 @@ export function CartDrawer() {
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-[var(--text-muted)]">Shipping</span>
-                    <span className="text-[var(--accent)]">Calculated at checkout</span>
+                    <span className="text-[var(--accent)]">Free standard</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[var(--text-muted)]">Studio check</span>
+                    <span>Included</span>
                   </div>
                   <div className="flex items-center justify-between text-lg font-semibold pt-2 border-t border-[var(--border)]">
                     <span>Total</span>

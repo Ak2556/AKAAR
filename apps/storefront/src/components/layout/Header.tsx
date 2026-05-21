@@ -76,12 +76,17 @@ export function Header() {
       <motion.header
         initial={{ y: -80 }}
         animate={{ y: 0 }}
-        className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6"
+        className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4"
       >
-        <nav className="glass mx-auto max-w-7xl rounded-[1.75rem] px-5 py-4 sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-8">
-              <Logo size="md" showTagline={false} />
+        <nav className="glass relative mx-auto max-w-7xl rounded-[1.35rem] px-3 py-3 sm:rounded-[1.75rem] sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
+            <div className="flex min-w-0 items-center gap-5 lg:gap-8">
+              <span className="hidden md:inline-flex">
+                <Logo size="md" showTagline={false} />
+              </span>
+              <span className="inline-flex md:hidden">
+                <Logo size="sm" showText={false} showTagline={false} />
+              </span>
 
               <div className="hidden lg:flex items-center gap-7">
                 {navItems.map((item) => (
@@ -224,7 +229,7 @@ export function Header() {
               </Link>
             </div>
 
-            <div className="flex items-center gap-2 md:hidden">
+            <div className="absolute right-3 top-1/2 flex shrink-0 -translate-y-1/2 items-center gap-1.5 md:hidden">
               <button
                 onClick={toggleMode}
                 className="luxury-pill rounded-full p-2.5"

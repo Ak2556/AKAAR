@@ -1,6 +1,16 @@
 "use client";
 
-import { ArrowRight, Grid, List, Search, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Clock3,
+  Grid,
+  List,
+  MessageCircle,
+  PackageCheck,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
@@ -13,6 +23,13 @@ const sortOptions = [
   { value: "price-low", label: "Price: low to high" },
   { value: "price-high", label: "Price: high to low" },
   { value: "name", label: "Name" },
+];
+
+const confidenceItems = [
+  { icon: BadgeCheck, title: "Studio checked", body: "Finish and packing reviewed before dispatch." },
+  { icon: Clock3, title: "48h dispatch", body: "Ready listings leave the Jaipur studio quickly." },
+  { icon: PackageCheck, title: "Free standard shipping", body: "No surprise shipping line on ready products." },
+  { icon: MessageCircle, title: "Custom fallback", body: "Need changes? Move any item into quote review." },
 ];
 
 interface ProductsShellProps {
@@ -225,6 +242,22 @@ export function ProductsShell({
                 />
               ))}
             </div>
+          </div>
+
+          <div className="grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 xl:grid-cols-4">
+            {confidenceItems.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="bg-[var(--bg-secondary)] px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
+                    <Icon className="h-4 w-4 text-[var(--accent)]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">{title}</p>
+                    <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{body}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {showMobileFilters ? (

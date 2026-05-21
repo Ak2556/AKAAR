@@ -6,6 +6,7 @@ import { ArrowUpRight, ShoppingCart, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
+import { getProductCommerceProfile } from "@/lib/product-commerce";
 
 interface ProductCardProps {
   id: string;
@@ -39,12 +40,13 @@ export function ProductCard({
   const { addItem } = useCart();
   const toast = useToast();
   const { formatPrice } = useSettings();
+  const profile = getProductCommerceProfile({ name, category, description });
 
   const handleAddToCart = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
-    addItem({ id, name, slug, price });
+    addItem({ id, name, slug, price, image: imageUrl });
     toast.success(`Added ${name} to cart`);
   };
 
@@ -99,7 +101,9 @@ export function ProductCard({
 
           <div className="grid grid-cols-[1fr_auto] gap-px border-t border-[var(--border)] bg-[var(--border)]">
             <div className="bg-[var(--bg-secondary)] px-4 py-4 sm:px-5 sm:py-5">
-              <p className="display-font text-xl uppercase leading-tight tracking-tight text-[var(--text-primary)] line-clamp-1">{name}</p>
+              <p className="display-font min-h-[3rem] text-xl uppercase leading-tight tracking-tight text-[var(--text-primary)] line-clamp-2">
+                {name}
+              </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="text-sm font-semibold text-[var(--text-primary)]">{formatPrice(price)}</span>
                 {stockLabel ? (
@@ -110,6 +114,16 @@ export function ProductCard({
                     Free shipping
                   </span>
                 )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {profile.cardHighlights.slice(0, 2).map((highlight) => (
+                  <span
+                    key={highlight}
+                    className="rounded-full border border-[var(--border)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]"
+                  >
+                    {highlight}
+                  </span>
+                ))}
               </div>
             </div>
             <button

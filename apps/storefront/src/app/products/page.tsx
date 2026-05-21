@@ -80,7 +80,7 @@ export default async function ProductsPage({
   return (
     <div className="min-h-screen pb-16">
       <div className="border-b border-[var(--border)] bg-[var(--surface-highlight)] pt-20">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-1 overflow-hidden px-4 py-2.5 text-center sm:gap-x-6 sm:px-6">
           <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
             <Truck className="h-3 w-3" />
             Free shipping · all orders
@@ -88,10 +88,10 @@ export default async function ProductsPage({
           <span className="hidden h-3 w-px bg-[var(--border-accent)] sm:block" />
           <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
             <Zap className="h-3 w-3" />
-            Ships within 48 hrs · Jaipur
+            Dispatch within 48 hrs · Jaipur
           </span>
           <span className="hidden h-3 w-px bg-[var(--border-accent)] sm:block" />
-          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+          <span className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-secondary)] sm:inline">
             Limited studio production · order while available
           </span>
         </div>

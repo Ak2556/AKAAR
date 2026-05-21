@@ -20,6 +20,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
+import { getProductCommerceProfile } from "@/lib/product-commerce";
 
 const ProductViewer3D = dynamic(
   () => import("@/components/products/ProductViewer3D").then((mod) => mod.ProductViewer3D),
@@ -51,13 +52,6 @@ export interface ProductData {
   } | null;
 }
 
-const performanceFacts = [
-  { label: "Material", value: "White PLA · FDM printed" },
-  { label: "Studio", value: "AKAAR, Jaipur" },
-  { label: "Shipping", value: "FREE · Pan-India" },
-  { label: "Dispatch", value: "5–7 business days" },
-];
-
 export function ProductDetailClient({
   product,
   relatedProducts,
@@ -87,6 +81,16 @@ export function ProductDetailClient({
 
   const price = product.price != null ? Number(product.price) : null;
   const isWishlisted = isInWishlist(product.id);
+  const profile = useMemo(
+    () =>
+      getProductCommerceProfile({
+        name: product.name,
+        category: product.category,
+        description: product.description,
+        shortDescription: product.shortDescription,
+      }),
+    [product.category, product.description, product.name, product.shortDescription]
+  );
 
   const allImages = useMemo(() => {
     if (product.images?.length) return product.images;
@@ -178,7 +182,7 @@ export function ProductDetailClient({
     <div className="min-h-screen pb-32 lg:pb-16">
       {/* Urgency bar */}
       <div className="border-b border-[var(--border)] bg-[var(--surface-highlight)] pt-20">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-1 overflow-hidden px-4 py-2.5 text-center sm:gap-x-6 sm:px-6">
           <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
             <Truck className="h-3 w-3" />
             Free shipping · all orders
@@ -186,10 +190,10 @@ export function ProductDetailClient({
           <span className="hidden h-3 w-px bg-[var(--border-accent)] sm:block" />
           <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
             <Zap className="h-3 w-3" />
-            Ships within 48 hrs · Jaipur
+            Dispatch within 48 hrs · Jaipur
           </span>
           <span className="hidden h-3 w-px bg-[var(--border-accent)] sm:block" />
-          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+          <span className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-secondary)] sm:inline">
             Handcrafted · Limited studio production
           </span>
         </div>
@@ -341,7 +345,7 @@ export function ProductDetailClient({
               </div>
 
               <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 xl:grid-cols-4">
-                {performanceFacts.map((fact) => (
+                {profile.detailSpecs.map((fact) => (
                   <FactCard key={fact.label} label={fact.label} value={fact.value} />
                 ))}
               </div>
@@ -391,7 +395,7 @@ export function ProductDetailClient({
                 <div className="mt-6 flex items-center gap-3 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/8 px-4 py-3">
                   <span className="h-2 w-2 rounded-full bg-emerald-400" />
                   <p className="text-xs font-medium text-emerald-400">
-                    Ships within 48 hours of order confirmation
+                    Dispatches within 48 hours of order confirmation
                   </p>
                 </div>
 
@@ -435,13 +439,18 @@ export function ProductDetailClient({
                 ) : null}
                 <InfoPanel
                   kicker="What's included"
-                  title="Ready to display, straight out of the box"
-                  body="Your order arrives fully assembled and ready to place — on a desk, shelf, or altar. No finishing, painting, or post-processing required."
+                  title={profile.includedTitle}
+                  body={profile.includedBody}
+                />
+                <InfoPanel
+                  kicker="Production confidence"
+                  title={profile.quality}
+                  body={`AKAAR prints this as a finished studio product, then checks ${profile.finish.toLowerCase()}, packing condition, and basic fit before dispatch from Jaipur.`}
                 />
                 <InfoPanel
                   kicker="Need modifications?"
                   title="Shift into a reviewed custom build"
-                  body="Need a different scale, finish, material, or geometry? Move from this listing into a custom build request — reviewed personally before production."
+                  body={profile.customPrompt}
                   cta={
                     <Link
                       href="/quote"

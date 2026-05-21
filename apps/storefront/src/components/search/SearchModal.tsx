@@ -297,22 +297,23 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 )}
               </div>
 
-              <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-secondary)]">
-                <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <kbd className="px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-xs">↑↓</kbd>
-                      Navigate
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <kbd className="px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-xs">↵</kbd>
-                      Select
-                    </span>
-                  </div>
-                  <span className="flex items-center gap-1">
-                    <kbd className="px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-xs">ESC</kbd>
-                    Close
-                  </span>
+              <div className="border-t border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                  <Link
+                    href="/quote"
+                    onClick={handleLinkClick}
+                    className="font-medium text-[var(--text-primary)] transition-colors hover:text-[var(--accent)]"
+                  >
+                    Need a custom part?
+                  </Link>
+                  <Link
+                    href="/products"
+                    onClick={handleLinkClick}
+                    className="inline-flex items-center gap-2 text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+                  >
+                    Open full collection
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             </div>

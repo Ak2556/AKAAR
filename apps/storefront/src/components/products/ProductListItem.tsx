@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
+import { getProductCommerceProfile } from "@/lib/product-commerce";
 
 interface ProductListItemProps {
   id: string;
@@ -31,11 +32,12 @@ export function ProductListItem({
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
   const toast = useToast();
   const { formatPrice } = useSettings();
+  const profile = getProductCommerceProfile({ name, category, description });
 
   const handleAddToCart = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    addItem({ id, name, slug, price });
+    addItem({ id, name, slug, price, image: imageUrl });
     toast.success(`Added ${name} to cart`);
   };
 
@@ -92,14 +94,24 @@ export function ProductListItem({
 
               <div className="mt-8 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
                 <SpecCell label="Starting from" value={formatPrice(price)} />
-                <SpecCell label="Preview" value={imageUrl ? "Configured" : "Awaiting asset"} />
-                <SpecCell label="Production" value="On request" />
+                <SpecCell label="Material" value={profile.material} />
+                <SpecCell label="Dispatch" value={profile.dispatch} />
               </div>
             </div>
 
             <div className="flex flex-col justify-between gap-5 bg-[var(--bg-secondary)] px-6 py-6 sm:px-7">
               <div>
-                <p className="luxury-metric-label">Use this listing as a production reference or move it directly into cart.</p>
+                <p className="luxury-metric-label">{profile.quality}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {profile.cardHighlights.map((highlight) => (
+                    <span
+                      key={highlight}
+                      className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--text-secondary)]"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-3">
