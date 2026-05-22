@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Send, Sparkles, RotateCcw } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -402,7 +403,7 @@ export function AIChatWidget() {
             exit={{ opacity: 0, x: -8 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
             onClick={handleOpen}
-            className="fixed bottom-[88px] left-4 z-[95] max-w-[220px] rounded-2xl px-4 py-2.5 text-left text-xs leading-snug shadow-xl md:bottom-[82px] md:left-6"
+            className="fixed bottom-[88px] left-4 z-[95] hidden max-w-[220px] rounded-2xl px-4 py-2.5 text-left text-xs leading-snug shadow-xl md:bottom-[82px] md:left-6 md:block"
             style={{
               background: "var(--bg-secondary)",
               border: "1px solid var(--border-accent)",
@@ -431,7 +432,7 @@ export function AIChatWidget() {
         aria-label={isOpen ? "Close ARIA chat" : "Open ARIA chat assistant"}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.93 }}
-        className="fixed bottom-20 left-4 z-[95] flex h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 md:left-6"
+        className="fixed bottom-20 left-4 z-[95] hidden h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 md:left-6 md:flex"
         style={{
           background: "linear-gradient(135deg, var(--accent) 0%, #b8902e 100%)",
           boxShadow: hasBadge
@@ -553,13 +554,13 @@ export function AIChatWidget() {
 
             {/* Quick Actions bar */}
             <div className="flex items-center gap-1.5 px-3 py-2" style={{ borderTop: "1px solid var(--border)", background: "var(--bg-tertiary)" }}>
-              <a
+              <Link
                 href="/quote"
                 className="flex-1 rounded-lg py-1.5 text-center text-[11px] font-medium transition-colors hover:opacity-80"
                 style={{ background: "var(--accent)", color: "var(--bg-primary)", fontFamily: "var(--font-ibm-plex-mono)" }}
               >
                 📋 Quote
-              </a>
+              </Link>
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
@@ -569,13 +570,13 @@ export function AIChatWidget() {
               >
                 💬 WhatsApp
               </a>
-              <a
+              <Link
                 href="/products"
                 className="flex-1 rounded-lg py-1.5 text-center text-[11px] font-medium transition-colors hover:opacity-80"
                 style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-accent)", color: "var(--text-primary)", fontFamily: "var(--font-ibm-plex-mono)" }}
               >
                 📦 Products
-              </a>
+              </Link>
             </div>
 
             {/* Input */}

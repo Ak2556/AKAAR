@@ -69,7 +69,7 @@ export function Footer() {
             <div className="space-y-6">
               <Logo size="lg" showTagline />
               <p className="max-w-sm text-[var(--text-secondary)]">
-                FDM 3D printing studio in Jaipur. We review your file, print it, and ship it across India — typically within 48–72 hours of quote approval.
+                FDM 3D printing studio in Jaipur. We review files within 48 hours, then print and ship across India based on the approved build and delivery method.
               </p>
               <div className="space-y-1 text-sm text-[var(--text-muted)]">
                 <p>9-B, 69, Block-B, Ring Road, Boorthal</p>
@@ -126,7 +126,7 @@ function FooterColumn({
       <p className="luxury-metric-label mb-4">{title}</p>
       <ul className="space-y-3">
         {links.map((link) => (
-          <li key={link.href}>
+          <li key={`${link.label}-${link.href}`}>
             <Link
               href={link.href}
               className="text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"

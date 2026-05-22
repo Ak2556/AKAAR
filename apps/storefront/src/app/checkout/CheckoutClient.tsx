@@ -23,20 +23,16 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
+import { SHIPPING_METHODS, getShippingMethod } from "@/lib/shipping";
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: Record<string, unknown>) => { open: () => void };
   }
 }
 
-const shippingMethods = [
-  { id: "standard", name: "Standard Shipping", price: 0,   time: "5-7 business days", badge: "FREE" },
-  { id: "express",  name: "Express Shipping",  price: 149, time: "2-3 business days", badge: null },
-  { id: "overnight",name: "Priority Shipping", price: 299, time: "1-2 business days", badge: null },
-];
-
 const steps = ["Information", "Shipping", "Payment"];
+const shippingMethods = SHIPPING_METHODS;
 
 const reassuranceNotes = [
   "Reviewed manufacturing flow",
@@ -85,8 +81,8 @@ export default function CheckoutPage() {
     }));
   };
 
-  const selectedShipping = shippingMethods.find((method) => method.id === formData.shippingMethod);
-  const shippingCost = selectedShipping?.price || 0;
+  const selectedShipping = getShippingMethod(formData.shippingMethod);
+  const shippingCost = selectedShipping.price;
   const tax = 0;
   const orderTotal = totalPrice + shippingCost;
   const featuredCartItem = items[0];
@@ -141,7 +137,7 @@ export default function CheckoutPage() {
             shippingCost,
             tax,
             total: orderTotal,
-            shippingMethod: selectedShipping?.name || "Standard",
+            shippingMethodId: selectedShipping.id,
             shippingAddress: {
               firstName: formData.firstName,
               lastName: formData.lastName,
@@ -201,6 +197,7 @@ export default function CheckoutPage() {
             quantity: item.quantity,
             material: item.material,
           })),
+          shippingMethodId: selectedShipping.id,
           shippingAddress: {
             firstName: formData.firstName,
             lastName: formData.lastName,
@@ -330,7 +327,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="mt-8 grid gap-px overflow-hidden rounded-[1.7rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
-              <ConfirmMetric icon={Truck} text={selectedShipping?.time || "Shipping selected"} />
+              <ConfirmMetric icon={Truck} text={selectedShipping.time} />
               <ConfirmMetric icon={Package} text="Confirmation email sent" />
               <ConfirmMetric icon={Shield} text="Quality review included" />
             </div>
@@ -382,7 +379,7 @@ export default function CheckoutPage() {
 
                 <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
                   <HeroMetric label="Items" value={`${items.length}`} />
-                  <HeroMetric label="Delivery" value={selectedShipping?.time || "Pending"} />
+                  <HeroMetric label="Delivery" value={selectedShipping.time} />
                   <HeroMetric label="Total" value={formatPrice(orderTotal)} />
                 </div>
               </div>
@@ -659,8 +656,8 @@ export default function CheckoutPage() {
                       />
                       <SummaryCell
                         label="Shipping"
-                        value={selectedShipping?.name || "Standard"}
-                        secondary={selectedShipping?.time || ""}
+                        value={selectedShipping.name}
+                        secondary={selectedShipping.time}
                       />
                     </div>
                   </div>
@@ -771,7 +768,7 @@ export default function CheckoutPage() {
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-[0.14em]">
-              {items.length} item{items.length !== 1 ? "s" : ""} · {selectedShipping?.name || "Standard"}
+              {items.length} item{items.length !== 1 ? "s" : ""} · {selectedShipping.name}
             </p>
             <p className="mt-0.5 text-base font-semibold text-[var(--text-primary)]">
               {formatPrice(orderTotal)}

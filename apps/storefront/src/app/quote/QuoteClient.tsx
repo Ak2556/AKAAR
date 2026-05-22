@@ -18,6 +18,11 @@ import { Button } from "@/components/ui/Button";
 import { FieldBlock, MetricTile, SummaryRow } from "@/components/ui/storefront-primitives";
 import { useAuthState } from "@/components/providers/AuthProvider";
 import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
+import {
+  ALLOWED_QUOTE_EXTENSIONS,
+  MAX_QUOTE_FILE_SIZE,
+  isValidQuoteFile,
+} from "@/lib/quote-files";
 
 const materials = [
   { id: "pla", name: "PLA", description: "Reliable entry point for prototype reviews" },
@@ -33,11 +38,23 @@ const services = [
   { id: "cnc", name: "CNC Machining", icon: Clock, available: false },
 ];
 
+const acceptedFileTypes = ALLOWED_QUOTE_EXTENSIONS.join(",");
+
 interface UploadedFile {
   id: string;
   name: string;
   size: number;
   type: string;
+  file: File;
+  fingerprint: string;
+}
+
+interface UploadedQuoteFile {
+  originalFilename: string;
+  s3Key: string;
+  s3Bucket: string;
+  fileSize: number;
+  fileType: string;
 }
 
 interface SubmissionResult {
@@ -62,6 +79,7 @@ export default function QuotePage() {
   const [phone, setPhone] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStage, setSubmissionStage] = useState<"idle" | "uploading" | "submitting">("idle");
   const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -88,6 +106,12 @@ export default function QuotePage() {
     Boolean(name.trim()) &&
     Boolean(email.trim()) &&
     Number(quantity) > 0;
+  const submitLabel =
+    submissionStage === "uploading"
+      ? "Uploading files..."
+      : submissionStage === "submitting"
+        ? "Submitting request..."
+        : "Submit Request";
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -118,16 +142,36 @@ export default function QuotePage() {
   };
 
   const handleFiles = (incomingFiles: File[]) => {
-    const nextFiles = incomingFiles.map((file) => ({
-      id: crypto.randomUUID(),
-      name: file.name,
-      size: file.size,
-      type: file.type || "application/octet-stream",
-    }));
+    const acceptedFiles: UploadedFile[] = [];
+    const rejectedNames: string[] = [];
+
+    incomingFiles.forEach((file) => {
+      if (!isValidQuoteFile(file.name) || file.size <= 0 || file.size > MAX_QUOTE_FILE_SIZE) {
+        rejectedNames.push(file.name);
+        return;
+      }
+
+      acceptedFiles.push({
+        id: crypto.randomUUID(),
+        name: file.name,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+        file,
+        fingerprint: `${file.name}-${file.size}-${file.lastModified}`,
+      });
+    });
+
+    if (rejectedNames.length > 0) {
+      setFormError(
+        `Skipped ${rejectedNames.join(", ")}. Attach supported geometry or reference files up to 100MB.`
+      );
+    } else {
+      setFormError(null);
+    }
 
     setFiles((current) => {
-      const seen = new Set(current.map((file) => `${file.name}-${file.size}`));
-      return [...current, ...nextFiles.filter((file) => !seen.has(`${file.name}-${file.size}`))];
+      const seen = new Set(current.map((file) => file.fingerprint));
+      return [...current, ...acceptedFiles.filter((file) => !seen.has(file.fingerprint))];
     });
   };
 
@@ -141,6 +185,41 @@ export default function QuotePage() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const uploadQuoteFile = async (uploadedFile: UploadedFile): Promise<UploadedQuoteFile> => {
+    const prepareResponse = await fetch("/api/quotes/uploads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: uploadedFile.name,
+        contentType: uploadedFile.type,
+        fileSize: uploadedFile.size,
+      }),
+    });
+
+    const prepared = await prepareResponse.json();
+    if (!prepareResponse.ok || !prepared.uploadUrl || !prepared.s3Key || !prepared.s3Bucket) {
+      throw new Error(prepared.error || `Could not prepare upload for ${uploadedFile.name}`);
+    }
+
+    const uploadResponse = await fetch(prepared.uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": uploadedFile.type },
+      body: uploadedFile.file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error(`Could not upload ${uploadedFile.name}. Please try again.`);
+    }
+
+    return {
+      originalFilename: uploadedFile.name,
+      s3Key: prepared.s3Key,
+      s3Bucket: prepared.s3Bucket,
+      fileSize: uploadedFile.size,
+      fileType: prepared.fileType || uploadedFile.type,
+    };
+  };
+
   const resetForm = () => {
     setFiles([]);
     setSelectedService("3d-printing");
@@ -149,6 +228,7 @@ export default function QuotePage() {
     setNotes("");
     setPhone("");
     setFormError(null);
+    setSubmissionStage("idle");
     setSubmissionResult(null);
   };
 
@@ -162,8 +242,12 @@ export default function QuotePage() {
 
     setFormError(null);
     setIsSubmitting(true);
+    setSubmissionStage("uploading");
 
     try {
+      const uploadedFiles = await Promise.all(files.map(uploadQuoteFile));
+      setSubmissionStage("submitting");
+
       const response = await fetch("/api/quotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -176,12 +260,7 @@ export default function QuotePage() {
           material: selectedMaterialLabel,
           quantity: Number(quantity),
           notes: notes.trim() || undefined,
-          files: files.map((file) => ({
-            originalFilename: file.name,
-            fileSize: file.size,
-            fileType: file.type,
-            reviewOnly: true,
-          })),
+          files: uploadedFiles,
         }),
       });
 
@@ -195,6 +274,7 @@ export default function QuotePage() {
       setFormError(error instanceof Error ? error.message : "Failed to submit quote request");
     } finally {
       setIsSubmitting(false);
+      setSubmissionStage("idle");
     }
   };
 
@@ -264,7 +344,7 @@ export default function QuotePage() {
 
         {!quoteSubmissionAvailable ? (
           <div className="mt-6 rounded-[1.6rem] border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-100">
-            Quote submission is unavailable in this environment until the required backend configuration is present.
+            Quote submission needs both database and file-upload configuration before customers can send CAD files.
           </div>
         ) : null}
 
@@ -296,7 +376,7 @@ export default function QuotePage() {
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept=".stl,.obj,.step,.stp,.iges,.igs,.3mf,.fbx"
+                  accept={acceptedFileTypes}
                   onChange={handleFileSelect}
                   className="hidden"
                 />
@@ -304,7 +384,7 @@ export default function QuotePage() {
                   <Upload className="h-7 w-7 text-[var(--accent)]" />
                 </div>
                 <p className="mt-5 text-lg font-medium text-[var(--text-primary)]">Drop files here or browse</p>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">STL, OBJ, STEP, IGES, 3MF, and FBX are all accepted.</p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">STL, OBJ, STEP, IGES, 3MF, FBX, images, PDFs, and archives up to 100MB.</p>
               </div>
 
               {files.length > 0 ? (
@@ -450,7 +530,7 @@ export default function QuotePage() {
                 </div>
 
                 <Button type="submit" size="lg" className="mt-6 w-full" disabled={isSubmitting || !canSubmit}>
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                  {submitLabel}
                   {!isSubmitting ? <ArrowRight className="ml-2 h-4 w-4" /> : null}
                 </Button>
 

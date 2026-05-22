@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { nanoid } from 'nanoid'
 import { quoteRequestSchema, validateRequest } from '@/lib/validations'
+import { MAX_QUOTE_FILE_SIZE, isValidQuoteFile } from '@/lib/quote-files'
+import { BUCKET_NAME, hasS3UploadConfig, objectExistsInS3 } from '@/lib/s3'
+
+interface SubmittedQuoteFile {
+  originalFilename: string
+  s3Key?: string
+  s3Bucket?: string
+  fileSize: number
+  fileType: string
+}
 
 export async function GET() {
   try {
@@ -37,6 +47,26 @@ export async function POST(request: Request) {
     const { name, email, company, phone, service, material, quantity, notes, files } = validation.data
     const quoteNumber = `QT-${nanoid(10).toUpperCase()}`
 
+    if (!hasS3UploadConfig()) {
+      return NextResponse.json({ error: 'File uploads are not configured' }, { status: 503 })
+    }
+
+    for (const file of files as SubmittedQuoteFile[]) {
+      const s3Key = file.s3Key
+      const s3Bucket = file.s3Bucket
+      const uploadKeyIsExpected = s3Key?.startsWith('quotes/pending-')
+      const fileSizeIsValid = Number.isFinite(file.fileSize) && file.fileSize > 0 && file.fileSize <= MAX_QUOTE_FILE_SIZE
+
+      if (!s3Key || s3Bucket !== BUCKET_NAME || !uploadKeyIsExpected || !fileSizeIsValid || !isValidQuoteFile(file.originalFilename)) {
+        return NextResponse.json({ error: 'Every quote file must be uploaded before submitting.' }, { status: 400 })
+      }
+
+      const uploadExists = await objectExistsInS3(s3Key)
+      if (!uploadExists) {
+        return NextResponse.json({ error: `Upload missing for ${file.originalFilename}. Please reattach the file.` }, { status: 400 })
+      }
+    }
+
     const { data: quote, error: quoteError } = await supabase
       .from('quote_requests')
       .insert({
@@ -58,18 +88,17 @@ export async function POST(request: Request) {
 
     // Attach files if any
     if (files?.length) {
-      const quoteFiles = files.map((file: {
-        originalFilename: string; s3Key?: string; s3Bucket?: string; fileSize: number; fileType: string;
-      }) => ({
+      const quoteFiles = (files as SubmittedQuoteFile[]).map((file) => ({
         quote_request_id: quote.id,
         original_filename: file.originalFilename,
-        stored_filename: file.s3Key?.split('/').pop() ?? file.originalFilename,
-        s3_key: file.s3Key ?? `review/${quoteNumber}/${file.originalFilename}`,
-        s3_bucket: file.s3Bucket ?? process.env.AWS_S3_BUCKET ?? 'review-attachments',
+        stored_filename: file.s3Key!.split('/').pop() ?? file.originalFilename,
+        s3_key: file.s3Key!,
+        s3_bucket: file.s3Bucket!,
         file_size: file.fileSize,
         file_type: file.fileType,
       }))
-      await supabase.from('quote_files').insert(quoteFiles)
+      const { error: filesError } = await supabase.from('quote_files').insert(quoteFiles)
+      if (filesError) throw filesError
     }
 
     return NextResponse.json(

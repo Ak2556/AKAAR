@@ -4,9 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { hasRazorpayCredentials } from '@/lib/local-runtime'
 import { withRateLimit, rateLimitPresets } from '@/lib/rate-limit'
+import { getShippingMethod, isShippingMethodId } from '@/lib/shipping'
 
 interface CartItem {
-  productId?: string
+  productId: string
   name: string
   slug?: string
   price: number
@@ -32,17 +33,21 @@ export async function POST(request: NextRequest) {
       items,
       currency = 'INR',
       receipt,
-      shippingCost: clientShippingCost = 0,
+      shippingMethodId = 'standard',
     } = body as {
       items: CartItem[]
       currency?: string
       receipt?: string
-      shippingCost?: number
+      shippingMethodId?: string
       // amount from client is intentionally ignored — computed server-side
     }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Cart items are required' }, { status: 400 })
+    }
+
+    if (!isShippingMethodId(shippingMethodId)) {
+      return NextResponse.json({ error: 'Invalid shipping method' }, { status: 400 })
     }
 
     // ── Server-side price validation ──────────────────────────────────────
@@ -54,30 +59,29 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       const qty = Math.max(1, Math.round(Number(item.quantity) || 1))
 
-      if (item.productId) {
-        const { data: product } = await admin
-          .from('products')
-          .select('price')
-          .eq('id', item.productId)
-          .eq('is_active', true)
-          .single()
-
-        if (!product || product.price == null) {
-          return NextResponse.json(
-            { error: 'One or more products could not be priced. Please refresh and try again.' },
-            { status: 400 }
-          )
-        }
-
-        itemsTotal += Number(product.price) * qty
-      } else {
-        // Non-catalogued item (e.g. custom quote line) — accept client price
-        itemsTotal += Number(item.price) * qty
+      if (!item.productId) {
+        return NextResponse.json({ error: 'Cart contains an invalid product' }, { status: 400 })
       }
+
+      const { data: product } = await admin
+        .from('products')
+        .select('price')
+        .eq('id', item.productId)
+        .eq('is_active', true)
+        .single()
+
+      if (!product || product.price == null) {
+        return NextResponse.json(
+          { error: 'One or more products could not be priced. Please refresh and try again.' },
+          { status: 400 }
+        )
+      }
+
+      itemsTotal += Number(product.price) * qty
     }
 
-    // Validate shipping cost is a non-negative number
-    const shippingCost = Math.max(0, Number(clientShippingCost) || 0)
+    const shippingMethod = getShippingMethod(shippingMethodId)
+    const shippingCost = shippingMethod.price
     const serverTotal = itemsTotal + shippingCost
 
     if (serverTotal <= 0) {
@@ -90,6 +94,11 @@ export async function POST(request: NextRequest) {
       amount: amountPaise,
       currency,
       receipt: receipt || `rcpt_${Date.now()}`,
+      notes: {
+        shippingMethodId: shippingMethod.id,
+        shippingMethod: shippingMethod.name,
+        userId: user?.id ?? 'guest',
+      },
     })
 
     return NextResponse.json({
@@ -101,6 +110,8 @@ export async function POST(request: NextRequest) {
       userId:   user?.id ?? null,
       // Return the server-verified total (in rupees) so the client can confirm
       verifiedTotal: serverTotal,
+      shippingCost,
+      shippingMethodId: shippingMethod.id,
     })
   } catch (error) {
     console.error('Error creating Razorpay order:', error)

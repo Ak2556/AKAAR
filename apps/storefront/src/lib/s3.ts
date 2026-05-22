@@ -3,10 +3,28 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {
+  ALLOWED_QUOTE_EXTENSIONS,
+  MAX_QUOTE_FILE_SIZE,
+  isValidQuoteFile,
+} from "@/lib/quote-files";
 
 let _s3Client: S3Client | null = null;
+
+function hasValue(value: string | undefined): boolean {
+  return Boolean(value && value.trim().length > 0);
+}
+
+export function hasS3UploadConfig(): boolean {
+  return (
+    hasValue(process.env.AWS_ACCESS_KEY_ID) &&
+    hasValue(process.env.AWS_SECRET_ACCESS_KEY) &&
+    hasValue(process.env.AWS_S3_BUCKET)
+  );
+}
 
 function getS3Client(): S3Client {
   if (!_s3Client) {
@@ -88,6 +106,20 @@ export async function deleteFromS3(key: string): Promise<void> {
   await getS3Client().send(command);
 }
 
+export async function objectExistsInS3(key: string): Promise<boolean> {
+  const command = new HeadObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+  });
+
+  try {
+    await getS3Client().send(command);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function generateQuoteFileKey(
   quoteId: string,
   filename: string
@@ -120,29 +152,13 @@ export const ALLOWED_QUOTE_FILE_TYPES = [
 ];
 
 export const ALLOWED_EXTENSIONS = [
-  ".stl",
-  ".obj",
-  ".step",
-  ".stp",
-  ".iges",
-  ".igs",
-  ".3mf",
-  ".gltf",
-  ".glb",
-  ".pdf",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".webp",
-  ".zip",
-  ".rar",
+  ...ALLOWED_QUOTE_EXTENSIONS,
 ];
 
-export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+export const MAX_FILE_SIZE = MAX_QUOTE_FILE_SIZE;
 
 export function isValidFileType(filename: string): boolean {
-  const ext = filename.toLowerCase().slice(filename.lastIndexOf("."));
-  return ALLOWED_EXTENSIONS.includes(ext);
+  return isValidQuoteFile(filename);
 }
 
 export { BUCKET_NAME };
