@@ -40,6 +40,7 @@ export interface Database {
           description: string | null
           short_description: string | null
           image_url: string | null
+          images: string[] | null
           category: string | null
           sort_order: number
           is_active: boolean
@@ -55,6 +56,7 @@ export interface Database {
           description?: string | null
           short_description?: string | null
           image_url?: string | null
+          images?: string[] | null
           category?: string | null
           sort_order?: number
           is_active?: boolean
@@ -67,6 +69,7 @@ export interface Database {
           description?: string | null
           short_description?: string | null
           image_url?: string | null
+          images?: string[] | null
           category?: string | null
           sort_order?: number
           is_active?: boolean
