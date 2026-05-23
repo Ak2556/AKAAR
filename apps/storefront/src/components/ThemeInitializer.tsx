@@ -17,6 +17,9 @@ const themeScript = `
     // Validate saved values
     const style = (savedStyle && validStyles.includes(savedStyle)) ? savedStyle : defaultStyle;
     const mode = (savedMode === 'light' || savedMode === 'dark') ? savedMode : defaultMode;
+    if (style !== savedStyle) {
+      localStorage.setItem(STYLE_STORAGE_KEY, style);
+    }
 
     // Build theme ID
     const themeId = style + '-' + mode;

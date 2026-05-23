@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import {
   Palette, Check, Globe, Bell, Eye, Shield,
   Monitor, MousePointer, Type, Sun, Moon,
@@ -25,18 +24,15 @@ export default function SettingsPage() {
   const { style, mode, isDark, setStyle, toggleMode } = useTheme();
   const { settings, updateSetting, resetSettings } = useSettings();
   const toast = useToast();
-  const [hasChanges, setHasChanges] = useState(false);
 
   // Wrapper to track changes
   const handleUpdateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     updateSetting(key, value);
-    setHasChanges(true);
     toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} updated`);
   };
 
   const handleReset = () => {
     resetSettings();
-    setHasChanges(false);
     toast.info("Settings reset to defaults");
   };
 
@@ -85,7 +81,7 @@ export default function SettingsPage() {
           <SettingsSection
             icon={Palette}
             title="Theme"
-            description="Choose your preferred visual style"
+            description="Graphite Performance is the storefront visual style"
             delay={0.1}
           >
             {/* Light/Dark Mode Toggle */}
