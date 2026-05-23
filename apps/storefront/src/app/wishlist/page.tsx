@@ -73,7 +73,7 @@ export default function WishlistPage() {
               title="Your wishlist is empty"
               description="Save parts you want to revisit by using the wishlist action across the collection."
               action={
-                <Link href="/products">
+                <Link href="/">
                   <Button size="lg">
                     Browse Products
                     <ArrowRight className="ml-2 h-4 w-4" />

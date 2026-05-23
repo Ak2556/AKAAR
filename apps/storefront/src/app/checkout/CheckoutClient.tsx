@@ -293,7 +293,7 @@ export default function CheckoutPage() {
               Add products to your cart before entering checkout.
             </p>
             <Link
-              href="/products"
+              href="/"
               className="mt-8 inline-flex rounded-full bg-[var(--text-primary)] px-6 py-3 text-sm font-medium text-[var(--bg-primary)]"
             >
               Browse Products
@@ -336,7 +336,7 @@ export default function CheckoutPage() {
               <Link href="/account/orders">
                 <Button>View Order</Button>
               </Link>
-              <Link href="/products">
+              <Link href="/">
                 <Button variant="outline">Continue Shopping</Button>
               </Link>
             </div>
@@ -353,7 +353,7 @@ export default function CheckoutPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-8">
             <Link
-              href="/products"
+              href="/"
               className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             >
               <ArrowLeft className="h-4 w-4" />

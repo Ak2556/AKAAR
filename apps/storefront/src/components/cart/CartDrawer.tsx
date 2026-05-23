@@ -154,7 +154,7 @@ export function CartDrawer() {
                   <p className="text-sm text-[var(--text-muted)] mb-6">
                     Add some products to get started
                   </p>
-                  <Link href="/products" onClick={closeCart}>
+                  <Link href="/" onClick={closeCart}>
                     <Button variant="primary">
                       Browse Products
                       <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />

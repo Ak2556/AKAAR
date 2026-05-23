@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Grid2x2, Home, ShoppingCart, User } from "lucide-react";
+import { Grid2x2, PackagePlus, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 const tabs = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/products", label: "Shop", icon: Grid2x2 },
+  { href: "/", label: "Shop", icon: Grid2x2 },
+  { href: "/quote", label: "Quote", icon: PackagePlus },
   { href: "/account", label: "Account", icon: User },
 ];
 
@@ -25,7 +25,10 @@ export function BottomNav() {
     >
       <div className="glass flex items-stretch border-t border-[var(--border)]">
         {tabs.map(({ href, label, icon: Icon }) => {
-          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const isActive =
+            href === "/"
+              ? pathname === "/" || pathname.startsWith("/products")
+              : pathname.startsWith(href);
           return (
             <Link
               key={href}

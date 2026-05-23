@@ -62,7 +62,7 @@ export default function NotFound() {
                   Back to Home
                 </Button>
               </Link>
-              <Link href="/products">
+              <Link href="/">
                 <Button variant="outline" size="lg">
                   <Search className="w-5 h-5 mr-2" />
                   Browse Products
@@ -83,7 +83,7 @@ export default function NotFound() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               {[
-                { href: "/products", label: "Products" },
+                { href: "/", label: "Products" },
                 { href: "/services", label: "Services" },
                 { href: "/quote", label: "Get Quote" },
                 { href: "/contact", label: "Contact" },

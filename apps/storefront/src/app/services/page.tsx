@@ -143,7 +143,7 @@ export default function ServicesPage() {
                     Request a Quote
                   </Button>
                 </Link>
-                <Link href="/products">
+                <Link href="/">
                   <Button variant="outline" size="lg">
                     Explore Collection
                   </Button>

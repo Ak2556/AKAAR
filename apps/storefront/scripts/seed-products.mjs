@@ -50,7 +50,7 @@ const products = [
     image_files: [`${PHOTOS_DIR}/IMG-20260416-WA0059.jpg`],
   },
   {
-    name: "AKAAR Plant Grow Light",
+    name: "The EARTH Lamp",
     slug: "plant-grow-light",
     category: "Lamp",
     price: 1999,

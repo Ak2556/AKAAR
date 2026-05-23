@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
+import { getProductDisplayName } from "@/lib/product-names";
 
 export interface CatalogProduct {
   id: string;
@@ -62,6 +63,21 @@ function normalizeSearch(search: string | null | undefined) {
   return trimmed.replace(/[,%]/g, " ").replace(/\s+/g, " ").slice(0, 80);
 }
 
+function buildSearchFilter(search: string) {
+  const clauses = [
+    `name.ilike.%${search}%`,
+    `description.ilike.%${search}%`,
+    `short_description.ilike.%${search}%`,
+  ];
+
+  const normalizedSearch = search.toLowerCase();
+  if ("the earth lamp".includes(normalizedSearch) || normalizedSearch.includes("earth")) {
+    clauses.push("slug.eq.plant-grow-light");
+  }
+
+  return clauses.join(",");
+}
+
 function createCatalogClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -111,9 +127,7 @@ async function getCatalogUncached(options: CatalogQueryOptions = {}): Promise<Ca
     }
 
     if (search) {
-      query = query.or(
-        `name.ilike.%${search}%,description.ilike.%${search}%,short_description.ilike.%${search}%`
-      );
+      query = query.or(buildSearchFilter(search));
     }
 
     const sortColumn = validSortCols[sortBy] ?? "sort_order";
@@ -145,7 +159,7 @@ async function getCatalogUncached(options: CatalogQueryOptions = {}): Promise<Ca
 
     const mapped = (products ?? []).map((product) => ({
       id: product.id,
-      name: product.name,
+      name: getProductDisplayName(product.name, product.slug),
       slug: product.slug,
       category: product.category ?? null,
       price: product.price,

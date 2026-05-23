@@ -307,7 +307,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     Need a custom part?
                   </Link>
                   <Link
-                    href="/products"
+                    href="/"
                     onClick={handleLinkClick}
                     className="inline-flex items-center gap-2 text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
                   >

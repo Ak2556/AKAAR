@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getProductDisplayName } from "@/lib/product-names";
 import { rankRelated, type ScoredProduct } from "@/lib/recommendations";
 import { ProductDetailClient, type ProductData } from "./ProductDetailClient";
 
@@ -23,7 +24,8 @@ export async function generateMetadata({
   if (!data) return {};
 
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
-  const title = `${data.name} | AKAAR 3D`;
+  const displayName = getProductDisplayName(data.name as string, slug);
+  const title = `${displayName} | AKAAR 3D`;
   const description = (data.short_description as string | null) ?? "Handcrafted 3D printed part from the AKAAR studio, Jaipur.";
   const imageUrl = data.image_url as string | null;
 
@@ -35,7 +37,7 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
-      images: imageUrl ? [{ url: imageUrl, alt: data.name as string }] : [],
+      images: imageUrl ? [{ url: imageUrl, alt: displayName }] : [],
     },
     twitter: {
       card: "summary_large_image",
@@ -50,7 +52,7 @@ function mapProduct(p: Record<string, unknown>): ProductData {
   const mf = p.mesh_files as Record<string, unknown> | null;
   return {
     id:               p.id as string,
-    name:             p.name as string,
+    name:             getProductDisplayName(p.name as string, p.slug as string),
     slug:             p.slug as string,
     category:         (p.category as string | null) ?? null,
     price:            p.price as number | null,

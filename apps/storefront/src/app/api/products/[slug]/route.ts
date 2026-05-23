@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getProductDisplayName } from '@/lib/product-names'
 
 // Transform raw Supabase snake_case row → camelCase shape the product page expects
 function mapProduct(p: Record<string, unknown>) {
   const mf = p.mesh_files as Record<string, unknown> | null
   return {
     id:               p.id,
-    name:             p.name,
+    name:             getProductDisplayName(p.name as string, p.slug as string),
     slug:             p.slug,
     category:         p.category ?? null,
     price:            p.price,

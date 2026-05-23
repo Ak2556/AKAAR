@@ -145,7 +145,7 @@ export default function OrdersPage() {
           icon={AlertCircle}
           title="No orders found"
           description={orders.length === 0 ? "You haven’t placed any orders yet." : "No orders match the current filters."}
-          action={orders.length === 0 ? <Link href="/products"><Button>Browse Products</Button></Link> : undefined}
+          action={orders.length === 0 ? <Link href="/"><Button>Browse Products</Button></Link> : undefined}
         />
       ) : (
         <div className="space-y-4">

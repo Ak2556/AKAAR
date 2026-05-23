@@ -118,7 +118,7 @@ function getCtas(content: string): { label: string; href: string }[] {
   if (lower.includes("whatsapp") || lower.includes("contact") || lower.includes("reach us"))
     ctaSet.push({ label: "💬 WhatsApp Us →", href: WHATSAPP_URL });
   if (lower.includes("browse") || lower.includes("products") || lower.includes("catalog"))
-    ctaSet.push({ label: "📦 Browse Products →", href: "/products" });
+    ctaSet.push({ label: "📦 Browse Products →", href: "/" });
   return ctaSet;
 }
 
@@ -571,7 +571,7 @@ export function AIChatWidget() {
                 💬 WhatsApp
               </a>
               <Link
-                href="/products"
+                href="/"
                 className="flex-1 rounded-lg py-1.5 text-center text-[11px] font-medium transition-colors hover:opacity-80"
                 style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-accent)", color: "var(--text-primary)", fontFamily: "var(--font-ibm-plex-mono)" }}
               >

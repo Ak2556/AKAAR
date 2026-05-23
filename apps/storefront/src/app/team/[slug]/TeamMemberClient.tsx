@@ -407,7 +407,7 @@ export function TeamMemberClient({ member }: { member: TeamMember }) {
                   Get a Quote
                 </Link>
                 <Link
-                  href="/products"
+                  href="/"
                   className="inline-flex items-center gap-2 px-8 py-4 border border-[var(--border)] text-[var(--text-primary)] font-semibold rounded-xl hover:border-[var(--accent)]/50 hover:text-[var(--accent)] transition-all"
                 >
                   Browse Products

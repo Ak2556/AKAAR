@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
-import { HeroSection } from "@/components/sections/HeroSection";
+import { ProductIndexPage, type ProductSearchParams } from "./products/ProductIndexPage";
 
 export const metadata: Metadata = buildMetadata(
-  "AKAAR 3D — 3D Printing Studio in Jaipur",
-  "Upload your CAD file, pick a material, and get a reviewed quote within 48 hours. PLA, ABS, TPU, PETG — Jaipur studio shipping across India.",
+  "Shop 3D Printed Products | AKAAR 3D",
+  "Explore ready-to-ship 3D printed products from AKAAR's Jaipur studio, then request a custom build when you need something specific.",
   "/"
 );
-import { PrinterShowcaseSection } from "@/components/sections/PrinterShowcaseSection";
-import { ServicesSection } from "@/components/sections/ServicesSection";
-import { ProductsShowcase } from "@/components/sections/ProductsShowcase";
-import { CTASection } from "@/components/sections/CTASection";
 
-export default function Home() {
-  return (
-    <>
-      <HeroSection />
-      <PrinterShowcaseSection />
-      <ServicesSection />
-      <ProductsShowcase />
-      <CTASection />
-    </>
-  );
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<ProductSearchParams>;
+}) {
+  return <ProductIndexPage searchParams={await searchParams} />;
 }

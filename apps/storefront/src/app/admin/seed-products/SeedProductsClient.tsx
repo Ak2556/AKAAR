@@ -27,7 +27,7 @@ const PRODUCTS = [
       "A complete altar composition in two parts: the saffron-orange temple pavilion with carved columns, arched gateway, and tiered dome — and the white Ganesha figurine seated inside. Each piece is printed separately and assembled as a scene. The contrast between the warm orange shell and the white figure is intentional. Makes a complete gift or home altar piece.",
   },
   {
-    name: "AKAAR Plant Grow Light",
+    name: "The EARTH Lamp",
     slug: "plant-grow-light",
     category: "Lamp",
     price: 1999,
@@ -183,7 +183,7 @@ export function SeedProductsClient() {
 
         <div className="rounded-xl border border-[var(--border)] px-5 py-4 text-sm text-[var(--text-muted)]">
           After seeding, visit{" "}
-          <Link href="/products" className="text-[var(--accent)] underline">/products</Link>{" "}
+          <Link href="/" className="text-[var(--accent)] underline">the shop page</Link>{" "}
           to see the live catalog, or{" "}
           <Link href="/admin/products" className="text-[var(--accent)] underline">/admin/products</Link>{" "}
           to edit them.

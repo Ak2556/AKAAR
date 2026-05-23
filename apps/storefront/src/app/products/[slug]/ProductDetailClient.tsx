@@ -202,7 +202,7 @@ export function ProductDetailClient({
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 pt-6">
           <Link
-            href="/products"
+            href="/"
             className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
           >
             <ArrowLeft className="h-4 w-4" />

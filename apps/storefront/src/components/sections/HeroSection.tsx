@@ -53,7 +53,7 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/products"
+                  href="/"
                   className="inline-flex items-center justify-center gap-3 rounded-full border border-[var(--border-accent)] px-7 py-3.5 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--surface-highlight)]"
                 >
                   View Collection

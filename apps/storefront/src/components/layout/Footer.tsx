@@ -4,9 +4,9 @@ import { Logo } from "@/components/ui/Logo";
 
 const footerLinks = {
   collection: [
-    { label: "All Products", href: "/products" },
-    { label: "Figurines", href: "/products?category=Figurine" },
-    { label: "Lamps", href: "/products?category=Lamp" },
+    { label: "All Products", href: "/" },
+    { label: "Figurines", href: "/?category=Figurine" },
+    { label: "Lamps", href: "/?category=Lamp" },
     { label: "Request a Build", href: "/quote" },
   ],
   capabilities: [

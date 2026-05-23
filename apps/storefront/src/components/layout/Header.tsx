@@ -32,7 +32,7 @@ const SearchModal = dynamic(
 );
 
 const navItems = [
-  { href: "/products", label: "Collection" },
+  { href: "/", label: "Shop" },
   { href: "/services", label: "Capabilities" },
   { href: "/about", label: "Studio" },
 ];

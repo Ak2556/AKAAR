@@ -111,7 +111,7 @@ export default function AboutPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/products">
+                <Link href="/">
                   <Button variant="outline" size="lg">View Collection</Button>
                 </Link>
               </div>
@@ -410,7 +410,7 @@ export default function AboutPage() {
                   Start a Build
                 </Button>
               </Link>
-              <Link href="/products">
+              <Link href="/">
                 <Button variant="outline" size="lg">Explore Collection</Button>
               </Link>
             </div>
