@@ -73,8 +73,10 @@ const showcaseProjects = [
 
 const detailFrames = [
   { title: "Krishna close-up", image: "/showcase/studio/krishna-macro.png" },
-  { title: "Shiva alternate angle", image: "/showcase/studio/shiva-back.png" },
-  { title: "Fold lamp study", image: "/showcase/studio/fold-lamp.png" },
+  {
+    title: "Lord Hanuman side close-up",
+    image: "https://mpdjjxkkjuhnqcynclin.supabase.co/storage/v1/object/public/product-assets/images/1778406355498-hanuman-dhyan-mudra-2.jpg",
+  },
   { title: "Ganesha detail frame", image: "/showcase/studio/ganesha-closeup.png" },
 ];
 
@@ -264,7 +266,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {detailFrames.map((frame, i) => (
               <article
                 key={frame.title}
