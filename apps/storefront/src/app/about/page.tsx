@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = buildMetadata(
   "About Our Studio | AKAAR 3D",
-  "Meet the team behind AKAAR 3D — a 3D printing studio in Jaipur building products and custom parts for engineers and hardware startups across India.",
+  "Learn how AKAAR 3D runs its Jaipur studio, from product design and FDM printing to quote review, finishing, packing, and pan-India delivery.",
   "/about"
 );
 import {
@@ -21,26 +21,26 @@ import { teamMembers } from "@/lib/team-data";
 import { BRAND_TAGLINE } from "@/lib/brand";
 
 const studioMetrics = [
-  { label: "Studio mode", value: "Real desk, real setup" },
-  { label: "Output", value: "Functional and decorative" },
-  { label: "Workflow", value: "Review before production" },
+  { label: "Location", value: "Jaipur, Rajasthan" },
+  { label: "Focus", value: "Products and custom prints" },
+  { label: "Process", value: "Review, print, finish, dispatch" },
 ];
 
 const principles = [
   {
     icon: Layers3,
-    title: "Prototyped in context",
-    body: "The product is judged as an object in a room — on a desk, shelf, or in a customer's hand. Context shapes every geometry decision before production begins.",
+    title: "Designed for real use",
+    body: "Each part is reviewed for how it will actually be used: display, fit, strength, lighting, handling, or daily wear. That context guides material, orientation, and finish choices.",
   },
   {
     icon: Shield,
-    title: "Reviewed before promised",
-    body: "Every part moves through a material and geometry check so the quote reflects the real production path, not a blind estimate from a file weight.",
+    title: "Checked before production",
+    body: "We review files, wall thickness, material fit, and print direction before confirming a build. Customers get practical guidance before time or filament is committed.",
   },
   {
     icon: Clock3,
-    title: "Fast loops, calm output",
-    body: "Fast iteration matters, but the point is calm progress. Each revision should be cleaner, more usable, and closer to the intended object.",
+    title: "Clear updates",
+    body: "The goal is a smooth path from idea to finished part: clear next steps, realistic timelines, careful packing, and direct support when a design needs adjustment.",
   },
 ];
 
@@ -49,25 +49,25 @@ const showcaseProjects = [
     title: "Illuminated planter series",
     category: "Ambient product build",
     description:
-      "A soft-lit planter built as a product object — not a print sample. Shape, glow, and desktop placement are resolved together, not as separate decisions.",
+      "A compact planter with integrated warm lighting, built to sit neatly on a desk or shelf. The enclosure, light position, and planter tray are developed together so the object feels complete.",
     image: "/showcase/studio/planter-lineup.png",
-    details: ["Lighting-led form", "Desk-scale object", "Repeatable enclosure geometry"],
+    details: ["Integrated lighting", "Desk-scale footprint", "Repeatable enclosure geometry"],
   },
   {
     title: "Shiva sculpt study",
     category: "Detail and finish",
     description:
-      "A character piece demonstrating form fidelity, surface handling, and how a strong presentation shot makes the object feel finished rather than raw.",
+      "A detailed sculpt used to test silhouette clarity, visible layer quality, and finishing choices for display pieces.",
     image: "/showcase/studio/shiva-outdoor.png",
-    details: ["Fine silhouette retention", "Strong outdoor staging", "Showpiece-grade finish"],
+    details: ["Clear silhouette", "Display-ready finish", "Surface detail check"],
   },
   {
     title: "Temple pavilion with Ganesha",
     category: "Multi-part composition",
     description:
-      "Clean contrast between the pavilion shell and the figure inside — turning the print into a complete scene rather than a single isolated object.",
+      "A two-part devotional piece with a printed pavilion and separate Ganesha figure. The contrast, fit, and presentation are checked as one complete object.",
     image: "/showcase/studio/ganesha-pavilion.png",
-    details: ["Two-tone composition", "Architectural detailing", "Gift and display ready"],
+    details: ["Two-part assembly", "Architectural detailing", "Gift and display ready"],
   },
 ];
 
@@ -95,13 +95,13 @@ export default function AboutPage() {
                 <span className="luxury-kicker">About AKAAR</span>
                 <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--accent)]">{BRAND_TAGLINE}</p>
                 <h1 className="display-font text-[clamp(2.9rem,5vw,5rem)] leading-[0.94] text-[var(--text-primary)]">
-                  A working studio turning experimental prints into believable products.
+                  A Jaipur 3D printing studio for products, prototypes, and custom parts.
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                  AKAAR is not a made-up manufacturing brand with placeholder renders. The work comes out of an actual desktop setup in Jaipur — real machines, real lighting experiments, and repeated product studies until the object feels resolved.
+                  AKAAR designs, prints, checks, and ships FDM parts from a real studio setup in Jaipur. We build ready-to-buy products and review custom requests so customers know what will be printed, how it will be made, and when it can ship.
                 </p>
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-muted)]">
-                  Jaipur studio · Product studies · Review-led manufacturing
+                  Product collection · Custom builds · Pan-India shipping
                 </p>
               </div>
               <div className="flex flex-col gap-4 sm:flex-row">
@@ -151,10 +151,10 @@ export default function AboutPage() {
           <div className="luxury-card rounded-[2rem] p-6 sm:p-7">
             <span className="luxury-kicker">How the brand is built</span>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              Objects that deserve to exist outside the slicer.
+              From CAD file to finished object, every step is reviewed.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
-              AKAAR works from a real desk in Jaipur — not a render farm or a generic print shop. Each product is developed as a physical object that needs to perform in a room, hold up under repeated use, and feel resolved when it arrives.
+              AKAAR combines product design, FDM printing, material selection, finishing checks, and packing in one workflow. The same review process supports both the shop collection and customer-submitted builds.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {principles.map((item) => (
@@ -186,10 +186,10 @@ export default function AboutPage() {
               <div className="bg-[var(--bg-secondary)] px-6 py-6">
                 <p className="luxury-kicker">Studio proof</p>
                 <h3 className="display-font mt-3 text-3xl text-[var(--text-primary)]">
-                  Objects tested on the desk they are meant to live on.
+                  Product ideas are tested as physical objects before they reach the shop.
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">
-                  The lineup shot proves the work is being developed as a repeatable family — not as one-off lucky prints. This is the difference between "we can print things" and "we are shaping a product language."
+                  We check size, stability, finish, light placement, and everyday handling before treating a design as a sellable product.
                 </p>
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function AboutPage() {
           <div className="mb-8 max-w-3xl">
             <span className="luxury-kicker">Real output</span>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              Built to live in the world, not just to finish printing.
+              Studio work that shows the range of what we build.
             </h2>
           </div>
 
@@ -257,10 +257,10 @@ export default function AboutPage() {
           <div className="mb-8 max-w-3xl">
             <span className="luxury-kicker">Detail frames</span>
             <h2 className="display-font mt-4 text-4xl text-[var(--text-primary)] sm:text-5xl">
-              Smaller shots do the credibility work.
+              Close-up views show finish, scale, and detail.
             </h2>
             <p className="mt-4 text-[var(--text-secondary)]">
-              Close-ups, alternate angles, and real-environment shots show finish, scale, and object character without needing explanation.
+              We photograph products from multiple angles so customers can understand surface quality, proportions, and display presence before ordering.
             </p>
           </div>
 
@@ -298,7 +298,7 @@ export default function AboutPage() {
               The people behind the studio.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
-              Every build involves direct collaboration with the founder and team. No handoffs, no blind production queues — each request goes through the same people who designed the output process.
+              AKAAR is a small team, so customers are not passed through a faceless production queue. Product direction, file review, printing, procurement, and dispatch are handled by the people listed here.
             </p>
           </div>
 
@@ -323,12 +323,12 @@ export default function AboutPage() {
                     {founder.role}
                   </p>
                   <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
-                    AKAAR exists because Akash set out to remove the friction between ambition and manufacturing. The storefront, quote flow, and product direction all stem from the same thesis: hardware creation should feel transparent, reviewed, and fast enough to keep momentum alive.
+                    AKAAR exists to make 3D printing easier to understand and easier to order. Akash leads the product direction and builds the software systems behind the storefront, quote flow, and customer experience.
                   </p>
 
                   <div className="mt-5 rounded-[1.35rem] border border-[var(--border)] bg-[var(--bg-primary)] px-5 py-4">
                     <p className="text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
-                      <span className="text-[var(--text-muted)]">"</span>{founder.founderVision}<span className="text-[var(--text-muted)]">"</span>
+                      <span className="text-[var(--text-muted)]">&ldquo;</span>{founder.founderVision}<span className="text-[var(--text-muted)]">&rdquo;</span>
                     </p>
                   </div>
 
@@ -401,7 +401,7 @@ export default function AboutPage() {
               Bring the next object into the studio.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-[var(--text-secondary)]">
-              If you already know what the part needs to do, move straight into a reviewed build request. If not, use the collection as a reference and start from there.
+              Browse the product collection for ready-to-ship objects, or send a file for a reviewed custom build when you need something specific.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <Link href="/quote">
