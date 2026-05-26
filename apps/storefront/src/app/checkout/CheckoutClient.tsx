@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Script from "next/script";
 import {
@@ -24,6 +24,10 @@ import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useRuntimeCapabilities } from "@/context/RuntimeCapabilitiesContext";
 import { SHIPPING_METHODS, getShippingMethod } from "@/lib/shipping";
+import {
+  isValidIndianPin,
+  type ServiceabilityResult,
+} from "@/lib/serviceability";
 
 declare global {
   interface Window {
@@ -51,6 +55,10 @@ export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [pinCheck, setPinCheck] = useState<{
+    state: "idle" | "checking" | "ok" | "blocked";
+    result: ServiceabilityResult | null;
+  }>({ state: "idle", result: null });
   const [formData, setFormData] = useState({
     email: "",
     phone: "",
@@ -69,6 +77,40 @@ export default function CheckoutPage() {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  // ── PIN-code serviceability check ─────────────────────────────────────
+  useEffect(() => {
+    const pin = formData.zip.trim();
+    if (!isValidIndianPin(pin)) {
+      setPinCheck({ state: "idle", result: null });
+      return;
+    }
+    let cancelled = false;
+    setPinCheck((c) => ({ ...c, state: "checking" }));
+    const handle = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/shipping/serviceability?pin=${pin}`);
+        const data: ServiceabilityResult = await res.json();
+        if (cancelled) return;
+        setPinCheck({
+          state: data.serviceable ? "ok" : "blocked",
+          result: data,
+        });
+        // Auto-fill city/state if blank so the customer doesn't have to type
+        setFormData((prev) => ({
+          ...prev,
+          city: prev.city || data.city || prev.city,
+          state: prev.state || data.state || prev.state,
+        }));
+      } catch {
+        if (!cancelled) setPinCheck({ state: "idle", result: null });
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+  }, [formData.zip]);
 
   const handlePlaceSelect = (fields: { address: string; city: string; state: string; zip: string; country: string }) => {
     setFormData((prev) => ({
@@ -99,6 +141,14 @@ export default function CheckoutPage() {
         !formData.zip
       ) {
         toast.error("Please fill in all required fields");
+        return false;
+      }
+      if (!isValidIndianPin(formData.zip)) {
+        toast.error("Enter a valid 6-digit Indian PIN code");
+        return false;
+      }
+      if (pinCheck.state === "blocked") {
+        toast.error(pinCheck.result?.reason ?? "We can't ship to this PIN code right now");
         return false;
       }
     }
@@ -558,10 +608,30 @@ export default function CheckoutPage() {
                           type="text"
                           name="zip"
                           required
+                          inputMode="numeric"
+                          maxLength={6}
+                          pattern="[1-9][0-9]{5}"
                           value={formData.zip}
                           onChange={handleChange}
                           className="luxury-input w-full rounded-full px-5 py-3"
                         />
+                        {pinCheck.state === "checking" ? (
+                          <p className="mt-2 text-xs text-[var(--text-muted)]">Checking serviceability…</p>
+                        ) : pinCheck.state === "ok" && pinCheck.result ? (
+                          <div className="mt-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+                            <p className="font-medium">
+                              Deliverable to {pinCheck.result.city}, {pinCheck.result.state}
+                            </p>
+                            <p className="mt-0.5 text-emerald-200/80">
+                              Standard: {pinCheck.result.etaDays.standard[0]}–{pinCheck.result.etaDays.standard[1]} days · Express: {pinCheck.result.etaDays.express[0]}–{pinCheck.result.etaDays.express[1]} days
+                              {pinCheck.result.cod ? " · COD eligible" : ""}
+                            </p>
+                          </div>
+                        ) : pinCheck.state === "blocked" && pinCheck.result ? (
+                          <div className="mt-2 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                            {pinCheck.result.reason ?? "We can't ship to this PIN code right now."}
+                          </div>
+                        ) : null}
                       </FormField>
                       <FormField label="Country">
                         <select
