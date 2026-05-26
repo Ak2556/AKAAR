@@ -18,6 +18,7 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ImageLightbox } from "@/components/products/ImageLightbox";
 import { ProductReviews } from "@/components/products/ProductReviews";
+import { VariantPicker, type Variant } from "@/components/products/VariantPicker";
 import {
   availabilityToneClasses,
   resolveAvailability,
@@ -76,6 +77,7 @@ export function ProductDetailClient({
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [showViewer, setShowViewer] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [isCartButtonVisible, setIsCartButtonVisible] = useState(true);
@@ -89,7 +91,8 @@ export function ProductDetailClient({
   const cartButtonRef = useRef<HTMLButtonElement>(null);
   const touchStartX = useRef<number>(0);
 
-  const price = product.price != null ? Number(product.price) : null;
+  const basePrice = product.price != null ? Number(product.price) : null;
+  const price = selectedVariant ? selectedVariant.finalPrice : basePrice;
   const isWishlisted = isInWishlist(product.id);
   const profile = useMemo(
     () =>
@@ -155,7 +158,17 @@ export function ProductDetailClient({
     }
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
     addItem(
-      { id: product.id, name: product.name, slug: product.slug, price, image: allImages[0] || undefined },
+      {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price,
+        image: allImages[0] || undefined,
+        variantId: selectedVariant?.id ?? null,
+        material: selectedVariant
+          ? [selectedVariant.material, selectedVariant.color].filter(Boolean).join(" · ")
+          : undefined,
+      },
       quantity
     );
     toast.success(`Added ${quantity} ${product.name} to cart`);
@@ -404,6 +417,12 @@ export function ProductDetailClient({
               transition={{ delay: 0.16 }}
               className="flex flex-col gap-6"
             >
+              <VariantPicker
+                productSlug={product.slug}
+                basePrice={basePrice ?? 0}
+                onSelect={(v) => setSelectedVariant(v)}
+              />
+
               <div className="luxury-card rounded-[2rem] p-6 sm:p-7">
                 <span className="luxury-kicker">Product brief</span>
                 <h1 className="display-font mt-4 text-4xl uppercase leading-none text-[var(--text-primary)] sm:text-5xl">

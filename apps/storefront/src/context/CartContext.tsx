@@ -11,6 +11,7 @@ export interface CartItem {
   quantity: number;
   material?: string;
   image?: string;
+  variantId?: string | null;
 }
 
 interface CartContextType {
@@ -67,8 +68,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
+      // Two lines share a slot only if both product + variant match
       const existingIndex = prev.findIndex(
-        (i) => i.id === item.id && i.material === item.material
+        (i) =>
+          i.id === item.id &&
+          (i.variantId ?? null) === (item.variantId ?? null) &&
+          (i.material ?? null) === (item.material ?? null)
       );
 
       if (existingIndex > -1) {

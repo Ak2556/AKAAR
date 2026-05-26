@@ -9,12 +9,14 @@ import { getShippingMethod, isShippingMethodId } from '@/lib/shipping'
 
 interface SubmittedOrderItem {
   productId?: string
+  variantId?: string | null
   material?: string
   quantity: number
 }
 
 interface VerifiedOrderItem {
   product_id: string
+  variant_id: string | null
   name: string
   slug: string | null
   material: string | null
@@ -149,18 +151,43 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const unitPrice = Number(product.price)
+      let unitPrice = Number(product.price)
+      let variantId: string | null = null
+      let resolvedMaterial: string | null = item.material ?? null
       if (!Number.isFinite(unitPrice)) {
         return NextResponse.json({ error: 'Invalid product price' }, { status: 400 })
+      }
+
+      if (item.variantId) {
+        const { data: variant } = await admin
+          .from('product_variants')
+          .select('id, material, color, price_modifier, is_active, stock_quantity')
+          .eq('id', item.variantId)
+          .eq('product_id', product.id)
+          .single()
+        if (!variant || !variant.is_active) {
+          return NextResponse.json({ error: 'Selected material is no longer available' }, { status: 400 })
+        }
+        if (variant.stock_quantity != null && variant.stock_quantity < quantity) {
+          return NextResponse.json(
+            { error: `${product.name ?? 'A product'} only has ${variant.stock_quantity} in stock` },
+            { status: 400 }
+          )
+        }
+        unitPrice += Number(variant.price_modifier) || 0
+        variantId = variant.id
+        resolvedMaterial =
+          [variant.material, variant.color].filter(Boolean).join(" · ") || resolvedMaterial
       }
 
       const lineTotal = unitPrice * quantity
       subtotal += lineTotal
       verifiedItems.push({
         product_id: product.id,
+        variant_id: variantId,
         name: product.name,
         slug: product.slug ?? null,
-        material: item.material ?? null,
+        material: resolvedMaterial,
         quantity,
         unit_price: unitPrice,
         total_price: lineTotal,
@@ -212,6 +239,17 @@ export async function POST(request: NextRequest) {
 
     // ── 3b. Decrement stock for items that track inventory ───────────────
     for (const item of verifiedItems) {
+      if (item.variant_id) {
+        const { data: variant } = await admin
+          .from('product_variants')
+          .select('stock_quantity')
+          .eq('id', item.variant_id)
+          .single()
+        if (variant?.stock_quantity != null) {
+          const next = Math.max(0, Number(variant.stock_quantity) - Number(item.quantity))
+          await admin.from('product_variants').update({ stock_quantity: next }).eq('id', item.variant_id)
+        }
+      }
       const { data: current } = await admin
         .from('products')
         .select('stock_quantity')

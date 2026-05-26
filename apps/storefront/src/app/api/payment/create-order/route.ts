@@ -8,6 +8,7 @@ import { getShippingMethod, isShippingMethodId } from '@/lib/shipping'
 
 interface CartItem {
   productId: string
+  variantId?: string | null
   name: string
   slug?: string
   price: number
@@ -77,14 +78,35 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      if (product.stock_quantity != null && product.stock_quantity < qty) {
+      let unitPrice = Number(product.price)
+      let variantStock: number | null = null
+
+      if (item.variantId) {
+        const { data: variant } = await admin
+          .from('product_variants')
+          .select('id, price_modifier, stock_quantity, is_active')
+          .eq('id', item.variantId)
+          .eq('product_id', item.productId)
+          .single()
+        if (!variant || !variant.is_active) {
+          return NextResponse.json(
+            { error: 'Selected material is no longer available' },
+            { status: 400 }
+          )
+        }
+        unitPrice += Number(variant.price_modifier) || 0
+        variantStock = variant.stock_quantity
+      }
+
+      const stockLimit = variantStock ?? product.stock_quantity
+      if (stockLimit != null && stockLimit < qty) {
         return NextResponse.json(
-          { error: `${product.name ?? 'A product'} only has ${product.stock_quantity} in stock` },
+          { error: `${product.name ?? 'A product'} only has ${stockLimit} in stock` },
           { status: 400 }
         )
       }
 
-      itemsTotal += Number(product.price) * qty
+      itemsTotal += unitPrice * qty
     }
 
     const shippingMethod = getShippingMethod(shippingMethodId)

@@ -177,6 +177,7 @@ export default function CheckoutPage() {
           orderData: {
             items: items.map((item) => ({
               productId: item.id,
+              variantId: item.variantId ?? null,
               name: item.name,
               slug: item.slug,
               price: item.price,
@@ -241,6 +242,7 @@ export default function CheckoutPage() {
           amount: orderTotal,
           items: items.map((item) => ({
             productId: item.id,
+            variantId: item.variantId ?? null,
             name: item.name,
             slug: item.slug,
             price: item.price,
