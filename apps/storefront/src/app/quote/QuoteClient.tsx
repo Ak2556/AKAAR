@@ -23,6 +23,7 @@ import {
   MAX_QUOTE_FILE_SIZE,
   isValidQuoteFile,
 } from "@/lib/quote-files";
+import { QuickQuoteEstimator } from "@/components/quote/QuickQuoteEstimator";
 
 const materials = [
   { id: "pla", name: "PLA", description: "Reliable entry point for prototype reviews" },
@@ -354,6 +355,13 @@ export default function QuotePage() {
             <span>{formError}</span>
           </div>
         ) : null}
+
+        <div className="mt-10">
+          <QuickQuoteEstimator
+            defaultMaterialId={selectedMaterial}
+            quantity={Number(quantity) > 0 ? Number(quantity) : 1}
+          />
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-10 grid gap-8 xl:grid-cols-[1.08fr_0.92fr]">
           <div className="space-y-8">
