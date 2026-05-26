@@ -6,7 +6,7 @@ import { ProductsShell } from "./ProductsShell";
 
 export type ProductSearchParams = Record<string, string | string[] | undefined>;
 
-const PRODUCTS_PER_PAGE = 12;
+const PRODUCTS_PER_PAGE = 16;
 const DEFAULT_VIEW: "grid" | "list" = "grid";
 
 function getParam(searchParams: ProductSearchParams, key: string) {
