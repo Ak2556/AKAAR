@@ -12,6 +12,8 @@ interface Product {
   price: number;
   description?: string;
   imageUrl?: string;
+  stockQuantity?: number | null;
+  leadTimeDays?: number | null;
 }
 
 interface ProductGridProps {
@@ -84,7 +86,12 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product, index) => (
         <div key={product.id}>
-          <ProductCard {...product} badge={badgeForRank(index + 1)} />
+          <ProductCard
+            {...product}
+            stockQuantity={product.stockQuantity ?? null}
+            leadTimeDays={product.leadTimeDays ?? null}
+            badge={badgeForRank(index + 1)}
+          />
         </div>
       ))}
     </div>

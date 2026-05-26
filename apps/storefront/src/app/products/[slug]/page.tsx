@@ -60,6 +60,8 @@ function mapProduct(p: Record<string, unknown>): ProductData {
     shortDescription: (p.short_description as string | null) ?? null,
     imageUrl:         (p.image_url as string | null) ?? null,
     images:           (p.images as string[] | null) ?? [],
+    stockQuantity:    (p.stock_quantity as number | null) ?? null,
+    leadTimeDays:     (p.lead_time_days as number | null) ?? null,
     meshFile: mf ? {
       id:               mf.id as string,
       storagePath:      (mf.storage_path as string | null) ?? null,
@@ -167,7 +169,12 @@ export default async function ProductDetailPage({
             "@type": "Offer",
             price: product.price,
             priceCurrency: "INR",
-            availability: "https://schema.org/InStock",
+            availability:
+              product.stockQuantity != null && product.stockQuantity <= 0
+                ? "https://schema.org/OutOfStock"
+                : product.leadTimeDays != null && product.leadTimeDays > 0
+                ? "https://schema.org/MadeToOrder"
+                : "https://schema.org/InStock",
             itemCondition: "https://schema.org/NewCondition",
             url: `${BASE_URL}/products/${product.slug}`,
             seller: { "@type": "Organization", name: "AKAAR 3D" },

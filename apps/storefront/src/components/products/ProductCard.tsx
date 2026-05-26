@@ -7,6 +7,10 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useSettings } from "@/context/SettingsContext";
 import { getProductCommerceProfile } from "@/lib/product-commerce";
+import {
+  availabilityToneClasses,
+  resolveAvailability,
+} from "@/lib/availability";
 
 interface ProductCardProps {
   id: string;
@@ -18,6 +22,8 @@ interface ProductCardProps {
   imageUrl?: string;
   badge?: string;
   stockLabel?: string;
+  stockQuantity?: number | null;
+  leadTimeDays?: number | null;
 }
 
 const badgeStyles: Record<string, string> = {
@@ -36,15 +42,22 @@ export function ProductCard({
   imageUrl,
   badge,
   stockLabel,
+  stockQuantity = null,
+  leadTimeDays = null,
 }: ProductCardProps) {
   const { addItem } = useCart();
   const toast = useToast();
   const { formatPrice } = useSettings();
   const profile = getProductCommerceProfile({ name, category, description });
+  const availability = resolveAvailability({ stockQuantity, leadTimeDays });
 
   const handleAddToCart = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    if (!availability.canPurchase) {
+      toast.error("This product is currently sold out");
+      return;
+    }
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
     addItem({ id, name, slug, price, image: imageUrl });
     toast.success(`Added ${name} to cart`);
@@ -106,6 +119,12 @@ export function ProductCard({
               </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="text-sm font-semibold text-[var(--text-primary)]">{formatPrice(price)}</span>
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${availabilityToneClasses(availability.tone)}`}
+                  title={availability.description}
+                >
+                  {availability.label}
+                </span>
                 {stockLabel ? (
                   <span className="text-xs font-medium text-amber-400">{stockLabel}</span>
                 ) : (
@@ -128,10 +147,11 @@ export function ProductCard({
             </div>
             <button
               onClick={handleAddToCart}
-              className="flex flex-col items-center justify-center gap-1 bg-[var(--bg-secondary)] px-4 py-4 sm:px-5 transition-colors hover:bg-[var(--surface-highlight)]"
+              disabled={!availability.canPurchase}
+              className="flex flex-col items-center justify-center gap-1 bg-[var(--bg-secondary)] px-4 py-4 sm:px-5 transition-colors hover:bg-[var(--surface-highlight)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--bg-secondary)]"
             >
               <ShoppingCart className="h-4 w-4 text-[var(--text-primary)]" />
-              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--text-primary)]">Add</span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--text-primary)]">{availability.canPurchase ? "Add" : "Sold out"}</span>
             </button>
           </div>
         </article>

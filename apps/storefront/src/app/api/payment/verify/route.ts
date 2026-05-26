@@ -210,6 +210,19 @@ export async function POST(request: NextRequest) {
     const { error: orderItemsError } = await admin.from('order_items').insert(orderItems)
     if (orderItemsError) throw orderItemsError
 
+    // ── 3b. Decrement stock for items that track inventory ───────────────
+    for (const item of verifiedItems) {
+      const { data: current } = await admin
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', item.product_id)
+        .single()
+      if (current?.stock_quantity != null) {
+        const next = Math.max(0, Number(current.stock_quantity) - Number(item.quantity))
+        await admin.from('products').update({ stock_quantity: next }).eq('id', item.product_id)
+      }
+    }
+
     // ── 4. Audit log ─────────────────────────────────────────────────────
     if (user) {
       await admin.from('audit_logs').insert({

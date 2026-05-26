@@ -18,6 +18,10 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ImageLightbox } from "@/components/products/ImageLightbox";
 import { ProductReviews } from "@/components/products/ProductReviews";
+import {
+  availabilityToneClasses,
+  resolveAvailability,
+} from "@/lib/availability";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
@@ -47,6 +51,8 @@ export interface ProductData {
   shortDescription: string | null;
   imageUrl: string | null;
   images: string[];
+  stockQuantity: number | null;
+  leadTimeDays: number | null;
   meshFile?: {
     id: string;
     storagePath?: string | null;
@@ -128,8 +134,25 @@ export function ProductDetailClient({
     return () => observer.disconnect();
   }, []);
 
+  const availability = useMemo(
+    () =>
+      resolveAvailability({
+        stockQuantity: product.stockQuantity,
+        leadTimeDays: product.leadTimeDays,
+      }),
+    [product.stockQuantity, product.leadTimeDays]
+  );
+
   const handleAddToCart = () => {
     if (price == null) return;
+    if (!availability.canPurchase) {
+      toast.error("This product is currently sold out");
+      return;
+    }
+    if (product.stockQuantity != null && quantity > product.stockQuantity) {
+      toast.error(`Only ${product.stockQuantity} unit${product.stockQuantity === 1 ? "" : "s"} left`);
+      return;
+    }
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
     addItem(
       { id: product.id, name: product.name, slug: product.slug, price, image: allImages[0] || undefined },
@@ -415,11 +438,13 @@ export function ProductDetailClient({
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center gap-3 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/8 px-4 py-3">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  <p className="text-xs font-medium text-emerald-400">
-                    Dispatches within 48 hours of order confirmation
-                  </p>
+                <div
+                  className={`mt-6 flex items-center gap-3 rounded-[1.2rem] px-4 py-3 ${availabilityToneClasses(availability.tone)}`}
+                >
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${availabilityToneClasses(availability.tone)}`}>
+                    {availability.label}
+                  </span>
+                  <p className="text-xs font-medium">{availability.description}</p>
                 </div>
 
                 <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
@@ -428,11 +453,11 @@ export function ProductDetailClient({
                     variant="primary"
                     size="lg"
                     className="w-full"
-                    disabled={price == null}
+                    disabled={price == null || !availability.canPurchase}
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    Add to Cart
+                    {availability.canPurchase ? "Add to Cart" : "Sold out"}
                   </Button>
                   <Button
                     variant="outline"

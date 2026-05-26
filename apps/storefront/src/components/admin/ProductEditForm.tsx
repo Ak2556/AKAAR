@@ -17,6 +17,8 @@ interface Product {
   isActive: boolean;
   imageUrl: string | null;
   images: string[];
+  stockQuantity: number | null;
+  leadTimeDays: number | null;
   modelUrl: string | null;
   modelFilename: string | null;
 }
@@ -135,6 +137,12 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
 
       // ── PATCH product ───────────────────────────────────────────────────
       setStage("saving");
+      const parseOptionalInt = (key: string): number | null => {
+        const raw = (fd.get(key) as string | null)?.trim();
+        if (!raw) return null;
+        const n = Number(raw);
+        return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+      };
       const body: Record<string, unknown> = {
         id: product.id,
         name,
@@ -146,6 +154,8 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
         isActive: fd.get("isActive") === "true",
         imageUrl,
         images: finalImages,
+        stockQuantity: parseOptionalInt("stockQuantity"),
+        leadTimeDays: parseOptionalInt("leadTimeDays"),
       };
 
       if (modelUrl !== undefined) {
@@ -258,6 +268,38 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
           <label htmlFor="isActive" className="text-sm font-medium">
             Product is live on the storefront
           </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Stock quantity</label>
+          <input
+            type="number"
+            name="stockQuantity"
+            min="0"
+            step="1"
+            defaultValue={product.stockQuantity ?? ""}
+            className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+            placeholder="Leave blank if made-to-order"
+          />
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Blank = unlimited (made to order). 0 = sold out.
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Lead time (working days)</label>
+          <input
+            type="number"
+            name="leadTimeDays"
+            min="0"
+            step="1"
+            defaultValue={product.leadTimeDays ?? ""}
+            className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+            placeholder="e.g. 7"
+          />
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Shown to customers when the item is made to order.
+          </p>
         </div>
 
         <div className="md:col-span-2">

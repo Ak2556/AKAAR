@@ -45,6 +45,8 @@ export interface Database {
           sort_order: number
           is_active: boolean
           price: number | null
+          stock_quantity: number | null
+          lead_time_days: number | null
           mesh_file_id: string | null
           created_at: string
           updated_at: string
@@ -61,6 +63,8 @@ export interface Database {
           sort_order?: number
           is_active?: boolean
           price?: number | null
+          stock_quantity?: number | null
+          lead_time_days?: number | null
           mesh_file_id?: string | null
         }
         Update: {
@@ -74,6 +78,8 @@ export interface Database {
           sort_order?: number
           is_active?: boolean
           price?: number | null
+          stock_quantity?: number | null
+          lead_time_days?: number | null
           mesh_file_id?: string | null
           updated_at?: string
         }

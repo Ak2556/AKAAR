@@ -131,6 +131,18 @@ export function ProductCreateForm({ existingProducts: _ }: ProductCreateFormProp
           isActive: isActiveRaw === "true",
           imageUrl,
           images: imageUrls.length > 0 ? imageUrls : undefined,
+          stockQuantity: (() => {
+            const raw = (fd.get("stockQuantity") as string | null)?.trim();
+            if (!raw) return null;
+            const n = Number(raw);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+          })(),
+          leadTimeDays: (() => {
+            const raw = (fd.get("leadTimeDays") as string | null)?.trim();
+            if (!raw) return null;
+            const n = Number(raw);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+          })(),
           modelUrl,
           modelFilename,
           modelSize,
@@ -247,6 +259,36 @@ export function ProductCreateForm({ existingProducts: _ }: ProductCreateFormProp
             <label htmlFor="isActive" className="text-sm font-medium">
               Product is live on the storefront
             </label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Stock quantity</label>
+            <input
+              type="number"
+              name="stockQuantity"
+              min="0"
+              step="1"
+              className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+              placeholder="Leave blank if made-to-order"
+            />
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Blank = unlimited (made to order). 0 = sold out.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Lead time (working days)</label>
+            <input
+              type="number"
+              name="leadTimeDays"
+              min="0"
+              step="1"
+              className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+              placeholder="e.g. 7 — leave blank for stocked items"
+            />
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Shown to customers when the item is made to order.
+            </p>
           </div>
 
           <div className="md:col-span-2">

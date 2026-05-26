@@ -67,6 +67,8 @@ export async function ProductIndexPage({
     price: product.price ? Number(product.price) : 0,
     description: product.description || product.shortDescription || undefined,
     imageUrl: product.imageUrl || undefined,
+    stockQuantity: product.stockQuantity,
+    leadTimeDays: product.leadTimeDays,
   }));
 
   return (

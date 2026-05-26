@@ -11,6 +11,8 @@ export interface CatalogProduct {
   description: string | null;
   shortDescription: string | null;
   imageUrl: string | null;
+  stockQuantity: number | null;
+  leadTimeDays: number | null;
 }
 
 export interface CategoryOption {
@@ -43,7 +45,7 @@ export interface CatalogResult {
 }
 
 const PRODUCT_SELECT =
-  "id,name,slug,category,price,description,short_description,image_url,created_at,sort_order";
+  "id,name,slug,category,price,description,short_description,image_url,stock_quantity,lead_time_days,created_at,sort_order";
 
 const validSortCols: Record<string, string> = {
   price: "price",
@@ -166,6 +168,8 @@ async function getCatalogUncached(options: CatalogQueryOptions = {}): Promise<Ca
       description: product.description ?? null,
       shortDescription: product.short_description ?? null,
       imageUrl: product.image_url ?? null,
+      stockQuantity: product.stock_quantity ?? null,
+      leadTimeDays: product.lead_time_days ?? null,
     }));
 
     const total = count ?? 0;

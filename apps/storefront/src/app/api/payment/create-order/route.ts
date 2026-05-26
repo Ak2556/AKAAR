@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
       const { data: product } = await admin
         .from('products')
-        .select('price')
+        .select('price, stock_quantity, name')
         .eq('id', item.productId)
         .eq('is_active', true)
         .single()
@@ -73,6 +73,13 @@ export async function POST(request: NextRequest) {
       if (!product || product.price == null) {
         return NextResponse.json(
           { error: 'One or more products could not be priced. Please refresh and try again.' },
+          { status: 400 }
+        )
+      }
+
+      if (product.stock_quantity != null && product.stock_quantity < qty) {
+        return NextResponse.json(
+          { error: `${product.name ?? 'A product'} only has ${product.stock_quantity} in stock` },
           { status: 400 }
         )
       }

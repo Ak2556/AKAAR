@@ -50,6 +50,8 @@ export async function POST(request: Request) {
       isActive,
       imageUrl,
       images,
+      stockQuantity,
+      leadTimeDays,
       modelUrl,
       modelFilename,
       modelSize,
@@ -100,6 +102,8 @@ export async function POST(request: Request) {
         image_url: imageUrl || null,
         images: images?.length ? images : (imageUrl ? [imageUrl] : null),
         price,
+        stock_quantity: stockQuantity == null ? null : Number(stockQuantity),
+        lead_time_days: leadTimeDays == null ? null : Number(leadTimeDays),
         is_active: isActive ?? true,
         mesh_file_id: meshFileId,
       })
@@ -185,9 +189,11 @@ export async function PATCH(request: Request) {
     price:             updates.price,
     is_active:         updates.isActive,
   }
-  if ('imageUrl' in updates)  productUpdate.image_url   = updates.imageUrl
-  if ('images' in updates)    productUpdate.images      = updates.images
-  if (meshFileId !== undefined) productUpdate.mesh_file_id = meshFileId
+  if ('imageUrl' in updates)       productUpdate.image_url      = updates.imageUrl
+  if ('images' in updates)         productUpdate.images         = updates.images
+  if ('stockQuantity' in updates)  productUpdate.stock_quantity = updates.stockQuantity == null ? null : Number(updates.stockQuantity)
+  if ('leadTimeDays' in updates)   productUpdate.lead_time_days = updates.leadTimeDays == null ? null : Number(updates.leadTimeDays)
+  if (meshFileId !== undefined)    productUpdate.mesh_file_id   = meshFileId
 
   const { data: product, error } = await admin
     .from('products')
