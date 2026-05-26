@@ -59,6 +59,14 @@ export default function CheckoutPage() {
     state: "idle" | "checking" | "ok" | "blocked";
     result: ServiceabilityResult | null;
   }>({ state: "idle", result: null });
+  const [couponInput, setCouponInput] = useState("");
+  const [couponState, setCouponState] = useState<{
+    status: "idle" | "checking" | "applied" | "rejected";
+    code: string | null;
+    discount: number;
+    freeShipping: boolean;
+    message: string | null;
+  }>({ status: "idle", code: null, discount: 0, freeShipping: false, message: null });
   const [formData, setFormData] = useState({
     email: "",
     phone: "",
@@ -124,9 +132,59 @@ export default function CheckoutPage() {
   };
 
   const selectedShipping = getShippingMethod(formData.shippingMethod);
-  const shippingCost = selectedShipping.price;
+  const baseShippingCost = selectedShipping.price;
+  const shippingCost = couponState.freeShipping ? 0 : baseShippingCost;
+  const couponDiscount = couponState.status === "applied" ? couponState.discount : 0;
   const tax = 0;
-  const orderTotal = totalPrice + shippingCost;
+  const orderTotal = Math.max(0, totalPrice + shippingCost - couponDiscount);
+
+  const applyCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) {
+      toast.error("Enter a coupon code");
+      return;
+    }
+    setCouponState((c) => ({ ...c, status: "checking", message: null }));
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, subtotal: totalPrice, shippingCost: baseShippingCost }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.valid) {
+        setCouponState({
+          status: "rejected",
+          code: null,
+          discount: 0,
+          freeShipping: false,
+          message: data.reason || "Coupon could not be applied",
+        });
+        return;
+      }
+      setCouponState({
+        status: "applied",
+        code: data.coupon?.code ?? code,
+        discount: Number(data.discount) || 0,
+        freeShipping: Boolean(data.freeShipping),
+        message: data.coupon?.description ?? null,
+      });
+      toast.success(`Coupon ${data.coupon?.code ?? code} applied`);
+    } catch {
+      setCouponState({
+        status: "rejected",
+        code: null,
+        discount: 0,
+        freeShipping: false,
+        message: "Could not validate coupon right now",
+      });
+    }
+  };
+
+  const clearCoupon = () => {
+    setCouponInput("");
+    setCouponState({ status: "idle", code: null, discount: 0, freeShipping: false, message: null });
+  };
   const featuredCartItem = items[0];
 
   const validateStep = () => {
@@ -189,6 +247,7 @@ export default function CheckoutPage() {
             tax,
             total: orderTotal,
             shippingMethodId: selectedShipping.id,
+            couponCode: couponState.status === "applied" ? couponState.code : null,
             shippingAddress: {
               firstName: formData.firstName,
               lastName: formData.lastName,
@@ -250,6 +309,7 @@ export default function CheckoutPage() {
             material: item.material,
           })),
           shippingMethodId: selectedShipping.id,
+          couponCode: couponState.status === "applied" ? couponState.code : null,
           shippingAddress: {
             firstName: formData.firstName,
             lastName: formData.lastName,
@@ -806,9 +866,49 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  <div className="mt-6 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)]">
+                  <div className="mt-6 rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+                    <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">Promo code</p>
+                    {couponState.status === "applied" ? (
+                      <div className="mt-2 flex items-center justify-between gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+                        <span>
+                          <span className="font-mono font-semibold">{couponState.code}</span>
+                          {couponState.freeShipping ? " · Free shipping" : ` · −${formatPrice(couponState.discount)}`}
+                        </span>
+                        <button type="button" onClick={clearCoupon} className="text-xs uppercase tracking-wider hover:underline">
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                          placeholder="WELCOME10"
+                          className="luxury-input flex-1 rounded-full px-4 py-2 text-sm font-mono uppercase"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={applyCoupon}
+                          disabled={couponState.status === "checking" || !couponInput.trim()}
+                        >
+                          Apply
+                        </Button>
+                      </div>
+                    )}
+                    {couponState.status === "rejected" && couponState.message ? (
+                      <p className="mt-2 text-xs text-rose-300">{couponState.message}</p>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-4 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)]">
                     <TotalRow label="Subtotal" value={formatPrice(totalPrice)} />
                     <TotalRow label="Shipping" value={shippingCost === 0 ? 'FREE' : formatPrice(shippingCost)} />
+                    {couponDiscount > 0 ? (
+                      <TotalRow label={`Coupon ${couponState.code ?? ""}`} value={`−${formatPrice(couponDiscount)}`} />
+                    ) : null}
                     <div className="flex items-center justify-between bg-[var(--bg-secondary)] px-4 py-5">
                       <div>
                         <span className="text-sm font-medium text-[var(--text-primary)]">Total</span>

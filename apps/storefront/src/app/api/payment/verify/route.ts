@@ -6,6 +6,7 @@ import crypto from 'crypto'
 import { withRateLimit, rateLimitPresets } from '@/lib/rate-limit'
 import { fetchPaymentDetails } from '@/lib/razorpay'
 import { getShippingMethod, isShippingMethodId } from '@/lib/shipping'
+import { evaluateCoupon, type CouponRecord } from '@/lib/coupons'
 
 interface SubmittedOrderItem {
   productId?: string
@@ -109,6 +110,7 @@ export async function POST(request: NextRequest) {
       shippingAddress = {},
       email = '',
       phone = '',
+      couponCode = null,
     } = orderData ?? {}
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -194,7 +196,43 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const total = subtotal + shippingCost + tax
+    // ── Coupon validation (optional) ─────────────────────────────────────
+    let couponId: string | null = null
+    let couponDiscount = 0
+    let resolvedCouponCode: string | null = null
+    let effectiveShipping = shippingCost
+    if (typeof couponCode === 'string' && couponCode.trim()) {
+      const code = couponCode.trim().toUpperCase()
+      const { data: couponRow } = await admin.from('coupons').select('*').eq('code', code).single()
+      if (couponRow) {
+        const coupon: CouponRecord = {
+          id: couponRow.id,
+          code: couponRow.code,
+          description: couponRow.description,
+          type: couponRow.type,
+          value: Number(couponRow.value) || 0,
+          minOrderTotal: couponRow.min_order_total == null ? null : Number(couponRow.min_order_total),
+          maxDiscount: couponRow.max_discount == null ? null : Number(couponRow.max_discount),
+          maxUses: couponRow.max_uses,
+          usedCount: couponRow.used_count ?? 0,
+          startsAt: couponRow.starts_at,
+          expiresAt: couponRow.expires_at,
+          isActive: couponRow.is_active,
+        }
+        const evaluation = evaluateCoupon(coupon, { subtotal, shippingCost })
+        if (!evaluation.valid) {
+          return NextResponse.json({ error: evaluation.reason ?? 'Invalid coupon' }, { status: 400 })
+        }
+        couponId = coupon.id
+        resolvedCouponCode = coupon.code
+        couponDiscount = evaluation.discount ?? 0
+        if (evaluation.freeShipping) effectiveShipping = 0
+      } else {
+        return NextResponse.json({ error: 'Coupon not found' }, { status: 400 })
+      }
+    }
+
+    const total = Math.max(0, subtotal + effectiveShipping + tax - couponDiscount)
     const expectedAmountPaise = Math.round(total * 100)
     const paidAmountPaise = Number(payment.amount)
 
@@ -210,7 +248,7 @@ export async function POST(request: NextRequest) {
         order_number:        orderNumber,
         user_id:             user?.id ?? null,
         subtotal,
-        shipping_cost:       shippingCost,
+        shipping_cost:       effectiveShipping,
         tax,
         total,
         status:              'CONFIRMED',
@@ -222,6 +260,9 @@ export async function POST(request: NextRequest) {
         razorpay_order_id:   razorpay_order_id,
         razorpay_payment_id: razorpay_payment_id,
         razorpay_signature:  razorpay_signature,
+        coupon_id:           couponId,
+        coupon_code:         resolvedCouponCode,
+        coupon_discount:     couponDiscount,
       })
       .select()
       .single()
@@ -258,6 +299,17 @@ export async function POST(request: NextRequest) {
       if (current?.stock_quantity != null) {
         const next = Math.max(0, Number(current.stock_quantity) - Number(item.quantity))
         await admin.from('products').update({ stock_quantity: next }).eq('id', item.product_id)
+      }
+    }
+
+    // ── 3c. Coupon usage counter ─────────────────────────────────────────
+    if (couponId) {
+      const { data: c } = await admin.from('coupons').select('used_count').eq('id', couponId).single()
+      if (c) {
+        await admin
+          .from('coupons')
+          .update({ used_count: (Number(c.used_count) || 0) + 1 })
+          .eq('id', couponId)
       }
     }
 

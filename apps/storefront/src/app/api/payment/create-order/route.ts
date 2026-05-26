@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { hasRazorpayCredentials } from '@/lib/local-runtime'
 import { withRateLimit, rateLimitPresets } from '@/lib/rate-limit'
 import { getShippingMethod, isShippingMethodId } from '@/lib/shipping'
+import { evaluateCoupon, type CouponRecord } from '@/lib/coupons'
 
 interface CartItem {
   productId: string
@@ -35,11 +36,13 @@ export async function POST(request: NextRequest) {
       currency = 'INR',
       receipt,
       shippingMethodId = 'standard',
+      couponCode = null,
     } = body as {
       items: CartItem[]
       currency?: string
       receipt?: string
       shippingMethodId?: string
+      couponCode?: string | null
       // amount from client is intentionally ignored — computed server-side
     }
 
@@ -110,8 +113,40 @@ export async function POST(request: NextRequest) {
     }
 
     const shippingMethod = getShippingMethod(shippingMethodId)
-    const shippingCost = shippingMethod.price
-    const serverTotal = itemsTotal + shippingCost
+    let shippingCost = shippingMethod.price
+
+    let couponDiscount = 0
+    let appliedCouponCode: string | null = null
+    if (typeof couponCode === 'string' && couponCode.trim()) {
+      const code = couponCode.trim().toUpperCase()
+      const { data: couponRow } = await admin.from('coupons').select('*').eq('code', code).single()
+      if (!couponRow) {
+        return NextResponse.json({ error: 'Coupon not found' }, { status: 400 })
+      }
+      const coupon: CouponRecord = {
+        id: couponRow.id,
+        code: couponRow.code,
+        description: couponRow.description,
+        type: couponRow.type,
+        value: Number(couponRow.value) || 0,
+        minOrderTotal: couponRow.min_order_total == null ? null : Number(couponRow.min_order_total),
+        maxDiscount: couponRow.max_discount == null ? null : Number(couponRow.max_discount),
+        maxUses: couponRow.max_uses,
+        usedCount: couponRow.used_count ?? 0,
+        startsAt: couponRow.starts_at,
+        expiresAt: couponRow.expires_at,
+        isActive: couponRow.is_active,
+      }
+      const evaluation = evaluateCoupon(coupon, { subtotal: itemsTotal, shippingCost })
+      if (!evaluation.valid) {
+        return NextResponse.json({ error: evaluation.reason ?? 'Invalid coupon' }, { status: 400 })
+      }
+      couponDiscount = evaluation.discount ?? 0
+      appliedCouponCode = coupon.code
+      if (evaluation.freeShipping) shippingCost = 0
+    }
+
+    const serverTotal = Math.max(0, itemsTotal + shippingCost - couponDiscount)
 
     if (serverTotal <= 0) {
       return NextResponse.json({ error: 'Invalid order total' }, { status: 400 })
@@ -127,6 +162,8 @@ export async function POST(request: NextRequest) {
         shippingMethodId: shippingMethod.id,
         shippingMethod: shippingMethod.name,
         userId: user?.id ?? 'guest',
+        couponCode: appliedCouponCode ?? '',
+        couponDiscount: String(couponDiscount),
       },
     })
 
@@ -141,6 +178,8 @@ export async function POST(request: NextRequest) {
       verifiedTotal: serverTotal,
       shippingCost,
       shippingMethodId: shippingMethod.id,
+      couponDiscount,
+      couponCode: appliedCouponCode,
     })
   } catch (error) {
     console.error('Error creating Razorpay order:', error)
