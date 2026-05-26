@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/Button";
 import { ImageLightbox } from "@/components/products/ImageLightbox";
 import { ProductReviews } from "@/components/products/ProductReviews";
 import { VariantPicker, type Variant } from "@/components/products/VariantPicker";
+import { ArQuickLook } from "@/components/products/ArQuickLook";
 import {
   availabilityToneClasses,
   resolveAvailability,
@@ -333,6 +334,13 @@ export function ProductDetailClient({
                       Zoom
                     </button>
                   )}
+
+                  {/* AR Quick Look — only shows when we have a GLB/GLTF source */}
+                  {has3D && product.meshFile?.storagePath ? (
+                    <div className="absolute left-6 top-6 z-10 sm:left-7 sm:top-7">
+                      <ArQuickLook modelUrl={product.meshFile.storagePath} name={product.name} />
+                    </div>
+                  ) : null}
                   {showViewer ? (
                     <ProductViewer3D
                       name={product.name}
