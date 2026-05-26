@@ -12,9 +12,11 @@ import {
   ShoppingCart,
   Truck,
   Zap,
+  ZoomIn,
 } from "lucide-react";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { ImageLightbox } from "@/components/products/ImageLightbox";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
@@ -68,6 +70,7 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [showViewer, setShowViewer] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [isCartButtonVisible, setIsCartButtonVisible] = useState(true);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
@@ -255,11 +258,17 @@ export function ProductDetailClient({
                 >
                   {/* All images in DOM — opacity-toggled for instant switching */}
                   {allImages.map((img, i) => (
-                    <div
+                    <button
+                      type="button"
                       key={img}
-                      className={`absolute inset-4 sm:inset-5 rounded-[1rem] transition-opacity duration-150 ${
+                      onClick={() => {
+                        if (showViewer || failedImages.has(img)) return;
+                        if (selectedImageIdx === i) setLightboxOpen(true);
+                      }}
+                      aria-label={`Open ${i === 0 ? product.name : `image ${i + 1}`} in zoomable viewer`}
+                      className={`absolute inset-4 sm:inset-5 appearance-none border-0 bg-transparent p-0 rounded-[1rem] transition-opacity duration-150 ${
                         !showViewer && selectedImageIdx === i && !failedImages.has(img)
-                          ? "opacity-100"
+                          ? "opacity-100 cursor-zoom-in"
                           : "opacity-0 pointer-events-none"
                       }`}
                     >
@@ -272,8 +281,21 @@ export function ProductDetailClient({
                         priority={i === 0}
                         onError={() => handleImageError(img)}
                       />
-                    </div>
+                    </button>
                   ))}
+
+                  {/* Zoom hint pill — only when an image (not the 3D viewer) is showing */}
+                  {!showViewer && allImages.length > 0 && !failedImages.has(allImages[selectedImageIdx]) && (
+                    <button
+                      type="button"
+                      onClick={() => setLightboxOpen(true)}
+                      className="absolute right-6 top-6 z-10 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/95 backdrop-blur-sm transition-colors hover:bg-black/75 sm:right-7 sm:top-7"
+                      aria-label="Open zoomable viewer"
+                    >
+                      <ZoomIn className="h-3 w-3" />
+                      Zoom
+                    </button>
+                  )}
                   {showViewer ? (
                     <ProductViewer3D
                       name={product.name}
@@ -622,6 +644,14 @@ export function ProductDetailClient({
           </Button>
         </div>
       </div>
+
+      <ImageLightbox
+        images={allImages}
+        startIndex={selectedImageIdx}
+        alt={product.name}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }
