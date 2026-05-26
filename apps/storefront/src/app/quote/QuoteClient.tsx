@@ -24,6 +24,8 @@ import {
   isValidQuoteFile,
 } from "@/lib/quote-files";
 import { QuickQuoteEstimator } from "@/components/quote/QuickQuoteEstimator";
+import { parseStl } from "@/lib/stl-geometry";
+import { PRINTER_BUILD_VOLUME_MM } from "@/lib/pricing";
 
 const materials = [
   { id: "pla", name: "PLA", description: "Reliable entry point for prototype reviews" },
@@ -41,6 +43,14 @@ const services = [
 
 const acceptedFileTypes = ALLOWED_QUOTE_EXTENSIONS.join(",");
 
+interface PrintabilityReport {
+  status: "ok" | "warning" | "error" | "skipped";
+  volumeMm3?: number;
+  boundingBoxMm?: { x: number; y: number; z: number };
+  triangleCount?: number;
+  messages: string[];
+}
+
 interface UploadedFile {
   id: string;
   name: string;
@@ -48,6 +58,7 @@ interface UploadedFile {
   type: string;
   file: File;
   fingerprint: string;
+  printability?: PrintabilityReport;
 }
 
 interface UploadedQuoteFile {
@@ -61,6 +72,51 @@ interface UploadedQuoteFile {
 interface SubmissionResult {
   quoteNumber: string;
   email: string;
+}
+
+async function runPrintabilityCheck(file: File): Promise<PrintabilityReport> {
+  if (file.size > 50 * 1024 * 1024) {
+    return {
+      status: "skipped",
+      messages: ["File too large for in-browser analysis — we'll review it manually."],
+    };
+  }
+  try {
+    const buffer = await file.arrayBuffer();
+    const summary = parseStl(buffer);
+    const messages: string[] = [];
+    let status: PrintabilityReport["status"] = "ok";
+    const bb = summary.boundingBoxMm;
+    if (
+      bb.x > PRINTER_BUILD_VOLUME_MM.x ||
+      bb.y > PRINTER_BUILD_VOLUME_MM.y ||
+      bb.z > PRINTER_BUILD_VOLUME_MM.z
+    ) {
+      status = "warning";
+      messages.push(
+        `Part is ${bb.x.toFixed(0)} × ${bb.y.toFixed(0)} × ${bb.z.toFixed(0)} mm — larger than our ${PRINTER_BUILD_VOLUME_MM.x}×${PRINTER_BUILD_VOLUME_MM.y}×${PRINTER_BUILD_VOLUME_MM.z} mm build volume. We'll split it into sub-parts.`
+      );
+    }
+    if (summary.volumeMm3 <= 0) {
+      status = "warning";
+      messages.push("Mesh does not appear closed — volume could not be measured. Print may need manual repair.");
+    }
+    if (summary.triangleCount > 1_500_000) {
+      messages.push("Very high triangle count — consider decimating before print.");
+    }
+    return {
+      status,
+      volumeMm3: summary.volumeMm3,
+      boundingBoxMm: bb,
+      triangleCount: summary.triangleCount,
+      messages,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      messages: [error instanceof Error ? error.message : "STL parse failed"],
+    };
+  }
 }
 
 export default function QuotePage() {
@@ -169,6 +225,31 @@ export default function QuotePage() {
     } else {
       setFormError(null);
     }
+
+    // Kick off async printability checks for any STL files. Result is
+    // merged into the same UploadedFile row once available.
+    acceptedFiles.forEach((entry) => {
+      const ext = entry.name.toLowerCase().split(".").pop();
+      if (ext !== "stl") {
+        entry.printability = { status: "skipped", messages: [] };
+        return;
+      }
+      runPrintabilityCheck(entry.file)
+        .then((report) => {
+          setFiles((current) =>
+            current.map((f) => (f.id === entry.id ? { ...f, printability: report } : f))
+          );
+        })
+        .catch(() => {
+          setFiles((current) =>
+            current.map((f) =>
+              f.id === entry.id
+                ? { ...f, printability: { status: "skipped", messages: [] } }
+                : f
+            )
+          );
+        });
+    });
 
     setFiles((current) => {
       const seen = new Set(current.map((file) => file.fingerprint));
@@ -397,20 +478,57 @@ export default function QuotePage() {
 
               {files.length > 0 ? (
                 <div className="mt-6 space-y-3">
-                  {files.map((file) => (
-                    <div key={file.id} className="flex items-center justify-between gap-4 rounded-[1.3rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <FileText className="h-5 w-5 flex-shrink-0 text-[var(--accent)]" />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-[var(--text-primary)]">{file.name}</p>
-                          <p className="text-xs text-[var(--text-muted)]">{formatFileSize(file.size)} attached for review</p>
+                  {files.map((file) => {
+                    const printability = file.printability;
+                    return (
+                      <div key={file.id} className="rounded-[1.3rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-4">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <FileText className="h-5 w-5 flex-shrink-0 text-[var(--accent)]" />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-[var(--text-primary)]">{file.name}</p>
+                              <p className="text-xs text-[var(--text-muted)]">{formatFileSize(file.size)} attached for review</p>
+                            </div>
+                          </div>
+                          <button type="button" onClick={() => removeFile(file.id)} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]">
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
+                        {printability && printability.status !== "skipped" ? (
+                          <div
+                            className={`mt-3 rounded-[1rem] border px-3 py-2 text-xs ${
+                              printability.status === "ok"
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                                : printability.status === "warning"
+                                  ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                                  : "border-rose-500/30 bg-rose-500/10 text-rose-200"
+                            }`}
+                          >
+                            {printability.boundingBoxMm ? (
+                              <p className="font-medium">
+                                {printability.boundingBoxMm.x.toFixed(0)} × {printability.boundingBoxMm.y.toFixed(0)} × {printability.boundingBoxMm.z.toFixed(0)} mm
+                                {printability.volumeMm3 != null
+                                  ? ` · ${(printability.volumeMm3 / 1000).toFixed(2)} cm³`
+                                  : ""}
+                                {printability.triangleCount != null
+                                  ? ` · ${printability.triangleCount.toLocaleString()} tris`
+                                  : ""}
+                              </p>
+                            ) : null}
+                            {printability.messages.length === 0 && printability.status === "ok" ? (
+                              <p className="mt-0.5 opacity-90">Fits our build volume · ready to print</p>
+                            ) : (
+                              <ul className="mt-1 space-y-0.5 opacity-90">
+                                {printability.messages.map((m, i) => (
+                                  <li key={i}>· {m}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
-                      <button type="button" onClick={() => removeFile(file.id)} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : null}
             </section>
