@@ -21,6 +21,7 @@ import { LazyAIChatWidget } from "@/components/layout/LazyAIChatWidget";
 import { getRuntimeCapabilities } from "@/lib/runtime-capabilities";
 import { DevelopmentSetupBanner } from "@/components/layout/DevelopmentSetupBanner";
 import { RecentlyViewedProvider } from "@/context/RecentlyViewedContext";
+import { Analytics } from "@/components/analytics/Analytics";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -151,6 +152,7 @@ export default function RootLayout({
                         <LazyAIChatWidget />
                         <LazyCartDrawer />
                       </CartProvider>
+                      <Analytics />
                       </RecentlyViewedProvider>
                     </WishlistProvider>
                   </ToastProvider>
