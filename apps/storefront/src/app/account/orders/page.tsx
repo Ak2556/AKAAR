@@ -14,15 +14,22 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmptyStatePanel } from "@/components/ui/storefront-primitives";
 import { useSettings } from "@/context/SettingsContext";
+import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
+import { useRouter } from "next/navigation";
 
 interface OrderItem {
   id: string;
+  productId?: string | null;
+  slug?: string | null;
   name: string;
   material: string | null;
   quantity: number;
+  unitPrice?: number | null;
 }
 
 interface Order {
@@ -47,10 +54,36 @@ const statusConfig: Record<string, { icon: LucideIcon; tone: string; label: stri
 
 export default function OrdersPage() {
   const { formatPrice } = useSettings();
+  const { addItem } = useCart();
+  const toast = useToast();
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const handleReorder = (order: Order) => {
+    let added = 0;
+    for (const item of order.items) {
+      if (!item.productId || !item.slug || item.unitPrice == null) continue;
+      addItem(
+        {
+          id: item.productId,
+          name: item.name,
+          slug: item.slug,
+          price: Number(item.unitPrice) || 0,
+        },
+        item.quantity
+      );
+      added += 1;
+    }
+    if (added === 0) {
+      toast.error("These items can't be reordered right now");
+      return;
+    }
+    toast.success(`Added ${added} item${added === 1 ? "" : "s"} to your cart`);
+    router.push("/cart");
+  };
 
   useEffect(() => {
     async function fetchOrders() {
@@ -210,6 +243,23 @@ export default function OrdersPage() {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleReorder(order)}
+                  disabled={order.status === "CANCELLED" || order.items.every((it) => !it.productId || !it.slug)}
+                >
+                  <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                  Reorder
+                </Button>
+                <Link href={`/account/orders/${order.id}`}>
+                  <Button variant="primary" size="sm">
+                    View details
+                    <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  </Button>
+                </Link>
               </div>
             </motion.article>
           ))}

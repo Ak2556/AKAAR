@@ -17,6 +17,7 @@ import {
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ImageLightbox } from "@/components/products/ImageLightbox";
+import { ProductReviews } from "@/components/products/ProductReviews";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
@@ -487,6 +488,8 @@ export function ProductDetailClient({
             </motion.div>
           </div>
         </section>
+
+        <ProductReviews productSlug={product.slug} />
 
         {/* Recently Viewed — excludes current product */}
         {(() => {

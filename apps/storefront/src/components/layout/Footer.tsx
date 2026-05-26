@@ -99,12 +99,18 @@ export function Footer() {
 
           <div className="flex flex-col gap-4 border-t border-[var(--border)] px-6 py-6 text-sm text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between lg:px-10">
             <p>&copy; {new Date().getFullYear()} AKAAR. Precision parts, responsibly shipped.</p>
-            <div className="flex gap-5">
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
               <Link href="/privacy" className="transition-colors hover:text-[var(--text-primary)]">
                 Privacy
               </Link>
               <Link href="/terms" className="transition-colors hover:text-[var(--text-primary)]">
                 Terms
+              </Link>
+              <Link href="/shipping-policy" className="transition-colors hover:text-[var(--text-primary)]">
+                Shipping
+              </Link>
+              <Link href="/refund-policy" className="transition-colors hover:text-[var(--text-primary)]">
+                Refunds
               </Link>
             </div>
           </div>

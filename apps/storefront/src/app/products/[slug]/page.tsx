@@ -144,14 +144,23 @@ export default async function ProductDetailPage({
   const product = mapProduct(raw as Record<string, unknown>);
   const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://akaar3d.in";
 
+  const allImages = product.images?.length
+    ? product.images
+    : product.imageUrl
+    ? [product.imageUrl]
+    : [];
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
+    sku: product.slug,
     description: product.shortDescription ?? product.description ?? undefined,
-    image: product.imageUrl ?? undefined,
+    image: allImages.length > 0 ? allImages : undefined,
     url: `${BASE_URL}/products/${product.slug}`,
+    category: product.category ?? undefined,
     brand: { "@type": "Brand", name: "AKAAR 3D" },
+    manufacturer: { "@type": "Organization", name: "AKAAR 3D", url: BASE_URL },
     ...(product.price != null
       ? {
           offers: {
@@ -159,8 +168,27 @@ export default async function ProductDetailPage({
             price: product.price,
             priceCurrency: "INR",
             availability: "https://schema.org/InStock",
+            itemCondition: "https://schema.org/NewCondition",
             url: `${BASE_URL}/products/${product.slug}`,
             seller: { "@type": "Organization", name: "AKAAR 3D" },
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "INR" },
+              shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
+              deliveryTime: {
+                "@type": "ShippingDeliveryTime",
+                handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 2, unitCode: "DAY" },
+                transitTime:  { "@type": "QuantitativeValue", minValue: 3, maxValue: 7, unitCode: "DAY" },
+              },
+            },
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "IN",
+              returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: 7,
+              returnMethod: "https://schema.org/ReturnByMail",
+              returnFees: "https://schema.org/ReturnShippingFees",
+            },
           },
         }
       : {}),
