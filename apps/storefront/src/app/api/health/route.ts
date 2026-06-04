@@ -4,7 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET() {
   try {
     const supabase = await createClient()
-    const { error } = await supabase.from('profiles').select('id').limit(1)
+    // Probe a table the anon role is permitted to read. `profiles` SELECT is
+    // intentionally revoked from anon (see supabase/migrations/002_security_fixes.sql),
+    // so querying it here always failed with "permission denied" and reported a
+    // false "database disconnected". `products` is public for the storefront catalog.
+    const { error } = await supabase.from('products').select('id').limit(1)
     if (error) throw error
 
     return NextResponse.json({
