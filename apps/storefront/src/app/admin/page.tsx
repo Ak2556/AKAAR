@@ -8,12 +8,7 @@ import {
   Package,
   MessageSquare,
   Users,
-  Clock,
-  CheckCircle2,
-  Truck,
-  XCircle,
   ChevronRight,
-  AlertCircle,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -124,10 +119,10 @@ export default async function AdminDashboardPage() {
       {/* ── Stat cards ─────────────────────────────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
         {/* Revenue */}
-        <div className="luxury-card rounded-[1.6rem] p-6">
+        <div className="luxury-card p-6">
           <div className="flex items-start justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-[var(--accent)]/15">
-              <TrendingUp className="h-5 w-5 text-[var(--accent)]" />
+            <div className="luxury-tile h-10 w-10">
+              <TrendingUp className="h-5 w-5" />
             </div>
             <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
               {fmt(monthRevenue)} this month
@@ -138,10 +133,10 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Orders */}
-        <div className="luxury-card rounded-[1.6rem] p-6">
+        <div className="luxury-card p-6">
           <div className="flex items-start justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-sky-500/15">
-              <ShoppingBag className="h-5 w-5 text-sky-300" />
+            <div className="luxury-tile h-10 w-10">
+              <ShoppingBag className="h-5 w-5" />
             </div>
             {pendingOrders > 0 && (
               <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
@@ -158,10 +153,10 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Products */}
-        <div className="luxury-card rounded-[1.6rem] p-6">
+        <div className="luxury-card p-6">
           <div className="flex items-start justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-violet-500/15">
-              <Package className="h-5 w-5 text-violet-300" />
+            <div className="luxury-tile h-10 w-10">
+              <Package className="h-5 w-5" />
             </div>
           </div>
           <p className="mt-5 text-3xl font-bold text-[var(--text-primary)]">{activeProducts}</p>
@@ -172,10 +167,10 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Quotes + Customers */}
-        <div className="luxury-card rounded-[1.6rem] p-6">
+        <div className="luxury-card p-6">
           <div className="flex items-start justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-teal-500/15">
-              <MessageSquare className="h-5 w-5 text-teal-300" />
+            <div className="luxury-tile h-10 w-10">
+              <MessageSquare className="h-5 w-5" />
             </div>
             {pendingQuotes > 0 && (
               <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
@@ -192,14 +187,14 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* ── Order status breakdown ──────────────────────────────────────── */}
-      <div className="mb-8 luxury-card rounded-[1.6rem] p-5">
+      <div className="mb-8 luxury-card p-5">
         <p className="mb-4 text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">Orders by Status</p>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
           {Object.entries(ORDER_STATUS).map(([key, cfg]) => (
             <Link
               key={key}
               href={`/admin/orders?status=${key}`}
-              className="group rounded-[1rem] border border-[var(--border)] bg-[var(--bg-primary)] p-3 text-center transition-colors hover:border-[var(--accent)]/40"
+              className="group rounded-[var(--rad-sm)] border border-[var(--border)] bg-[var(--bg-primary)] p-3 text-center transition-colors hover:border-[var(--accent)]/40"
             >
               <p className="text-2xl font-bold text-[var(--text-primary)]">
                 {orderCounts[key] ?? 0}
@@ -214,7 +209,7 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-6 xl:grid-cols-2">
 
         {/* Recent Orders */}
-        <div className="luxury-card rounded-[1.6rem] overflow-hidden">
+        <div className="luxury-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
             <p className="text-sm font-semibold text-[var(--text-primary)]">Recent Orders</p>
             <Link
@@ -260,7 +255,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Recent Quotes */}
-        <div className="luxury-card rounded-[1.6rem] overflow-hidden">
+        <div className="luxury-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
             <p className="text-sm font-semibold text-[var(--text-primary)]">Recent Quote Requests</p>
             <Link
@@ -310,10 +305,10 @@ export default async function AdminDashboardPage() {
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
         <Link
           href="/admin/products"
-          className="flex items-center gap-4 rounded-[1.4rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4 transition-colors hover:border-[var(--accent)]/40"
+          className="luxury-card-interactive flex items-center gap-4 rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-violet-500/15">
-            <Package className="h-5 w-5 text-violet-300" />
+          <div className="luxury-tile h-10 w-10 shrink-0">
+            <Package className="h-5 w-5" />
           </div>
           <div>
             <p className="text-sm font-semibold text-[var(--text-primary)]">Manage Products</p>
@@ -324,10 +319,10 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/quotes"
-          className="flex items-center gap-4 rounded-[1.4rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4 transition-colors hover:border-[var(--accent)]/40"
+          className="luxury-card-interactive flex items-center gap-4 rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-teal-500/15">
-            <MessageSquare className="h-5 w-5 text-teal-300" />
+          <div className="luxury-tile h-10 w-10 shrink-0">
+            <MessageSquare className="h-5 w-5" />
           </div>
           <div>
             <p className="text-sm font-semibold text-[var(--text-primary)]">Review Quotes</p>
@@ -340,10 +335,10 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/customers"
-          className="flex items-center gap-4 rounded-[1.4rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4 transition-colors hover:border-[var(--accent)]/40"
+          className="luxury-card-interactive flex items-center gap-4 rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-sky-500/15">
-            <Users className="h-5 w-5 text-sky-300" />
+          <div className="luxury-tile h-10 w-10 shrink-0">
+            <Users className="h-5 w-5" />
           </div>
           <div>
             <p className="text-sm font-semibold text-[var(--text-primary)]">Customers</p>
