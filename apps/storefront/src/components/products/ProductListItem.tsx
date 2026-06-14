@@ -52,7 +52,7 @@ export function ProductListItem({
 
   return (
     <Link href={`/products/${slug}`} className="block">
-      <article className="luxury-card group overflow-hidden rounded-[2.15rem]">
+      <article className="luxury-card group overflow-hidden rounded-[var(--rad-xl)]">
         <div className="grid gap-px bg-[var(--border)] xl:grid-cols-[0.95fr_1.05fr]">
           <div className="luxury-stage relative min-h-[320px] overflow-hidden p-6">
             <div className="absolute left-6 top-6 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.42)] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)] backdrop-blur-md">
@@ -76,7 +76,7 @@ export function ProductListItem({
                 />
               </div>
             ) : (
-              <div className="absolute inset-x-6 bottom-6 top-18 overflow-hidden rounded-[1.7rem] border border-[var(--border)] bg-[linear-gradient(145deg,#15181d_0%,#232a33_50%,#101114_100%)]">
+              <div className="absolute inset-x-6 bottom-6 top-18 overflow-hidden rounded-[var(--rad-lg)] border border-[var(--border)] bg-[linear-gradient(145deg,#15181d_0%,#232a33_50%,#101114_100%)]">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(214,178,114,0.16),transparent_30%),radial-gradient(circle_at_80%_74%,rgba(125,211,199,0.1),transparent_28%)]" />
               </div>
             )}
@@ -92,7 +92,7 @@ export function ProductListItem({
                 {description || "Preview-led part listing with production-aware geometry, staging, and configurable finish options."}
               </p>
 
-              <div className="mt-8 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+              <div className="mt-8 grid gap-px overflow-hidden rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
                 <SpecCell label="Starting from" value={formatPrice(price)} />
                 <SpecCell label="Material" value={profile.material} />
                 <SpecCell label="Dispatch" value={profile.dispatch} />

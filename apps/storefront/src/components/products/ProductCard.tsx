@@ -66,7 +66,7 @@ export function ProductCard({
   return (
     <div className="group h-full transition-transform duration-300 hover:-translate-y-1">
       <Link href={`/products/${slug}`} className="block h-full">
-        <article className="luxury-card flex h-full flex-col overflow-hidden rounded-[2.1rem]">
+        <article className="luxury-card flex h-full flex-col overflow-hidden rounded-[var(--rad-xl)]">
           <div className="luxury-stage relative aspect-[1.05/1] overflow-hidden px-5 py-5 sm:px-6">
             <div className="absolute left-5 top-5 z-10 rounded-full border border-[var(--border-accent)] bg-[rgba(9,9,11,0.42)] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)] backdrop-blur-md">
               {category}
@@ -101,7 +101,7 @@ export function ProductCard({
                 />
               </div>
             ) : (
-              <div className="absolute inset-x-5 bottom-5 top-20 overflow-hidden rounded-[1.7rem] border border-[var(--border)] bg-[linear-gradient(145deg,#14171c_0%,#232a33_52%,#101114_100%)]">
+              <div className="absolute inset-x-5 bottom-5 top-20 overflow-hidden rounded-[var(--rad-lg)] border border-[var(--border)] bg-[linear-gradient(145deg,#14171c_0%,#232a33_52%,#101114_100%)]">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(214,178,114,0.18),transparent_28%),radial-gradient(circle_at_78%_76%,rgba(125,211,199,0.12),transparent_28%)]" />
                 <div className="absolute inset-x-8 top-8 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between">

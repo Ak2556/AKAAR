@@ -11,7 +11,7 @@ export async function ProductsShowcase() {
   return (
     <section className="px-4 py-14 sm:px-6 sm:py-18">
       <div className="mx-auto max-w-7xl">
-        <div className="luxury-panel rounded-[2.2rem] px-6 py-8 sm:px-8 lg:px-10">
+        <div className="luxury-panel rounded-[var(--rad-xl)] px-6 py-8 sm:px-8 lg:px-10">
           <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl animate-fade-in-up">
               <span className="luxury-kicker">Studio Collection</span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { PackageSearch } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { ProductListItem } from "./ProductListItem";
 import { badgeForRank } from "@/lib/recommendations";
@@ -31,22 +32,22 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
         : "space-y-4"
       }>
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="animate-pulse">
+          <div key={i}>
             {viewMode === "grid" ? (
               <>
-                <div className="aspect-square bg-[var(--bg-tertiary)] rounded-xl" />
+                <div className="skeleton aspect-square rounded-[var(--rad-xl)]" />
                 <div className="mt-4 space-y-2">
-                  <div className="h-5 bg-[var(--bg-tertiary)] rounded w-3/4" />
-                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-1/2" />
+                  <div className="skeleton h-5 w-3/4" />
+                  <div className="skeleton h-4 w-1/2" />
                 </div>
               </>
             ) : (
-              <div className="flex gap-4 p-4 border border-[var(--border)] rounded-xl">
-                <div className="w-32 h-32 bg-[var(--bg-tertiary)] rounded-lg flex-shrink-0" />
+              <div className="flex gap-4 rounded-[var(--rad-xl)] border border-[var(--border)] p-4">
+                <div className="skeleton h-32 w-32 flex-shrink-0 rounded-[var(--rad-md)]" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-5 bg-[var(--bg-tertiary)] rounded w-1/2" />
-                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-3/4" />
-                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-1/4" />
+                  <div className="skeleton h-5 w-1/2" />
+                  <div className="skeleton h-4 w-3/4" />
+                  <div className="skeleton h-4 w-1/4" />
                 </div>
               </div>
             )}
@@ -59,8 +60,8 @@ export function ProductGrid({ products, loading = false, viewMode = "grid" }: Pr
   if (products.length === 0) {
     return (
       <div className="text-center py-20">
-        <div className="w-20 h-20 mx-auto mb-6 border border-[var(--border)] rounded-xl flex items-center justify-center">
-          <span className="text-[var(--text-muted)] font-mono">?</span>
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--bg-secondary)]">
+          <PackageSearch className="h-8 w-8 text-[var(--text-muted)]" />
         </div>
         <h3 className="text-xl font-semibold mb-2">No products found</h3>
         <p className="text-[var(--text-secondary)]">

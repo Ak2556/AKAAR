@@ -74,10 +74,10 @@ export function ServicesSection() {
               initial={{ opacity: 0, y: 24 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: index * 0.08 }}
-              className="luxury-card group rounded-[1.9rem] p-7"
+              className="luxury-card group rounded-[var(--rad-lg)] p-7"
             >
               <div className="flex items-start justify-between gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
+                <div className="flex h-14 w-14 items-center justify-center rounded-[var(--rad-md)] border border-[var(--border-accent)] bg-[var(--surface-highlight)]">
                   <service.icon className="h-6 w-6 text-[var(--accent)]" />
                 </div>
                 <span className="luxury-metric-label">0{index + 1}</span>

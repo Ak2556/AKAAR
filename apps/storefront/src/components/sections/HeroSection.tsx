@@ -29,7 +29,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="luxury-card overflow-hidden rounded-[2.25rem]"
+          className="luxury-card overflow-hidden rounded-[var(--rad-xl)]"
         >
           <div className="grid gap-8 px-6 py-8 lg:grid-cols-[1.12fr_0.88fr] lg:px-10 lg:py-10">
             <div className="flex flex-col justify-between gap-8">
@@ -40,7 +40,7 @@ export function HeroSection() {
                   3D printing studio in Jaipur. Your file, finished parts, shipped across India.
                 </h1>
                 <p className="max-w-xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                  Upload your CAD file, pick a material, and we'll review it and send you a quote within 48 hours. PLA, ABS, TPU, and PETG — from concept prints to functional parts ready for the field.
+                  Upload your CAD file, pick a material, and we&rsquo;ll review it and send you a quote within 48 hours. PLA, ABS, TPU, and PETG — from concept prints to functional parts ready for the field.
                 </p>
               </div>
 
@@ -62,7 +62,7 @@ export function HeroSection() {
             </div>
 
             <div className="flex flex-col gap-5">
-              <div className="luxury-stage relative flex min-h-[340px] items-end overflow-hidden rounded-[1.8rem] px-5 pt-10 sm:px-8">
+              <div className="luxury-stage relative flex min-h-[340px] items-end overflow-hidden rounded-[var(--rad-lg)] px-5 pt-10 sm:px-8">
                 <motion.div className="absolute inset-0 opacity-54" style={{ y: imageY, scale: imageScale }}>
                   <Image
                     src="/showcase/bambu-p1s.webp"
@@ -80,7 +80,7 @@ export function HeroSection() {
                 </div>
 
                 <div className="relative z-10 w-full pb-6">
-                  <div className="mx-auto max-w-[360px] rounded-[1.6rem] border border-white/10 bg-[rgba(10,10,12,0.58)] px-5 py-5 backdrop-blur-md sm:max-w-[420px]">
+                  <div className="mx-auto max-w-[360px] rounded-[var(--rad-lg)] border border-white/10 bg-[rgba(10,10,12,0.58)] px-5 py-5 backdrop-blur-md sm:max-w-[420px]">
                     <p className="luxury-metric-label text-white/56">Machine environment</p>
                     <p className="mt-3 text-2xl font-semibold text-white">Bambu Lab P1S enclosed chamber</p>
                     <p className="mt-3 text-sm leading-6 text-white/72">
@@ -90,7 +90,7 @@ export function HeroSection() {
                 </div>
               </div>
 
-              <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+              <div className="grid gap-px overflow-hidden rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
                 {metrics.map((metric) => (
                   <div key={metric.label} className="bg-[var(--bg-secondary)] px-5 py-5">
                     <p className="luxury-metric-label">{metric.label}</p>

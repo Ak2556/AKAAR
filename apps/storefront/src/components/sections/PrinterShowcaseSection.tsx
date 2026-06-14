@@ -39,7 +39,7 @@ export function PrinterShowcaseSection() {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mx-auto max-w-7xl">
-        <div className="luxury-card relative grid overflow-hidden rounded-[2.4rem] lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="luxury-card relative grid overflow-hidden rounded-[var(--rad-xl)] lg:grid-cols-[1.08fr_0.92fr]">
           <div className="relative min-h-[360px] overflow-hidden lg:min-h-[580px]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(214,178,114,0.18),_transparent_36%),linear-gradient(180deg,rgba(9,9,11,0.1),rgba(9,9,11,0.72))] z-10" />
             {printerStories.map((item, index) => (
@@ -107,7 +107,7 @@ export function PrinterShowcaseSection() {
                     {story.body}
                   </p>
 
-                  <div className="mt-10 grid gap-px overflow-hidden rounded-[1.6rem] border border-[var(--border)] bg-[var(--border)]">
+                  <div className="mt-10 grid gap-px overflow-hidden rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--border)]">
                     {story.stats.map((stat) => (
                       <div key={stat.label} className="bg-[var(--bg-secondary)] px-5 py-5">
                         <p className="luxury-metric-label">{stat.label}</p>
@@ -125,7 +125,7 @@ export function PrinterShowcaseSection() {
                   key={item.id}
                   type="button"
                   onClick={() => setActiveIndex(index)}
-                  className={`flex w-full items-center justify-between rounded-[1.4rem] border px-4 py-4 text-left transition-all ${
+                  className={`flex w-full items-center justify-between rounded-[var(--rad-md)] border px-4 py-4 text-left transition-all ${
                     index === activeIndex
                       ? "border-[var(--text-primary)] bg-[var(--surface-highlight)]"
                       : "border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--border-accent)]"

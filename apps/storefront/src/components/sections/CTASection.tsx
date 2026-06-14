@@ -24,7 +24,7 @@ export function CTASection() {
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.65 }}
-          className="luxury-card rounded-[2.35rem] px-6 py-8 sm:px-8 lg:px-10"
+          className="luxury-card rounded-[var(--rad-xl)] px-6 py-8 sm:px-8 lg:px-10"
         >
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
@@ -55,7 +55,7 @@ export function CTASection() {
               </div>
             </div>
 
-            <div className="grid gap-px overflow-hidden rounded-[1.8rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2">
+            <div className="grid gap-px overflow-hidden rounded-[var(--rad-lg)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2">
               {stats.map((stat) => (
                 <div key={stat.label} className="bg-[var(--bg-secondary)] px-5 py-6">
                   <p className="display-font text-4xl text-[var(--text-primary)]">{stat.value}</p>
