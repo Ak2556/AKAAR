@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MessageSquare, Search, Filter, ChevronRight, FileText } from "lucide-react";
+import { MessageSquare, Search, ChevronRight, FileText } from "lucide-react";
 
 interface QuoteFile {
   id: string;
@@ -117,11 +117,13 @@ export default function AdminQuotesPage() {
 
       {/* List */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="skeleton h-[92px] rounded-[var(--rad-lg)]" />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="luxury-card rounded-[1.8rem] p-12 text-center">
+        <div className="luxury-card p-12 text-center">
           <MessageSquare className="mx-auto mb-4 h-10 w-10 text-[var(--text-muted)]" />
           <p className="text-[var(--text-secondary)]">No quote requests found.</p>
         </div>
@@ -133,10 +135,10 @@ export default function AdminQuotesPage() {
               <Link
                 key={q.id}
                 href={`/admin/quotes/${q.id}`}
-                className="luxury-card flex flex-col gap-3 rounded-[1.4rem] p-5 hover:border-[var(--accent)]/40 transition-colors sm:flex-row sm:items-center"
+                className="luxury-card luxury-card-interactive flex flex-col gap-3 p-5 sm:flex-row sm:items-center"
               >
                 {/* Icon */}
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.9rem] bg-[var(--bg-primary)]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--rad-sm)] bg-[var(--bg-primary)]">
                   <MessageSquare className="h-5 w-5 text-[var(--accent)]" />
                 </div>
 

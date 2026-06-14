@@ -164,16 +164,24 @@ export default function AdminCustomersPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+        <div className="luxury-card overflow-hidden">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-6 py-4 border-b border-[var(--border)] last:border-0">
+              <div className="skeleton h-9 w-9 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-3 w-40" />
+                <div className="skeleton h-2.5 w-56" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="luxury-card rounded-[1.8rem] p-12 text-center">
+        <div className="luxury-card p-12 text-center">
           <Users className="mx-auto mb-4 h-10 w-10 text-[var(--text-muted)]" />
           <p className="text-[var(--text-secondary)]">No customers found.</p>
         </div>
       ) : (
-        <div className="luxury-card rounded-[1.8rem] overflow-hidden">
+        <div className="luxury-card overflow-hidden">
           {/* Table header */}
           <div className="hidden sm:grid grid-cols-[1fr_120px_110px_100px_80px] gap-4 border-b border-[var(--border)] px-6 py-3">
             <span className="text-xs uppercase tracking-[0.15em] text-[var(--text-muted)]">Customer</span>

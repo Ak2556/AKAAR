@@ -20,6 +20,17 @@
   --surface-soft: color-mix(in srgb, var(--bg-secondary) 88%, white 2%);
   --surface-highlight: color-mix(in srgb, var(--accent) 10%, var(--bg-secondary));
   --shadow-color: rgba(0, 0, 0, 0.34);
+
+  /* Radius scale — one ladder instead of ~28 ad-hoc values.
+     Namespaced --rad-* so it never collides with Tailwind's built-in
+     --radius-* tokens (which drive rounded-sm/md/lg/xl utilities).
+     xs: icon buttons / tiny chips · sm: icon tiles · md: inputs / mid cards
+     lg: cards & panels · xl: hero / feature surfaces */
+  --rad-xs: 0.625rem;
+  --rad-sm: 0.85rem;
+  --rad-md: 1.15rem;
+  --rad-lg: 1.5rem;
+  --rad-xl: 2rem;
 }
 
 *, *::before, *::after {
@@ -218,6 +229,7 @@ textarea:focus-visible {
 }
 
 .luxury-panel {
+  border-radius: var(--rad-lg);
   border: 1px solid color-mix(in srgb, var(--border) 86%, white 10%);
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 92%, white 5%) 0%, color-mix(in srgb, var(--bg-secondary) 98%, black 2%) 100%);
   box-shadow:
@@ -226,6 +238,7 @@ textarea:focus-visible {
 }
 
 .luxury-card {
+  border-radius: var(--rad-lg);
   border: 1px solid color-mix(in srgb, var(--border) 84%, white 12%);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 86%, white 5%) 0%, color-mix(in srgb, var(--bg-primary) 92%, black 8%) 100%);
@@ -234,7 +247,41 @@ textarea:focus-visible {
     0 30px 70px -56px var(--shadow-color);
 }
 
+/* Opt-in hover for cards that are links/buttons — one consistent motion
+   across admin + storefront instead of per-page ad-hoc hover treatments. */
+.luxury-card-interactive {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.luxury-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 36px 80px -52px var(--shadow-color),
+    0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+:root.reduce-motion .luxury-card-interactive:hover {
+  transform: none;
+}
+
+/* Icon tile — the small rounded square behind dashboard/list icons.
+   Standard size + radius so every tile matches. */
+.luxury-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rad-sm);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
 .luxury-pill {
+  border-radius: 9999px;
   border: 1px solid color-mix(in srgb, var(--border) 76%, white 16%);
   background: color-mix(in srgb, var(--bg-secondary) 78%, transparent);
   color: var(--text-secondary);
@@ -245,6 +292,7 @@ textarea:focus-visible {
 }
 
 .luxury-input {
+  border-radius: var(--rad-md);
   background: color-mix(in srgb, var(--bg-primary) 88%, white 4%);
   border: 1px solid color-mix(in srgb, var(--border) 82%, white 10%);
   color: var(--text-primary);
@@ -261,7 +309,7 @@ textarea:focus-visible {
 }
 
 .luxury-input:is(textarea) {
-  border-radius: 1.45rem;
+  border-radius: var(--rad-lg);
 }
 
 .luxury-kicker {

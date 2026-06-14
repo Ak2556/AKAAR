@@ -8,13 +8,12 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
-  Eye,
-  EyeOff,
   Loader2,
   Search,
   Package,
   ExternalLink,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import {
   toggleProductActive,
@@ -176,21 +175,22 @@ export function ProductListTable({
 
       {/* Error banner */}
       {actionError && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="flex items-center gap-2 rounded-[var(--rad-md)] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {actionError}
           <button
             onClick={() => setActionError(null)}
+            aria-label="Dismiss error"
             className="ml-auto text-red-400 hover:text-red-200"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
 
       {/* Empty state */}
       {visible.length === 0 && (
-        <div className="luxury-card rounded-[1.6rem] px-6 py-12 text-center">
+        <div className="luxury-card px-6 py-12 text-center">
           <Package className="mx-auto mb-3 h-10 w-10 text-[var(--text-muted)]" />
           <p className="text-sm text-[var(--text-secondary)]">
             {search || filter !== "all"
@@ -202,7 +202,7 @@ export function ProductListTable({
 
       {/* Product list */}
       {visible.length > 0 && (
-        <div className="luxury-card overflow-hidden rounded-[1.6rem]">
+        <div className="luxury-card overflow-hidden">
           {/* Desktop header */}
           <div className="hidden grid-cols-[2fr_1fr_90px_72px_80px] items-center gap-4 border-b border-[var(--border)] px-5 py-3 sm:grid">
             <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Product</span>
@@ -259,7 +259,7 @@ export function ProductListTable({
 
                       {/* Thumbnail + name */}
                       <div className="flex items-center gap-3">
-                        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[0.6rem] border border-[var(--border)] bg-[var(--bg-primary)]">
+                        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[var(--rad-sm)] border border-[var(--border)] bg-[var(--bg-primary)]">
                           {product.imageUrl ? (
                             <Image
                               src={product.imageUrl}
@@ -346,7 +346,7 @@ export function ProductListTable({
                           onClick={() => handleMove(product.id, "up")}
                           disabled={isPending || isFirst}
                           title="Move up"
-                          className="rounded-[0.4rem] p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-20"
+                          className="rounded-[var(--rad-xs)] p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-20"
                         >
                           <ChevronUp className="h-4 w-4" />
                         </button>
@@ -354,7 +354,7 @@ export function ProductListTable({
                           onClick={() => handleMove(product.id, "down")}
                           disabled={isPending || isLast}
                           title="Move down"
-                          className="rounded-[0.4rem] p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-20"
+                          className="rounded-[var(--rad-xs)] p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-20"
                         >
                           <ChevronDown className="h-4 w-4" />
                         </button>
@@ -368,7 +368,7 @@ export function ProductListTable({
                           target="_blank"
                           rel="noopener noreferrer"
                           title="View on storefront"
-                          className="rounded-[0.5rem] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+                          className="rounded-[var(--rad-xs)] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
@@ -377,7 +377,7 @@ export function ProductListTable({
                         <Link
                           href={`/admin/products/${product.id}`}
                           title="Edit product"
-                          className="rounded-[0.5rem] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent)]"
+                          className="rounded-[var(--rad-xs)] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent)]"
                           prefetch
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -387,7 +387,7 @@ export function ProductListTable({
                         <button
                           onClick={() => setConfirmDelete(product.id)}
                           title="Delete product"
-                          className="rounded-[0.5rem] p-2 text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400"
+                          className="rounded-[var(--rad-xs)] p-2 text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>

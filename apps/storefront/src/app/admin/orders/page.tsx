@@ -65,7 +65,7 @@ export default function AdminOrdersPage() {
 
       <div>
         {/* Filters */}
-        <div className="luxury-card rounded-[1.8rem] p-4 mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="luxury-card p-4 mb-6 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
@@ -99,7 +99,7 @@ export default function AdminOrdersPage() {
               <button
                 key={key}
                 onClick={() => setStatusFilter(statusFilter === key ? 'all' : key)}
-                className={`rounded-[1.2rem] border px-3 py-3 text-center transition-all ${statusFilter === key ? cfg.tone : 'border-[var(--border)] bg-[var(--bg-secondary)]'}`}
+                className={`rounded-[var(--rad-sm)] border px-3 py-3 text-center transition-all hover:border-[var(--accent)]/40 ${statusFilter === key ? cfg.tone : 'border-[var(--border)] bg-[var(--bg-secondary)]'}`}
               >
                 <p className="text-xl font-bold text-[var(--text-primary)]">{count}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">{cfg.label}</p>
@@ -110,11 +110,13 @@ export default function AdminOrdersPage() {
 
         {/* Orders list */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="skeleton h-[84px] rounded-[var(--rad-lg)]" />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="luxury-card rounded-[1.8rem] p-12 text-center">
+          <div className="luxury-card p-12 text-center">
             <Package className="h-10 w-10 text-[var(--text-muted)] mx-auto mb-4" />
             <p className="text-[var(--text-secondary)]">No orders found.</p>
           </div>
@@ -126,10 +128,10 @@ export default function AdminOrdersPage() {
                 <Link
                   key={order.id}
                   href={`/admin/orders/${order.id}`}
-                  className="luxury-card rounded-[1.6rem] p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-[var(--accent)] transition-colors block"
+                  className="luxury-card luxury-card-interactive p-5 flex flex-col sm:flex-row sm:items-center gap-4 block"
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-[0.9rem] bg-[var(--bg-primary)]">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-[var(--rad-sm)] bg-[var(--bg-primary)]">
                       <Package className="h-5 w-5 text-[var(--accent)]" />
                     </div>
                     <div>
